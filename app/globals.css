@@ -1,26 +1,210 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ------------------------------------------------------------------
+   CommercialLink design tokens
+   Warm-editorial CRE palette: deep teal authority + terracotta CTA
+   on a cream ground. Derived from the reference boards in /public/images.
+   ------------------------------------------------------------------ */
+@theme {
+  --color-ink-900: #0a2624;
+  --color-ink-700: #14413d;
+  --color-ink-500: #2d5a55;
+  --color-ink-300: #7a9691;
+
+  --color-brand-900: #0c3330;
+  --color-brand-800: #11423d;
+  --color-brand-700: #16544d;
+  --color-brand-600: #1c6b62;
+  --color-brand-500: #238679;
+  --color-brand-100: #d9e9e5;
+  --color-brand-50: #eef5f3;
+
+  --color-clay-700: #b4441f;
+  --color-clay-600: #cf5730;
+  --color-clay-500: #e0653a;
+  --color-clay-300: #f2a880;
+  --color-clay-100: #fbe3d5;
+  --color-clay-50: #fdf1e9;
+
+  --color-sand-50: #fdfaf5;
+  --color-sand-100: #faf5ec;
+  --color-sand-200: #f3ebdd;
+  --color-sand-300: #e8dcc8;
+
+  --color-gold-500: #c98a1f;
+  --color-gold-100: #f7e9c9;
+
+  /* ---- Data-viz tokens ----------------------------------------------
+     Validated with the dataviz skill's checker against the white chart
+     surface. Ordinal ramp: monotone L, adjacent ΔL ≥ 0.06, light end 2.22:1.
+     Categorical pair: worst all-pairs CVD ΔE 11.5, normal-vision ΔE 25.2.
+     Do not hand-edit these — re-run the validator if they change. */
+  --color-viz-step-1: #6cbcae;
+  --color-viz-step-2: #48a697;
+  --color-viz-step-3: #2b8d7f;
+  --color-viz-step-4: #1c766a;
+  --color-viz-step-5: #175f55;
+  --color-viz-step-6: #114a41;
+
+  --color-viz-series-1: #0f8f7d;
+  --color-viz-series-2: #cf5730;
+
+  /* Status scale — reserved meaning, always shipped with an icon + label. */
+  --color-status-good: #0ca30c;
+  --color-status-warning: #fab219;
+  --color-status-serious: #ec835a;
+  --color-status-critical: #d03b3b;
+
+  --color-viz-grid: #e7e2d7;
+  --color-viz-axis: #c8c0b0;
+  --color-viz-muted: #8a8578;
+
+  --radius-4xl: 2rem;
+  --radius-5xl: 2.75rem;
+
+  --shadow-soft: 0 1px 2px rgba(10, 38, 36, 0.04), 0 12px 32px -12px rgba(10, 38, 36, 0.14);
+  --shadow-lift: 0 2px 4px rgba(10, 38, 36, 0.05), 0 28px 56px -20px rgba(10, 38, 36, 0.24);
+
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-serif), ui-serif, Georgia, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-sand-50);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-clay-500);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-600);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* Small uppercase eyebrow used above every section heading — a motif
+     lifted from all four reference layouts. */
+  .kicker {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  /* Hand-drawn underline behind the italic accent word in headlines. */
+  .accent-underline {
+    background-image: linear-gradient(
+      to top,
+      var(--color-clay-300) 0,
+      var(--color-clay-300) 0.22em,
+      transparent 0.22em
+    );
+    background-repeat: no-repeat;
+    background-position: 0 0.86em;
+    background-size: 100% 100%;
+  }
+
+  .field-input {
+    width: 100%;
+    border-radius: 0.875rem;
+    border: 1px solid var(--color-sand-300);
+    background-color: #fff;
+    padding: 0.75rem 0.9375rem;
+    font-size: 0.9375rem;
+    color: var(--color-ink-900);
+    transition: border-color 160ms var(--ease-out-soft), box-shadow 160ms var(--ease-out-soft);
+  }
+
+  .field-input::placeholder {
+    color: var(--color-ink-300);
+  }
+
+  .field-input:hover {
+    border-color: var(--color-brand-100);
+  }
+
+  .field-input:focus {
+    outline: none;
+    border-color: var(--color-brand-500);
+    box-shadow: 0 0 0 3px var(--color-brand-50);
+  }
+
+  /* Borderless select used inside the hero search pill. */
+  .hero-select {
+    width: 100%;
+    appearance: none;
+    border: 0;
+    background-color: transparent;
+    padding: 0.125rem 1.25rem 0 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-brand-900);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%237a9691' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0 center;
+    background-size: 0.6875rem;
+    cursor: pointer;
+  }
+
+  .hero-select:focus {
+    outline: none;
+    color: var(--color-clay-600);
+  }
+
+  select.field-input {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%232d5a55' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.9375rem center;
+    background-size: 0.75rem;
+    padding-right: 2.25rem;
+  }
+}
+
+@utility grain {
+  /* Faint paper tooth so large cream fields don't read as flat #fff. */
+  position: relative;
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise-in {
+  animation: rise-in 640ms var(--ease-out-soft) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
