@@ -254,6 +254,122 @@
   animation: rise-in 420ms var(--ease-out-soft) both;
 }
 
+/* ------------------------------------------------------------------
+   Pending indicator
+
+   One mark stands for every wait in the product — a submit, a save, an
+   upload, a route change — so "the app is working" always looks the
+   same. It paints in `currentColor`, which lets the identical element
+   read white inside a primary button and navy on a light panel.
+
+   Geometry comes from `--loader-size`: the blade offsets below are
+   proportions of it rather than fixed pixels, so the three blades stay
+   in register at 14px and at 48px.
+   ------------------------------------------------------------------ */
+.loader {
+  --loader-size: 1.125rem;
+  position: relative;
+  width: var(--loader-size);
+  aspect-ratio: 1.154;
+  flex-shrink: 0;
+  background: conic-gradient(
+    from 120deg at 50% 64%,
+    #0000,
+    currentColor 1deg 120deg,
+    #0000 121deg
+  );
+  animation: loader-turn 1.5s infinite cubic-bezier(0.3, 1, 0, 1);
+}
+
+.loader::before,
+.loader::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  transform-origin: 50% 66%;
+  animation: loader-blade 1.5s infinite;
+}
+
+/* The second blade mirrors the first; `--blade` flips its direction. */
+.loader::after {
+  --blade: -1;
+}
+
+.loader-xs {
+  --loader-size: 0.875rem;
+}
+
+.loader-sm {
+  --loader-size: 1.125rem;
+}
+
+.loader-md {
+  --loader-size: 1.75rem;
+}
+
+.loader-lg {
+  --loader-size: 3rem;
+}
+
+@keyframes loader-turn {
+  0%,
+  30% {
+    transform: rotate(0);
+  }
+  70% {
+    transform: rotate(120deg);
+  }
+  70.01%,
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes loader-blade {
+  0% {
+    transform: rotate(calc(var(--blade, 1) * 120deg)) translate(0);
+  }
+  30%,
+  70% {
+    transform: rotate(calc(var(--blade, 1) * 120deg))
+      translate(
+        calc(var(--blade, 1) * var(--loader-size) * -0.1),
+        calc(var(--loader-size) * 0.2)
+      );
+  }
+  100% {
+    transform: rotate(calc(var(--blade, 1) * 120deg)) translate(0);
+  }
+}
+
+/* Covers a control's own label while its navigation runs: the veil takes
+   the control's background, so the indicator replaces the text in place
+   instead of resizing the control. */
+.pending-veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  border-radius: inherit;
+  background: inherit;
+  opacity: 0;
+  /* Reserves nothing and shows nothing until a navigation is actually
+     slow — a prefetched route never reaches the delay below. */
+  visibility: hidden;
+}
+
+.pending-veil.is-pending {
+  visibility: visible;
+  animation: pending-appear 160ms ease 120ms forwards;
+}
+
+@keyframes pending-appear {
+  to {
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -262,5 +378,24 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* The reset above would freeze the indicator mid-turn, leaving a static
+   wedge that says nothing. A slow fade carries the same "still working"
+   meaning without any movement. Class beats the universal selector, so
+   this wins regardless of source order. */
+@media (prefers-reduced-motion: reduce) {
+  .loader,
+  .loader::before,
+  .loader::after {
+    animation: loader-fade 1.4s ease-in-out infinite !important;
+    transform: none !important;
+  }
+}
+
+@keyframes loader-fade {
+  50% {
+    opacity: 0.25;
   }
 }

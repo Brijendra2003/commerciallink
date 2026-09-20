@@ -88,7 +88,7 @@ export function ContactForm() {
         </p>
       ) : null}
 
-      <Button type="submit" size="lg" disabled={pending} className="w-full" arrow={!pending}>
+      <Button type="submit" size="lg" loading={pending} className="w-full" arrow>
         {pending ? "Sending…" : "Send Message"}
       </Button>
     </form>

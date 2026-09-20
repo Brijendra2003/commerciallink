@@ -49,7 +49,7 @@ export function ResetPasswordForm() {
         </p>
       ) : null}
 
-      <Button type="submit" size="lg" disabled={pending} className="w-full" arrow={!pending}>
+      <Button type="submit" size="lg" loading={pending} className="w-full" arrow>
         {pending ? "Saving…" : "Save Password"}
       </Button>
 

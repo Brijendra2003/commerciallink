@@ -8,6 +8,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
+import { Loader } from "@/components/ui/loader";
 import { compressImage } from "@/lib/image-compress";
 import { createUploadTicket, discardUpload } from "@/lib/upload-actions";
 import {
@@ -344,17 +345,23 @@ export function MediaUploader({
                 ) : null}
 
                 {item.status === "uploading" ? (
-                  <div className="absolute inset-0 grid place-items-center bg-sand-1005">
-                    <div className="w-3/4">
-                      <div className="h-1 overflow-hidden rounded-full bg-white/30">
-                        <div
-                          className="h-full bg-white transition-[width] duration-200"
-                          style={{ width: `${item.progress}%` }}
-                        />
+                  <div className="absolute inset-0 grid place-items-center bg-brand-900/60">
+                    {/* The bar covers the transfer; the mark covers the parts
+                        it cannot — signing the request before the first byte
+                        moves, and Cloudinary's own processing after 100%. */}
+                    <div className="flex w-3/4 flex-col items-center gap-2">
+                      <Loader size="xs" className="text-white" />
+                      <div className="w-full">
+                        <div className="h-1 overflow-hidden rounded-full bg-white/30">
+                          <div
+                            className="h-full bg-white transition-[width] duration-200"
+                            style={{ width: `${item.progress}%` }}
+                          />
+                        </div>
+                        <p className="mt-1.5 text-center text-[0.625rem] font-semibold text-white tnum">
+                          {item.progress}%
+                        </p>
                       </div>
-                      <p className="mt-1.5 text-center text-[0.625rem] font-semibold text-white tnum">
-                        {item.progress}%
-                      </p>
                     </div>
                   </div>
                 ) : null}
@@ -368,7 +375,7 @@ export function MediaUploader({
                 ) : null}
 
                 {showCover && i === 0 && item.status === "done" ? (
-                  <span className="absolute left-1.5 top-1.5 rounded bg-sand-2005 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
+                  <span className="absolute left-1.5 top-1.5 rounded bg-brand-900/75 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
                     Cover
                   </span>
                 ) : null}

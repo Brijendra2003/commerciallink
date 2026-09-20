@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { SearchIcon } from "@/components/ui/icons";
+import { Loader } from "@/components/ui/loader";
 import {
   AREA_BANDS,
   BUDGET_BANDS,
@@ -201,11 +202,16 @@ export function FilterBar({ initial }: { initial: Filters }) {
                 Clear {active.length} filter{active.length > 1 ? "s" : ""}
               </button>
             ) : null}
+            {/* Changing any control re-runs the query, so this reports every
+                filter change and not only a press of Apply. */}
             <button
               type="submit"
-              className="rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
+              disabled={pending}
+              aria-busy={pending || undefined}
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800 disabled:opacity-80"
             >
-              Apply
+              {pending ? <Loader size="xs" /> : null}
+              {pending ? "Filtering…" : "Apply"}
             </button>
           </div>
         </div>

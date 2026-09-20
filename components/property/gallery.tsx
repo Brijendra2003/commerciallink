@@ -44,7 +44,7 @@ export function Gallery({ media, title }: { media: PropertyMedia[]; title: strin
               priority
               width={1400}
             />
-            <span className="absolute bottom-3 right-3 rounded bg-sand-2005 px-2.5 py-1 text-[0.6875rem] font-semibold text-white tnum">
+            <span className="absolute bottom-3 right-3 rounded bg-brand-900/75 px-2.5 py-1 text-[0.6875rem] font-semibold text-white tnum">
               {index + 1} / {slides.length}
             </span>
           </>

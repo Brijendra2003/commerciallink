@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { Loader } from "@/components/ui/loader";
 import { Photo } from "@/components/ui/photo";
 import {
   MediaUploader,
@@ -98,8 +99,9 @@ export function MediaManager({
         </p>
         <p
           aria-live="polite"
-          className={`text-[0.75rem] font-medium ${status?.ok === false ? "text-clay-700" : "text-brand-700"}`}
+          className={`flex items-center gap-2 text-[0.75rem] font-medium ${status?.ok === false ? "text-clay-700" : "text-brand-700"}`}
         >
+          {pending ? <Loader size="xs" className="text-brand-600" /> : null}
           {pending ? "Working…" : status?.message}
         </p>
       </div>
@@ -119,7 +121,7 @@ export function MediaManager({
           >
             <Photo publicId={m.cloudinary_public_id} alt={m.alt} sizes="200px" width={400} />
             {i === 0 ? (
-              <span className="absolute left-2 top-2 rounded bg-sand-2005 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
+              <span className="absolute left-2 top-2 rounded bg-brand-900/75 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
                 Cover
               </span>
             ) : null}

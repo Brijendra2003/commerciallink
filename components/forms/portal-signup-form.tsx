@@ -189,13 +189,7 @@ export function PortalSignupForm({
         </p>
       ) : null}
 
-      <Button
-        type="submit"
-        size="lg"
-        disabled={pending}
-        className="w-full"
-        arrow={!pending}
-      >
+      <Button type="submit" size="lg" loading={pending} className="w-full" arrow>
         {pending ? "Creating account…" : "Create Account"}
       </Button>
 

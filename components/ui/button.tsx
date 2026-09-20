@@ -1,5 +1,7 @@
 import Link from "next/link";
 import type { ComponentProps, ReactNode } from "react";
+import { LinkPendingVeil } from "@/components/ui/link-pending";
+import { Loader } from "@/components/ui/loader";
 
 type Variant = "primary" | "secondary" | "ghost" | "light";
 type Size = "sm" | "md" | "lg";
@@ -60,6 +62,11 @@ interface ButtonLinkProps extends Omit<ComponentProps<typeof Link>, "className">
   children: ReactNode;
 }
 
+/**
+ * Every CTA reports its own navigation: the veil is inert until the route
+ * is genuinely slow to arrive, so a prefetched destination is unaffected
+ * and a cold one no longer looks like a dead click.
+ */
 export function ButtonLink({
   variant = "primary",
   size = "md",
@@ -69,9 +76,13 @@ export function ButtonLink({
   ...props
 }: ButtonLinkProps) {
   return (
-    <Link className={classes(variant, size, className)} {...props}>
+    <Link
+      className={`relative ${classes(variant, size, className)}`}
+      {...props}
+    >
       {children}
       {arrow ? <Arrow /> : null}
+      <LinkPendingVeil />
     </Link>
   );
 }
@@ -80,6 +91,8 @@ interface ButtonProps extends ComponentProps<"button"> {
   variant?: Variant;
   size?: Size;
   arrow?: boolean;
+  /** Marks the button busy: shows the pending mark and blocks re-submission. */
+  loading?: boolean;
 }
 
 export function Button({
@@ -87,13 +100,25 @@ export function Button({
   size = "md",
   className,
   arrow = false,
+  loading = false,
+  disabled,
   children,
   ...props
 }: ButtonProps) {
   return (
-    <button className={classes(variant, size, className)} {...props}>
+    <button
+      className={classes(variant, size, className)}
+      // A busy button must not take a second click; callers no longer have
+      // to remember to disable it themselves.
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...props}
+    >
+      {loading ? <Loader size={size === "sm" ? "xs" : "sm"} /> : null}
       {children}
-      {arrow ? <Arrow /> : null}
+      {/* The arrow points forward; while the action runs there is nowhere
+          to go, so the mark takes its place. */}
+      {arrow && !loading ? <Arrow /> : null}
     </button>
   );
 }

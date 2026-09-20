@@ -72,12 +72,7 @@ export function ProfilePanel({ session }: { session: PortalSession }) {
           </p>
         ) : null}
 
-        <Button
-          type="submit"
-          variant="ghost"
-          disabled={pending}
-          className="w-full"
-        >
+        <Button type="submit" variant="ghost" loading={pending} className="w-full">
           {pending ? "Saving…" : "Save changes"}
         </Button>
       </form>

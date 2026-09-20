@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, type ReactNode } from "react";
+import { Loader } from "@/components/ui/loader";
 
 /**
  * Modal shell for the console's short create/edit forms. Uses the native
@@ -84,15 +85,18 @@ export function DialogActions({
       <button
         type="button"
         onClick={onCancel}
-        className="rounded-lg border border-sand-300 px-4 py-2 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
+        disabled={pending}
+        className="rounded-lg border border-sand-300 px-4 py-2 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100 disabled:opacity-60"
       >
         Cancel
       </button>
       <button
         type="submit"
         disabled={pending || disabled}
-        className="rounded-lg bg-brand-700 px-4 py-2 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
+        aria-busy={pending || undefined}
+        className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-4 py-2 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
       >
+        {pending ? <Loader size="xs" /> : null}
         {pending ? "Saving…" : submitLabel}
       </button>
     </div>

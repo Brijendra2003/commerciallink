@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { Loader } from "@/components/ui/loader";
 import { compressImage } from "@/lib/image-compress";
 import { MAX_IMAGE_BYTES } from "@/lib/media";
 
@@ -134,7 +135,7 @@ export function FilePicker({
                 <img src={item.preview} alt="" className="h-full w-full object-cover" />
               ) : null}
               {showCover && i === 0 ? (
-                <span className="absolute left-1.5 top-1.5 rounded bg-sand-2005 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
+                <span className="absolute left-1.5 top-1.5 rounded bg-brand-900/75 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
                   Cover
                 </span>
               ) : null}
@@ -169,9 +170,15 @@ export function FilePicker({
                   shownError ? "border-clay-500" : "border-sand-300"
                 }`}
               >
-                <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-                  <path d="M12 5v14M5 12h14" />
-                </svg>
+                {/* Re-encoding a large photograph to fit the cap takes a
+                    visible moment on a phone, so the tile says so. */}
+                {busy ? (
+                  <Loader size="xs" />
+                ) : (
+                  <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                )}
                 <span className="text-[0.6875rem] font-semibold">
                   {busy ? "Processing…" : "Add"}
                 </span>
@@ -206,6 +213,7 @@ export function FilePicker({
               htmlFor={inputId}
               className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-sand-300 px-4 py-4 text-[0.8125rem] font-semibold text-ink-500 transition-colors hover:border-brand-500 hover:text-brand-700"
             >
+              {busy ? <Loader size="xs" /> : null}
               {busy ? "Processing…" : "Choose a PDF"}
             </label>
           ) : null}

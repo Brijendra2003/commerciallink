@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { Arrow } from "@/components/ui/button";
+import { Loader } from "@/components/ui/loader";
 import { subscribeToMarketNotes } from "@/lib/actions";
 import type { LeadSubmission } from "@/lib/types";
 
@@ -42,14 +43,11 @@ export function MarketNotesForm() {
         <button
           type="submit"
           disabled={pending}
-          aria-label="Subscribe"
+          aria-busy={pending || undefined}
+          aria-label={pending ? "Subscribing…" : "Subscribe"}
           className="group/btn grid h-8 w-8 shrink-0 place-items-center rounded bg-brand-600 text-white transition-colors hover:bg-brand-500 disabled:opacity-60"
         >
-          {pending ? (
-            <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-          ) : (
-            <Arrow />
-          )}
+          {pending ? <Loader size="xs" /> : <Arrow />}
         </button>
       </div>
 

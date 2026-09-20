@@ -1,4 +1,5 @@
 import { Kicker } from "@/components/ui/section";
+import { SubmitControl } from "@/components/ui/submit-button";
 import { signOutPortalUser } from "@/lib/portal-actions";
 import type { PortalSession } from "@/lib/portal";
 
@@ -21,12 +22,12 @@ export function PortalHeader({ session }: { session: PortalSession }) {
       </div>
 
       <form action={signOutPortalUser} className="shrink-0">
-        <button
-          type="submit"
-          className="rounded-lg border border-sand-300 bg-white px-5 py-2.5 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
+        <SubmitControl
+          pendingLabel="Signing out…"
+          className="inline-flex items-center gap-2 rounded-lg border border-sand-300 bg-white px-5 py-2.5 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100 disabled:opacity-60"
         >
           Sign out
-        </button>
+        </SubmitControl>
       </form>
     </header>
   );

@@ -816,8 +816,8 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
             </div>
 
             {step === last ? (
-              <Button type="submit" size="lg" disabled={pending} arrow={!pending}>
-                {pending ? "Uploading & submitting…" : "Submit for review"}
+              <Button type="submit" size="lg" loading={pending} arrow>
+                {pending ? "Filing your listing…" : "Submit for review"}
               </Button>
             ) : (
               <Button type="button" size="lg" onClick={onContinue} arrow>

@@ -57,7 +57,7 @@ export function PortalLoginForm({
           </p>
         ) : null}
 
-        <Button type="submit" size="lg" disabled={resetPending} className="w-full">
+        <Button type="submit" size="lg" loading={resetPending} className="w-full">
           {resetPending ? "Sending…" : "Send reset link"}
         </Button>
 
@@ -117,13 +117,7 @@ export function PortalLoginForm({
         </p>
       ) : null}
 
-      <Button
-        type="submit"
-        size="lg"
-        disabled={pending}
-        className="w-full"
-        arrow={!pending}
-      >
+      <Button type="submit" size="lg" loading={pending} className="w-full" arrow>
         {pending ? "Signing in…" : "Log In"}
       </Button>
 

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AdminDialog, DialogActions, DialogStatus } from "@/components/admin/admin-dialog";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
+import { Loader } from "@/components/ui/loader";
 import {
   addOwnerNote,
   createDraftListing,
@@ -262,8 +263,10 @@ export function SettleDealButton({ dealRef }: { dealRef: string }) {
             setFailed(result.ok ? null : result.message);
           })
         }
-        className="rounded bg-brand-700 px-3 py-1.5 text-[0.6875rem] font-semibold text-white transition-colors hover:bg-brand-800 disabled:opacity-60"
+        aria-busy={pending || undefined}
+        className="inline-flex items-center gap-1.5 rounded bg-brand-700 px-3 py-1.5 text-[0.6875rem] font-semibold text-white transition-colors hover:bg-brand-800 disabled:opacity-60"
       >
+        {pending ? <Loader size="xs" /> : null}
         {pending ? "Saving…" : "Mark settled"}
       </button>
       {failed ? (

@@ -1,6 +1,7 @@
 import Form from "next/form";
 import { Photo } from "@/components/ui/photo";
-import { ButtonLink, Button } from "@/components/ui/button";
+import { ButtonLink } from "@/components/ui/button";
+import { SubmitButton } from "@/components/ui/submit-button";
 import { Container } from "@/components/ui/section";
 import { SearchIcon, ShieldIcon } from "@/components/ui/icons";
 import {
@@ -145,10 +146,16 @@ export function Hero() {
             </SearchCell>
 
             <div className="sm:pl-2">
-              <Button type="submit" size="lg" className="w-full sm:w-auto">
-                <SearchIcon className="h-4 w-4" />
+              {/* The search navigates rather than running an action, so the
+                  button reads the form's own status for its pending mark. */}
+              <SubmitButton
+                size="lg"
+                className="w-full sm:w-auto"
+                idleIcon={<SearchIcon className="h-4 w-4" />}
+                pendingLabel="Searching…"
+              >
                 Search
-              </Button>
+              </SubmitButton>
             </div>
           </div>
         </Form>

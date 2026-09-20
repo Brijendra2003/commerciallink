@@ -192,7 +192,7 @@ export function RequirementForm() {
         </p>
       ) : null}
 
-      <Button type="submit" size="lg" disabled={pending} className="w-full" arrow={!pending}>
+      <Button type="submit" size="lg" loading={pending} className="w-full" arrow>
         {pending ? "Submitting…" : "Submit Requirement"}
       </Button>
     </form>

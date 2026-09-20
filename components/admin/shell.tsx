@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { Logo } from "@/components/site/logo";
+import { NavPendingIcon } from "@/components/ui/link-pending";
+import { SubmitControl } from "@/components/ui/submit-button";
 import { signOut } from "@/lib/auth-actions";
 import type { AdminSession } from "@/lib/auth";
 
@@ -89,9 +91,16 @@ export function AdminShell({
                     : "text-sand-200/65 hover:bg-white/6 hover:text-sand-50"
                 }`}
               >
-                <Icon
-                  name={item.icon}
-                  className={`h-4 w-4 shrink-0 ${active ? "text-brand-100" : ""}`}
+                {/* Console pages query Supabase on every visit, so the wait
+                    is real. The section's own icon becomes the pending mark —
+                    the slot is already a fixed size, so the row holds still. */}
+                <NavPendingIcon
+                  icon={
+                    <Icon
+                      name={item.icon}
+                      className={`h-4 w-4 shrink-0 ${active ? "text-brand-100" : ""}`}
+                    />
+                  }
                 />
                 <span className="min-w-0 flex-1 truncate">{item.label}</span>
                 {"badge" in item && item.badge ? (
@@ -147,12 +156,12 @@ export function AdminShell({
             </p>
           ) : (
             <form action={signOut} className="mt-2.5 border-t border-sand-200/12 pt-2.5">
-              <button
-                type="submit"
-                className="w-full text-left text-[0.6875rem] font-semibold text-sand-200/60 transition-colors hover:text-white"
+              <SubmitControl
+                pendingLabel="Signing out…"
+                className="flex w-full items-center gap-2 text-left text-[0.6875rem] font-semibold text-sand-200/60 transition-colors hover:text-white disabled:opacity-70"
               >
                 Sign out
-              </button>
+              </SubmitControl>
             </form>
           )}
         </div>
@@ -179,7 +188,7 @@ export function AdminShell({
             type="button"
             aria-label="Close menu"
             onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-sand-1005 backdrop-blur-sm"
+            className="absolute inset-0 bg-brand-900/45 backdrop-blur-sm"
           />
           <aside className="relative flex h-full w-[16rem] max-w-[82vw] flex-col overflow-y-auto overscroll-contain bg-brand-900 p-5">
             <div className="mb-8 px-1">

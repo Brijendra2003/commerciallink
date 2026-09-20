@@ -1,6 +1,7 @@
 "use client";
 
 import { startTransition, useActionState, useEffect, type FormEvent, type ReactNode } from "react";
+import { Loader } from "@/components/ui/loader";
 import { updateProperty, type AdminActionState } from "@/lib/admin-actions";
 
 const PROPERTY_FORM_ID = "property-edit";
@@ -59,17 +60,20 @@ export function PropertyEditForm({
         aria-live="polite"
       >
         <p
-          className={`text-[0.8125rem] font-medium ${
+          className={`flex items-center gap-2 text-[0.8125rem] font-medium ${
             state ? (state.ok ? "text-brand-700" : "text-clay-700") : "text-ink-300"
           }`}
         >
+          {pending ? <Loader size="xs" className="text-brand-600" /> : null}
           {pending ? "Saving…" : state?.message ?? "Edit the fields below, then save."}
         </p>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-brand-700 px-5 py-2 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800 disabled:opacity-60"
+          aria-busy={pending || undefined}
+          className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800 disabled:opacity-60"
         >
+          {pending ? <Loader size="xs" /> : null}
           {pending ? "Saving…" : "Save changes"}
         </button>
       </div>
