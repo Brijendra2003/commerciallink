@@ -66,7 +66,7 @@ export default async function AdminDashboard() {
         action={
           <Link
             href="/admin/leads"
-            className="group/btn inline-flex items-center gap-2 rounded-full bg-brand-900 px-5 py-2.5 text-[0.8125rem] font-semibold text-sand-50 transition-colors hover:bg-brand-800"
+            className="group/btn inline-flex items-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
           >
             Open lead board
             <Arrow />
@@ -75,31 +75,22 @@ export default async function AdminDashboard() {
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {/* No month-on-month deltas: nothing snapshots these figures over
+            time yet, and a made-up "+18% vs last month" is worse than none. */}
         <StatTile
           label="Open pipeline value"
           value={formatINR(pipelineValue(leads))}
-          delta={18}
-          deltaLabel="vs last month"
           spark={leadVolume.slice(-12).map((m) => m.organic + m.paid)}
         />
         <StatTile
           label="New leads this week"
           value={String(newThisWeek)}
-          delta={12}
-          deltaLabel="vs prior week"
           spark={leadVolume.slice(-12).map((m) => m.paid)}
         />
-        <StatTile
-          label="Active listings"
-          value={String(published)}
-          delta={-4}
-          deltaLabel="vs last month"
-        />
+        <StatTile label="Active listings" value={String(published)} />
         <StatTile
           label="Lead → won conversion"
-          value={`${conversionRate(leads).toFixed(0)}%`}
-          delta={6}
-          deltaLabel="vs last quarter"
+          value={leads.length ? `${conversionRate(leads).toFixed(0)}%` : "—"}
         />
       </div>
 

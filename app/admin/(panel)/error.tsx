@@ -34,13 +34,13 @@ export default function AdminError({
         <button
           type="button"
           onClick={reset}
-          className="rounded-full bg-brand-900 px-5 py-2.5 text-[0.8125rem] font-semibold text-sand-50 transition-colors hover:bg-brand-800"
+          className="rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
         >
           Retry
         </button>
         <a
           href="/admin"
-          className="rounded-full border border-brand-900/15 px-5 py-2.5 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-white"
+          className="rounded-lg border border-sand-300 bg-white px-5 py-2.5 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
         >
           Back to dashboard
         </a>

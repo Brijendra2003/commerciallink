@@ -11,7 +11,6 @@ import {
   PROPERTY_TYPES,
   SORT_OPTIONS,
   ZONES,
-  ZONE_LABEL,
 } from "@/lib/data/taxonomy";
 
 export type Filters = {
@@ -117,13 +116,21 @@ export function FilterBar({ initial }: { initial: Filters }) {
             label="Micro-market"
             value={filters.market}
             onChange={(v) => set("market", v)}
-            options={(filters.zone
-              ? MICRO_MARKETS.filter((m) => m.zone === filters.zone)
-              : MICRO_MARKETS
-            ).map((m) => ({
-              value: m.name,
-              label: filters.zone ? m.name : `${m.name} · ${ZONE_LABEL[m.zone]}`,
-            }))}
+            options={
+              filters.zone
+                ? MICRO_MARKETS.filter((m) => m.zone === filters.zone).map((m) => ({
+                    value: m.name,
+                    label: m.name,
+                  }))
+                : // Eighty markets is too many to scan flat, so they are
+                  // grouped by corridor until a zone narrows them.
+                  ZONES.map((zone) => ({
+                    group: zone.label,
+                    options: MICRO_MARKETS.filter((m) => m.zone === zone.value).map(
+                      (m) => ({ value: m.name, label: m.name }),
+                    ),
+                  }))
+            }
             anyLabel={filters.zone ? "Anywhere in this zone" : "Any micro-market"}
           />
           <Select
@@ -207,6 +214,9 @@ export function FilterBar({ initial }: { initial: Filters }) {
   );
 }
 
+type Option = { value: string; label: string };
+type OptionGroup = { group: string; options: Option[] };
+
 function Select({
   label,
   value,
@@ -217,10 +227,12 @@ function Select({
   label: string;
   value: string;
   onChange: (value: string) => void;
-  options: { value: string; label: string }[];
+  options: Option[] | OptionGroup[];
   anyLabel: string;
 }) {
   const id = `filter-${label.replace(/\s+/g, "-").toLowerCase()}`;
+  const grouped = options.length > 0 && "group" in options[0];
+
   return (
     <div>
       <label
@@ -236,11 +248,21 @@ function Select({
         className="field-input py-2.5 text-[0.8125rem]"
       >
         <option value="">{anyLabel}</option>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
+        {grouped
+          ? (options as OptionGroup[]).map((g) => (
+              <optgroup key={g.group} label={g.group}>
+                {g.options.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </optgroup>
+            ))
+          : (options as Option[]).map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
       </select>
     </div>
   );

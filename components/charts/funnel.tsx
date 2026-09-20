@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChartEmpty } from "@/components/charts/chart-empty";
 
 const RAMP = [
   "var(--color-viz-step-1)",
@@ -24,12 +25,21 @@ export function FunnelChart({
   const [hover, setHover] = useState<number | null>(null);
   const max = Math.max(...data.map((d) => d.count), 1);
 
+  if (data.length === 0 || data.every((d) => d.count === 0)) {
+    return <ChartEmpty message="No leads in the funnel yet." />;
+  }
+
   return (
     <ol className="space-y-2.5">
       {data.map((stage, i) => {
         const pct = (stage.count / max) * 100;
+        // An empty stage above this one means there is no drop-off to state,
+        // rather than a 100% (or NaN) one.
+        const previous = i === 0 ? 0 : data[i - 1].count;
         const dropoff =
-          i === 0 ? null : Math.round((1 - stage.count / data[i - 1].count) * 100);
+          i === 0 || previous === 0
+            ? null
+            : Math.round((1 - stage.count / previous) * 100);
         const active = hover === i;
 
         return (

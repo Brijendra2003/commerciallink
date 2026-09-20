@@ -122,7 +122,7 @@ export function LeadBoard({
   return (
     <>
       {/* One filter row above everything it scopes. */}
-      <div className="mb-4 rounded-3xl border border-brand-900/8 bg-white p-4 shadow-soft">
+      <div className="mb-4 rounded-3xl border border-sand-200 bg-white p-4 shadow-soft">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <input
             type="search"
@@ -201,11 +201,15 @@ export function LeadBoard({
             <button
               type="button"
               onClick={exportCsv}
-              className="rounded-full border border-brand-900/15 px-4 py-1.5 text-[0.75rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
+              className="rounded-lg border border-sand-300 px-4 py-1.5 text-[0.75rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
             >
               Export CSV
             </button>
-            <div role="tablist" aria-label="Board view" className="flex rounded-full bg-sand-100 p-0.5">
+            <div
+              role="tablist"
+              aria-label="Board view"
+              className="flex rounded-lg border border-sand-200 bg-sand-100 p-0.5"
+            >
               {(["kanban", "table"] as const).map((v) => (
                 <button
                   key={v}
@@ -213,7 +217,7 @@ export function LeadBoard({
                   type="button"
                   aria-selected={view === v}
                   onClick={() => setView(v)}
-                  className={`rounded-full px-3.5 py-1.5 text-[0.6875rem] font-semibold capitalize transition-colors ${
+                  className={`rounded px-3.5 py-1.5 text-[0.6875rem] font-semibold capitalize transition-colors ${
                     view === v
                       ? "bg-white text-brand-900 shadow-soft"
                       : "text-ink-500 hover:text-brand-800"
@@ -250,7 +254,7 @@ export function LeadBoard({
                   className={`flex w-[17rem] shrink-0 flex-col rounded-2xl border p-2.5 transition-colors ${
                     overColumn === column
                       ? "border-brand-600 bg-brand-50"
-                      : "border-brand-900/8 bg-white/60"
+                      : "border-sand-200 bg-white/60"
                   }`}
                 >
                   <div className="mb-2.5 flex items-center justify-between gap-2 px-1.5 pt-1">
@@ -278,7 +282,7 @@ export function LeadBoard({
                           onDragStart={() => setDragging(lead.id)}
                           onDragEnd={() => setDragging(null)}
                           onClick={() => setOpenId(lead.id)}
-                          className={`w-full cursor-grab rounded-xl border border-brand-900/8 bg-white p-3 text-left shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lift active:cursor-grabbing ${
+                          className={`w-full cursor-grab rounded-xl border border-sand-200 bg-white p-3 text-left shadow-soft transition-all hover:-translate-y-0.5 hover:shadow-lift active:cursor-grabbing ${
                             dragging === lead.id ? "opacity-40" : ""
                           }`}
                         >
@@ -327,7 +331,7 @@ export function LeadBoard({
           </div>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-3xl border border-brand-900/8 bg-white shadow-soft">
+        <div className="overflow-x-auto rounded-3xl border border-sand-200 bg-white shadow-soft">
           <table className="w-full min-w-[54rem] border-collapse text-left">
             <thead>
               <tr className="border-b border-sand-200 bg-sand-50">

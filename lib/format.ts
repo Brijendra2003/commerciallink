@@ -41,6 +41,21 @@ export function formatPrice(property: Property): {
   return { value: "Price on request", unit: null, gated: true };
 }
 
+/**
+ * A share of a total, or an em dash when there is nothing to divide by. Every
+ * rate in the console runs through this — on an empty database the naive form
+ * renders "NaN%".
+ */
+export function formatRate(part: number, whole: number, digits = 1): string {
+  if (!whole || !Number.isFinite(part / whole)) return "—";
+  return `${((part / whole) * 100).toFixed(digits)}%`;
+}
+
+/** Same guard, for callers that need the number rather than the label. */
+export function rate(part: number, whole: number): number {
+  return whole ? part / whole : 0;
+}
+
 export function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString("en-IN", {
     day: "numeric",

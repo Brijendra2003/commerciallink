@@ -344,7 +344,7 @@ export function MediaUploader({
                 ) : null}
 
                 {item.status === "uploading" ? (
-                  <div className="absolute inset-0 grid place-items-center bg-brand-900/55">
+                  <div className="absolute inset-0 grid place-items-center bg-sand-1005">
                     <div className="w-3/4">
                       <div className="h-1 overflow-hidden rounded-full bg-white/30">
                         <div
@@ -368,7 +368,7 @@ export function MediaUploader({
                 ) : null}
 
                 {showCover && i === 0 && item.status === "done" ? (
-                  <span className="absolute left-1.5 top-1.5 rounded bg-brand-900/85 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
+                  <span className="absolute left-1.5 top-1.5 rounded bg-sand-2005 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
                     Cover
                   </span>
                 ) : null}

@@ -26,13 +26,14 @@ export const ZONES: { value: Zone; label: string; blurb: string }[] = [
   },
   {
     value: "western",
-    label: "Western Suburbs",
-    blurb: "BKC, Andheri, Goregaon and Malad — the deepest occupier market.",
+    label: "Western Suburbs & Line",
+    blurb:
+      "BKC and Andheri through Borivali, and out along the line to Mira Road, Vasai and Virar.",
   },
   {
     value: "eastern",
     label: "Eastern Suburbs",
-    blurb: "Powai, Vikhroli and Ghatkopar — value against a metro spine.",
+    blurb: "Powai, Vikhroli, Ghatkopar and Mulund — value against a metro spine.",
   },
   {
     value: "navi",
@@ -42,7 +43,8 @@ export const ZONES: { value: Zone; label: string; blurb: string }[] = [
   {
     value: "thane",
     label: "Thane & Beyond",
-    blurb: "Thane, Wagle Estate, Bhiwandi and Panvel — warehousing and logistics.",
+    blurb:
+      "Thane, Wagle Estate, Bhiwandi, the Kalyan–Dombivli belt and Panvel — warehousing and logistics.",
   },
 ];
 
@@ -50,32 +52,98 @@ export const ZONE_LABEL: Record<Zone, string> = Object.fromEntries(
   ZONES.map((z) => [z.value, z.label]),
 ) as Record<Zone, string>;
 
-/** The searchable micro-markets, in the zone they belong to. */
+/**
+ * The searchable micro-markets, in the zone they belong to.
+ *
+ * Ordered geographically within each zone — south to north on the Western and
+ * Central lines, so the dropdown reads like the line itself rather than like
+ * an alphabetical list.
+ */
 export const MICRO_MARKETS: { name: string; zone: Zone }[] = [
-  { name: "Nariman Point", zone: "south" },
-  { name: "Fort & Ballard Estate", zone: "south" },
+  /* ---- South Mumbai ------------------------------------------------ */
   { name: "Colaba", zone: "south" },
+  { name: "Cuffe Parade", zone: "south" },
+  { name: "Nariman Point", zone: "south" },
+  { name: "Churchgate", zone: "south" },
+  { name: "Fort & Ballard Estate", zone: "south" },
+  { name: "Marine Lines", zone: "south" },
+  { name: "Charni Road", zone: "south" },
+  { name: "Grant Road", zone: "south" },
+  { name: "Mumbai Central", zone: "south" },
+  { name: "Byculla", zone: "south" },
+  { name: "Mazgaon", zone: "south" },
+
+  /* ---- Central Mumbai ---------------------------------------------- */
+  { name: "Mahalaxmi", zone: "central" },
   { name: "Worli", zone: "central" },
   { name: "Lower Parel", zone: "central" },
+  { name: "Parel", zone: "central" },
   { name: "Prabhadevi", zone: "central" },
   { name: "Dadar", zone: "central" },
+  { name: "Matunga", zone: "central" },
+  { name: "Sion", zone: "central" },
+  { name: "Wadala", zone: "central" },
+
+  /* ---- Western suburbs, then out along the Western line ------------- */
   { name: "Bandra Kurla Complex", zone: "western" },
   { name: "Bandra West", zone: "western" },
+  { name: "Bandra East", zone: "western" },
+  { name: "Khar", zone: "western" },
+  { name: "Santacruz", zone: "western" },
+  { name: "Vile Parle", zone: "western" },
   { name: "Andheri East", zone: "western" },
   { name: "Andheri West", zone: "western" },
+  { name: "Jogeshwari", zone: "western" },
   { name: "Goregaon", zone: "western" },
   { name: "Malad", zone: "western" },
-  { name: "Powai", zone: "eastern" },
-  { name: "Vikhroli", zone: "eastern" },
-  { name: "Ghatkopar", zone: "eastern" },
+  { name: "Kandivali", zone: "western" },
+  { name: "Borivali", zone: "western" },
+  { name: "Dahisar", zone: "western" },
+  { name: "Mira Road", zone: "western" },
+  { name: "Bhayandar", zone: "western" },
+  { name: "Naigaon", zone: "western" },
+  { name: "Vasai", zone: "western" },
+  { name: "Nalasopara", zone: "western" },
+  { name: "Virar", zone: "western" },
+  { name: "Boisar", zone: "western" },
+
+  /* ---- Eastern suburbs ---------------------------------------------- */
+  { name: "Kurla", zone: "eastern" },
   { name: "Chembur", zone: "eastern" },
-  { name: "Vashi", zone: "navi" },
-  { name: "Turbhe", zone: "navi" },
+  { name: "Govandi", zone: "eastern" },
+  { name: "Mankhurd", zone: "eastern" },
+  { name: "Ghatkopar", zone: "eastern" },
+  { name: "Vikhroli", zone: "eastern" },
+  { name: "Powai", zone: "eastern" },
+  { name: "Kanjurmarg", zone: "eastern" },
+  { name: "Bhandup", zone: "eastern" },
+  { name: "Mulund", zone: "eastern" },
+
+  /* ---- Navi Mumbai --------------------------------------------------- */
   { name: "Airoli", zone: "navi" },
+  { name: "Rabale", zone: "navi" },
+  { name: "Ghansoli", zone: "navi" },
+  { name: "Mahape", zone: "navi" },
+  { name: "Turbhe", zone: "navi" },
+  { name: "Vashi", zone: "navi" },
+  { name: "Sanpada", zone: "navi" },
+  { name: "Nerul", zone: "navi" },
   { name: "Belapur", zone: "navi" },
+  { name: "Kharghar", zone: "navi" },
+  { name: "Ulwe", zone: "navi" },
   { name: "Taloja MIDC", zone: "navi" },
+
+  /* ---- Thane and beyond ---------------------------------------------- */
   { name: "Thane West", zone: "thane" },
+  { name: "Thane East", zone: "thane" },
   { name: "Wagle Estate", zone: "thane" },
+  { name: "Ghodbunder Road", zone: "thane" },
+  { name: "Mumbra", zone: "thane" },
+  { name: "Kalwa", zone: "thane" },
+  { name: "Dombivli", zone: "thane" },
+  { name: "Kalyan", zone: "thane" },
+  { name: "Ambernath", zone: "thane" },
+  { name: "Badlapur", zone: "thane" },
   { name: "Bhiwandi", zone: "thane" },
   { name: "Panvel", zone: "thane" },
 ];

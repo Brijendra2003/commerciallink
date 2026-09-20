@@ -134,7 +134,7 @@ export function FilePicker({
                 <img src={item.preview} alt="" className="h-full w-full object-cover" />
               ) : null}
               {showCover && i === 0 ? (
-                <span className="absolute left-1.5 top-1.5 rounded bg-brand-900/85 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
+                <span className="absolute left-1.5 top-1.5 rounded bg-sand-2005 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
                   Cover
                 </span>
               ) : null}

@@ -15,6 +15,7 @@ import {
   MICRO_MARKETS,
   PROPERTY_TYPES,
   TIMELINES,
+  ZONES,
 } from "@/lib/data/taxonomy";
 import { submitRequirement } from "@/lib/actions";
 import type { LeadSubmission } from "@/lib/types";
@@ -86,12 +87,16 @@ export function RequirementForm() {
               <option value="" disabled>
                 Select a micro-market
               </option>
-              {MICRO_MARKETS.map((m) => (
-                <option key={m.name} value={m.name}>
-                  {m.name}
-                </option>
-              ))}
               <option value="flexible">Flexible across MMR</option>
+              {ZONES.map((zone) => (
+                <optgroup key={zone.value} label={zone.label}>
+                  {MICRO_MARKETS.filter((m) => m.zone === zone.value).map((m) => (
+                    <option key={m.name} value={m.name}>
+                      {m.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
             </Select>
           </Field>
 

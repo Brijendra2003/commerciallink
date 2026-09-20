@@ -113,13 +113,13 @@ export function MediaManager({
             onDragOver={(e) => e.preventDefault()}
             onDrop={() => drop(i)}
             onDragEnd={() => setDragging(null)}
-            className={`group/media relative aspect-[4/3] cursor-grab overflow-hidden rounded-xl bg-brand-100 transition-all active:cursor-grabbing ${
+            className={`group/media relative aspect-[4/3] cursor-grab overflow-hidden rounded border border-sand-200 bg-sand-100 transition-all active:cursor-grabbing ${
               dragging === i ? "opacity-40 ring-2 ring-brand-600" : ""
             }`}
           >
             <Photo publicId={m.cloudinary_public_id} alt={m.alt} sizes="200px" width={400} />
             {i === 0 ? (
-              <span className="absolute left-2 top-2 rounded-full bg-brand-900/85 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-sand-50">
+              <span className="absolute left-2 top-2 rounded bg-sand-2005 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
                 Cover
               </span>
             ) : null}

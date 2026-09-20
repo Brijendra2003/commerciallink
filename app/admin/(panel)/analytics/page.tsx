@@ -16,7 +16,7 @@ import {
 } from "@/lib/data/crm";
 import { getLeads, getPublishedProperties } from "@/lib/data/queries";
 import { PROPERTY_TYPE_LABEL } from "@/lib/data/taxonomy";
-import { formatINR } from "@/lib/format";
+import { formatINR, formatRate, rate } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Analytics" };
 
@@ -29,23 +29,23 @@ export default async function AnalyticsPage() {
   const sources = leadsBySource(leads).filter((s) => s.count > 0);
 
   const paidLeads = leads.filter((l) => PAID_SOURCES.includes(l.source)).length;
-  const organicShare = Math.round(((leads.length - paidLeads) / leads.length) * 100);
 
   // Value-weighted source performance: volume alone hides that paid brings
   // more leads at a smaller average ticket.
   const sourceValue = sources.map((s) => ({
     label: LEAD_SOURCE_LABEL[s.source],
-    value: Math.round(
-      leads
-        .filter((l) => l.source === s.source)
-        .reduce((sum, l) => sum + l.value_estimate, 0) / s.count,
-    ),
+    value: s.count
+      ? Math.round(
+          leads
+            .filter((l) => l.source === s.source)
+            .reduce((sum, l) => sum + l.value_estimate, 0) / s.count,
+        )
+      : 0,
     sub: `${s.count} leads`,
   }));
 
   const listings = [...published].sort(
-    (a, b) =>
-      b.enquiry_count / b.view_count - a.enquiry_count / a.view_count,
+    (a, b) => rate(b.enquiry_count, b.view_count) - rate(a.enquiry_count, a.view_count),
   );
 
   return (
@@ -59,30 +59,27 @@ export default async function AnalyticsPage() {
         <StatTile
           label="Leads, last 12 months"
           value={leadVolume.reduce((s, m) => s + m.organic + m.paid, 0).toLocaleString("en-IN")}
-          delta={31}
-          deltaLabel="vs prior year"
           spark={leadVolume.map((m) => m.organic + m.paid)}
         />
         <StatTile
           label="Unpaid share of leads"
-          value={`${organicShare}%`}
-          delta={5}
-          deltaLabel="vs last quarter"
+          value={formatRate(leads.length - paidLeads, leads.length, 0)}
         />
         <StatTile
           label="Avg. lead value"
-          value={formatINR(
-            Math.round(
-              leads.reduce((s, l) => s + l.value_estimate, 0) / leads.length,
-            ),
-          )}
+          value={
+            leads.length
+              ? formatINR(
+                  Math.round(
+                    leads.reduce((s, l) => s + l.value_estimate, 0) / leads.length,
+                  ),
+                )
+              : "—"
+          }
         />
         <StatTile
           label="Site-visit rate"
-          value={`${Math.round(
-            (funnel[3].count / funnel[1].count) * 100,
-          )}%`}
-          delta={4}
+          value={formatRate(funnel[3].count, funnel[1].count, 0)}
           deltaLabel="of contacted leads"
         />
       </div>
@@ -194,7 +191,7 @@ export default async function AnalyticsPage() {
               </thead>
               <tbody>
                 {listings.map((p) => {
-                  const rate = (p.enquiry_count / p.view_count) * 100;
+                  const enquiryPct = rate(p.enquiry_count, p.view_count) * 100;
                   const pipeline = leads
                     .filter(
                       (l) =>
@@ -234,13 +231,13 @@ export default async function AnalyticsPage() {
                             <span
                               className="block h-full rounded-full"
                               style={{
-                                width: `${Math.min(rate * 30, 100)}%`,
+                                width: `${Math.min(enquiryPct * 30, 100)}%`,
                                 background: "var(--color-viz-series-1)",
                               }}
                             />
                           </span>
-                          <span className="w-10 text-right text-[0.8125rem] font-bold tabular-nums text-brand-900">
-                            {rate.toFixed(1)}%
+                          <span className="w-10 text-right text-[0.8125rem] font-semibold tabular-nums text-brand-900">
+                            {formatRate(p.enquiry_count, p.view_count)}
                           </span>
                         </span>
                       </td>

@@ -70,7 +70,7 @@ export default async function OwnersPage() {
       </div>
 
       {pending.length > 0 ? (
-        <div className="mb-4 rounded-3xl border border-brand-900/8 bg-white p-5 shadow-soft">
+        <div className="mb-4 rounded-3xl border border-sand-200 bg-white p-5 shadow-soft">
           <div className="flex items-center gap-2.5">
             <span
               aria-hidden="true"
@@ -102,7 +102,7 @@ export default async function OwnersPage() {
           return (
             <li
               key={owner.id}
-              className="flex flex-col rounded-3xl border border-brand-900/8 bg-white p-5 shadow-soft"
+              className="flex flex-col rounded-3xl border border-sand-200 bg-white p-5 shadow-soft"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">

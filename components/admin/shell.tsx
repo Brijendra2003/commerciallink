@@ -161,9 +161,11 @@ export function AdminShell({
   );
 
   return (
-    <div className="flex min-h-screen bg-sand-100">
-      {/* Desktop rail */}
-      <aside className="sticky top-0 hidden h-screen w-[15.5rem] shrink-0 flex-col bg-brand-900 p-5 lg:flex">
+    <div className="min-h-screen bg-sand-100 lg:pl-[15.5rem]">
+      {/* Desktop rail. Fixed rather than sticky, and scrollable in its own
+          right: the nav plus the account card runs taller than a short
+          viewport, which previously clipped the logo and the sign-out. */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[15.5rem] flex-col overflow-y-auto overscroll-contain bg-brand-900 p-5 lg:flex">
         <div className="mb-8 px-1">
           <Logo tone="light" />
         </div>
@@ -177,9 +179,9 @@ export function AdminShell({
             type="button"
             aria-label="Close menu"
             onClick={() => setOpen(false)}
-            className="absolute inset-0 bg-brand-900/55 backdrop-blur-sm"
+            className="absolute inset-0 bg-sand-1005 backdrop-blur-sm"
           />
-          <aside className="relative flex h-full w-[16rem] max-w-[82vw] flex-col bg-brand-900 p-5">
+          <aside className="relative flex h-full w-[16rem] max-w-[82vw] flex-col overflow-y-auto overscroll-contain bg-brand-900 p-5">
             <div className="mb-8 px-1">
               <Logo tone="light" />
             </div>
@@ -188,13 +190,13 @@ export function AdminShell({
         </div>
       ) : null}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-brand-900/8 bg-sand-100/90 px-4 backdrop-blur-md sm:px-6 lg:hidden">
+      <div className="flex min-h-screen min-w-0 flex-col">
+        <header className="sticky top-0 z-40 flex h-14 items-center gap-3 border-b border-sand-200 bg-sand-100/90 px-4 backdrop-blur-md sm:px-6 lg:hidden">
           <button
             type="button"
             onClick={() => setOpen(true)}
             aria-label="Open menu"
-            className="grid h-9 w-9 place-items-center rounded-full border border-brand-900/12 text-brand-900"
+            className="grid h-9 w-9 place-items-center rounded-lg border border-sand-300 text-brand-900"
           >
             <svg
               viewBox="0 0 16 16"
@@ -208,7 +210,7 @@ export function AdminShell({
               <path d="M2.5 4.5h11M2.5 8h11M2.5 11.5h11" />
             </svg>
           </button>
-          <span className="font-display text-[0.9375rem] text-brand-900">
+          <span className="font-display text-[0.9375rem] font-semibold text-brand-900">
             Admin
           </span>
         </header>

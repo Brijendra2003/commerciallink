@@ -81,7 +81,7 @@ export default async function EditPropertyPage({
             <Link
               href={`/properties/${property.slug}`}
               target="_blank"
-              className="rounded-full border border-brand-900/15 px-5 py-2.5 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-white"
+              className="rounded-full border border-sand-300 px-5 py-2.5 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-white"
             >
               View live
             </Link>

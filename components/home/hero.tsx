@@ -8,7 +8,7 @@ import {
   BUDGET_BANDS,
   MICRO_MARKETS,
   PROPERTY_TYPES,
-  ZONE_LABEL,
+  ZONES,
 } from "@/lib/data/taxonomy";
 
 /** Credibility markers, stated as facts rather than decoration. */
@@ -98,10 +98,15 @@ export function Hero() {
             <SearchCell label="Micro-market">
               <select name="market" className="hero-select" defaultValue="">
                 <option value="">Anywhere in MMR</option>
-                {MICRO_MARKETS.map((m) => (
-                  <option key={m.name} value={m.name}>
-                    {m.name} · {ZONE_LABEL[m.zone]}
-                  </option>
+                {/* Grouped by corridor — the flat list runs to eighty markets. */}
+                {ZONES.map((zone) => (
+                  <optgroup key={zone.value} label={zone.label}>
+                    {MICRO_MARKETS.filter((m) => m.zone === zone.value).map((m) => (
+                      <option key={m.name} value={m.name}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
             </SearchCell>

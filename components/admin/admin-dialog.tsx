@@ -37,7 +37,10 @@ export function AdminDialog({
         // Clicking the backdrop lands on the dialog element itself.
         if (e.target === ref.current) onClose();
       }}
-      className="w-[min(30rem,calc(100vw-2rem))] rounded-lg border border-sand-200 bg-white p-0 text-ink-900 shadow-lift backdrop:bg-brand-900/45"
+      // `m-auto` is load-bearing: a <dialog> centres itself through the user
+      // agent's `margin: auto`, which Tailwind's reset zeroes out. Without it
+      // the modal pins to the top-left corner.
+      className="m-auto max-h-[calc(100dvh-2rem)] w-[min(30rem,calc(100vw-2rem))] overflow-y-auto rounded-lg border border-sand-200 bg-white p-0 text-ink-900 shadow-lift backdrop:bg-brand-900/45"
     >
       <div className="flex items-start justify-between gap-4 border-b border-sand-200 px-5 py-4">
         <div>
@@ -68,10 +71,13 @@ export function DialogActions({
   onCancel,
   submitLabel,
   pending,
+  disabled = false,
 }: {
   onCancel: () => void;
   submitLabel: string;
   pending: boolean;
+  /** Blocks submission without claiming the form is saving. */
+  disabled?: boolean;
 }) {
   return (
     <div className="mt-5 flex items-center justify-end gap-2.5 border-t border-sand-200 pt-4">
@@ -84,8 +90,8 @@ export function DialogActions({
       </button>
       <button
         type="submit"
-        disabled={pending}
-        className="rounded-lg bg-brand-700 px-4 py-2 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800 disabled:opacity-60"
+        disabled={pending || disabled}
+        className="rounded-lg bg-brand-700 px-4 py-2 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800 disabled:cursor-not-allowed disabled:opacity-60"
       >
         {pending ? "Saving…" : submitLabel}
       </button>

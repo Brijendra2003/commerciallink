@@ -55,7 +55,7 @@ export function PropertyEditForm({
       <input type="hidden" name="ref" value={propertyRef} />
 
       <div
-        className="sticky top-2 z-20 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-brand-900/8 bg-white/95 px-4 py-3 shadow-soft backdrop-blur"
+        className="sticky top-2 z-20 mb-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-sand-200 bg-white/95 px-4 py-3 shadow-soft backdrop-blur"
         aria-live="polite"
       >
         <p

@@ -5,7 +5,7 @@ import { RequirementBadge } from "@/components/admin/status-badge";
 import { StatTile } from "@/components/charts/stat-tile";
 import { getLeads, getPublishedProperties, getRequirements } from "@/lib/data/queries";
 import { PROPERTY_TYPE_LABEL } from "@/lib/data/taxonomy";
-import { formatArea } from "@/lib/format";
+import { formatArea, formatRate } from "@/lib/format";
 import type { PropertyType } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Requirements" };
@@ -35,9 +35,11 @@ export default async function RequirementsPage() {
         />
         <StatTile
           label="Share of all leads"
-          value={`${Math.round(
-            (leads.filter((l) => l.source === "requirement").length / leads.length) * 100,
-          )}%`}
+          value={formatRate(
+            leads.filter((l) => l.source === "requirement").length,
+            leads.length,
+            0,
+          )}
         />
       </div>
 
@@ -66,12 +68,12 @@ export default async function RequirementsPage() {
           return (
             <li
               key={r.id}
-              className="rounded-3xl border border-brand-900/8 bg-white p-5 shadow-soft"
+              className="rounded-3xl border border-sand-200 bg-white p-5 shadow-soft"
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full bg-sand-100 px-2.5 py-1 text-[0.625rem] font-bold tracking-wider text-ink-500">
+                    <span className="rounded border border-sand-200 bg-sand-50 px-2 py-0.5 text-[0.625rem] font-semibold tracking-wider text-ink-500">
                       {r.id}
                     </span>
                     <RequirementBadge status={r.status} />
@@ -91,7 +93,7 @@ export default async function RequirementsPage() {
                 {linkedLead ? (
                   <Link
                     href={`/admin/leads?lead=${linkedLead.id}`}
-                    className="shrink-0 rounded-full bg-brand-900 px-4 py-2 text-[0.75rem] font-semibold text-sand-50 transition-colors hover:bg-brand-800"
+                    className="shrink-0 rounded-lg bg-brand-700 px-4 py-2 text-[0.75rem] font-semibold text-white transition-colors hover:bg-brand-800"
                   >
                     Open lead {linkedLead.id}
                   </Link>

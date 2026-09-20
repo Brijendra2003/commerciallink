@@ -96,7 +96,7 @@ export function LeadDrawer({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-brand-900/10 text-ink-500 transition-colors hover:bg-sand-100"
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full border border-sand-200 text-ink-500 transition-colors hover:bg-sand-100"
           >
             <svg
               viewBox="0 0 16 16"
@@ -114,7 +114,7 @@ export function LeadDrawer({
 
         <div className="flex-1 overflow-y-auto px-6 py-5">
           {/* Contact block — visible here and nowhere on the public site. */}
-          <section className="rounded-2xl border border-brand-900/8 bg-white p-4">
+          <section className="rounded-2xl border border-sand-200 bg-white p-4">
             <div className="flex items-center justify-between gap-3">
               <h3 className="text-[0.6875rem] font-bold uppercase tracking-[0.13em] text-ink-300">
                 Contact
@@ -161,7 +161,7 @@ export function LeadDrawer({
             </dl>
           </section>
 
-          <section className="mt-4 rounded-2xl border border-brand-900/8 bg-white p-4">
+          <section className="mt-4 rounded-2xl border border-sand-200 bg-white p-4">
             <h3 className="text-[0.6875rem] font-bold uppercase tracking-[0.13em] text-ink-300">
               Enquiry
             </h3>
@@ -214,7 +214,7 @@ export function LeadDrawer({
             ) : null}
           </section>
 
-          <section className="mt-4 rounded-2xl border border-brand-900/8 bg-white p-4">
+          <section className="mt-4 rounded-2xl border border-sand-200 bg-white p-4">
             <h3 className="text-[0.6875rem] font-bold uppercase tracking-[0.13em] text-ink-300">
               Move through the pipeline
             </h3>

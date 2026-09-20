@@ -26,11 +26,11 @@ export function ChartCard({
 
   return (
     <section
-      className={`flex flex-col rounded-3xl border border-brand-900/8 bg-white p-5 shadow-soft sm:p-6 ${className}`}
+      className={`flex flex-col rounded-lg border border-sand-200 bg-white p-5 sm:p-6 ${className}`}
     >
       <header className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="text-[0.9375rem] font-bold tracking-tight text-brand-900">
+          <h2 className="text-[0.9375rem] font-semibold tracking-tight text-brand-900">
             {title}
           </h2>
           {subtitle ? (
@@ -43,7 +43,7 @@ export function ChartCard({
           <div
             role="tablist"
             aria-label={`${title} view`}
-            className="flex rounded-full bg-sand-100 p-0.5"
+            className="flex rounded-lg border border-sand-200 bg-sand-100 p-0.5"
           >
             {(["chart", "table"] as const).map((v) => (
               <button
@@ -53,7 +53,7 @@ export function ChartCard({
                 aria-selected={view === v}
                 aria-controls={panelId}
                 onClick={() => setView(v)}
-                className={`rounded-full px-3 py-1 text-[0.6875rem] font-semibold capitalize transition-colors ${
+                className={`rounded px-3 py-1 text-[0.6875rem] font-semibold capitalize transition-colors ${
                   view === v
                     ? "bg-white text-brand-900 shadow-soft"
                     : "text-ink-500 hover:text-brand-800"

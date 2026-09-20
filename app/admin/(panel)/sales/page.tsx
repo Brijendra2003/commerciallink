@@ -98,19 +98,11 @@ export default async function SalesPage() {
         <StatTile
           label="Brokerage earned (12 mo)"
           value={formatINR(totalRevenue)}
-          delta={23}
-          deltaLabel="vs prior year"
           spark={revenueByMonth.map((m) => m.value)}
         />
-        <StatTile label="Deals won" value={String(won.length)} delta={15} deltaLabel="vs prior year" />
+        <StatTile label="Deals won" value={String(won.length)} />
         <StatTile label="Commission in open deals" value={formatINR(openCommission)} />
-        <StatTile
-          label="Payouts unsettled"
-          value={String(unsettled.length)}
-          delta={-50}
-          deltaLabel="vs last month"
-          upIsGood={false}
-        />
+        <StatTile label="Payouts unsettled" value={String(unsettled.length)} />
       </div>
 
       <div className="mt-4 grid gap-4 xl:grid-cols-[1.4fr_1fr]">

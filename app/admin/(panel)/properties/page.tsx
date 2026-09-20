@@ -8,7 +8,7 @@ import { Photo } from "@/components/ui/photo";
 import { PROPERTY_TYPE_LABEL, PURPOSE_LABEL } from "@/lib/data/taxonomy";
 import { makeOwnerLookup } from "@/lib/data/crm";
 import { getAllProperties, getLeads, getOwners } from "@/lib/data/queries";
-import { formatArea, formatINR, formatPrice } from "@/lib/format";
+import { formatArea, formatINR, formatPrice, formatRate } from "@/lib/format";
 import type { PropertyStatus } from "@/lib/types";
 
 export const metadata: Metadata = { title: "Property Management" };
@@ -92,13 +92,11 @@ export default async function AdminPropertiesPage({
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatTile label="Published listings" value={String(properties.filter((p) => p.status === "published").length)} />
-        <StatTile label="Total listing views" value={totalViews.toLocaleString("en-IN")} delta={9} deltaLabel="vs last month" />
-        <StatTile label="Enquiries generated" value={String(totalEnquiries)} delta={14} deltaLabel="vs last month" />
+        <StatTile label="Total listing views" value={totalViews.toLocaleString("en-IN")} />
+        <StatTile label="Enquiries generated" value={String(totalEnquiries)} />
         <StatTile
           label="View → enquiry rate"
-          value={`${((totalEnquiries / totalViews) * 100).toFixed(1)}%`}
-          delta={2}
-          deltaLabel="vs last month"
+          value={formatRate(totalEnquiries, totalViews)}
         />
       </div>
 
@@ -158,7 +156,7 @@ export default async function AdminPropertiesPage({
               className={`rounded-full px-4 py-2 text-[0.75rem] font-semibold transition-colors ${
                 active
                   ? "bg-brand-900 text-sand-50"
-                  : "border border-brand-900/12 text-ink-500 hover:bg-white"
+                  : "border border-sand-300 text-ink-500 hover:bg-white"
               }`}
             >
               {f.label}
@@ -170,7 +168,7 @@ export default async function AdminPropertiesPage({
         })}
       </nav>
 
-      <div className="overflow-x-auto rounded-3xl border border-brand-900/8 bg-white shadow-soft">
+      <div className="overflow-x-auto rounded-3xl border border-sand-200 bg-white shadow-soft">
         <table className="w-full min-w-[58rem] border-collapse text-left">
           <thead>
             <tr className="border-b border-sand-200 bg-sand-50">
@@ -193,7 +191,7 @@ export default async function AdminPropertiesPage({
             {rows.map((p) => {
               const price = formatPrice(p);
               const cover = p.media.find((m) => m.type === "image");
-              const rate = (p.enquiry_count / p.view_count) * 100;
+              const enquiryRate = formatRate(p.enquiry_count, p.view_count);
               const linked = leads.filter((l) => l.property_id === p.id).length;
 
               return (
@@ -242,12 +240,12 @@ export default async function AdminPropertiesPage({
                     {p.enquiry_count}
                   </td>
                   <td className="px-4 py-3 text-right text-[0.8125rem] font-semibold tabular-nums text-brand-900">
-                    {rate.toFixed(1)}%
+                    {enquiryRate}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Link
                       href={`/admin/properties/${p.id}`}
-                      className="rounded-full border border-brand-900/15 px-3.5 py-1.5 text-[0.6875rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
+                      className="rounded-lg border border-sand-300 px-3.5 py-1.5 text-[0.6875rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
                     >
                       Edit
                     </Link>

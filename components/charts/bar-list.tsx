@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChartEmpty } from "@/components/charts/chart-empty";
 import { FORMATTERS, type ValueFormat } from "@/components/charts/format";
 
 /**
@@ -22,6 +23,8 @@ export function BarList({
   const [hover, setHover] = useState<number | null>(null);
   const fmt = FORMATTERS[format];
   const max = Math.max(...data.map((d) => d.value), 1);
+
+  if (data.length === 0) return <ChartEmpty />;
 
   return (
     <div>

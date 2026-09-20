@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { ChartEmpty } from "@/components/charts/chart-empty";
 import { FORMATTERS, type ValueFormat } from "@/components/charts/format";
 
 export interface ColumnSeries {
@@ -36,11 +37,14 @@ export function ColumnChart({
   );
   const peak = Math.max(...totals, 1);
   const peakIndex = totals.indexOf(peak);
+  const empty = data.length === 0 || totals.every((t) => t === 0);
 
   // Round the axis top to a clean number so ticks land on readable values.
   const magnitude = 10 ** Math.floor(Math.log10(peak));
   const top = Math.ceil(peak / magnitude) * magnitude;
   const ticks = [0, top / 2, top];
+
+  if (empty) return <ChartEmpty />;
 
   return (
     <div>

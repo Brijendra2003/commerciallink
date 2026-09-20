@@ -48,7 +48,7 @@ export default function SiteError({
               href={whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full border border-brand-900/15 px-7 py-3.5 text-[0.9375rem] font-semibold text-brand-900 transition-colors hover:bg-white"
+              className="inline-flex items-center gap-2 rounded-lg border border-sand-300 bg-white px-6 py-3 text-[0.9375rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
             >
               <WhatsAppIcon className="h-4 w-4" />
               WhatsApp the desk

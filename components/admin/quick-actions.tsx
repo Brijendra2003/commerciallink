@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AdminDialog, DialogActions, DialogStatus } from "@/components/admin/admin-dialog";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
@@ -183,19 +184,35 @@ export function NewListingButton({
             />
           </Field>
 
-          <Field label="Owner" name="listing-owner" required error={errors.owner_id}>
-            <Select name="owner_id" id="listing-owner" defaultValue="" required>
-              <option value="" disabled>
-                Select the owner
-              </option>
-              {owners.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
-                  {o.company ? ` · ${o.company}` : ""}
+          {/* A listing must belong to an owner, so with none on the book the
+              only sensible next step is to create one. */}
+          {owners.length === 0 ? (
+            <p className="rounded-lg border border-gold-500/40 bg-gold-100/60 px-4 py-3 text-[0.8125rem] leading-relaxed text-ink-700">
+              No owners on the book yet. Every listing has to sit with one —
+              onboard the owner first from{" "}
+              <Link
+                href="/admin/owners"
+                className="font-semibold text-brand-700 underline underline-offset-4"
+              >
+                Owner management
+              </Link>
+              .
+            </p>
+          ) : (
+            <Field label="Owner" name="listing-owner" required error={errors.owner_id}>
+              <Select name="owner_id" id="listing-owner" defaultValue="" required>
+                <option value="" disabled>
+                  Select the owner
                 </option>
-              ))}
-            </Select>
-          </Field>
+                {owners.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                    {o.company ? ` · ${o.company}` : ""}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          )}
 
           <div className="grid gap-3.5 sm:grid-cols-2">
             <Field label="Asset class" name="listing-type" required error={errors.type}>
@@ -220,6 +237,7 @@ export function NewListingButton({
             onCancel={() => setOpen(false)}
             submitLabel="Create draft"
             pending={pending}
+            disabled={owners.length === 0}
           />
         </form>
       </AdminDialog>

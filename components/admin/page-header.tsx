@@ -12,7 +12,7 @@ export function PageHeader({
   return (
     <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div className="min-w-0">
-        <h1 className="font-display text-[1.5rem] leading-tight tracking-[-0.02em] text-brand-900 sm:text-[1.75rem]">
+        <h1 className="font-display text-[1.5rem] font-semibold leading-tight tracking-[-0.02em] text-brand-900 sm:text-[1.75rem]">
           {title}
         </h1>
         {lead ? (
@@ -41,11 +41,11 @@ export function Panel({
 }) {
   return (
     <section
-      className={`rounded-3xl border border-brand-900/8 bg-white shadow-soft ${className}`}
+      className={`rounded-lg border border-sand-200 bg-white ${className}`}
     >
       {title ? (
         <header className="flex items-center justify-between gap-3 border-b border-sand-200 px-5 py-4">
-          <h2 className="text-[0.9375rem] font-bold tracking-tight text-brand-900">
+          <h2 className="text-[0.9375rem] font-semibold tracking-tight text-brand-900">
             {title}
           </h2>
           {action}
