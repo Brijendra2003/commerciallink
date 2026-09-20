@@ -190,7 +190,7 @@ export function LeadBoard({
                   setAssignee("");
                   setQuery("");
                 }}
-                className="ml-3 font-semibold text-clay-600 underline underline-offset-4 hover:text-clay-700"
+                className="ml-3 font-semibold text-brand-700 underline underline-offset-4 hover:text-brand-800"
               >
                 Clear filters
               </button>
@@ -249,7 +249,7 @@ export function LeadBoard({
                   }}
                   className={`flex w-[17rem] shrink-0 flex-col rounded-2xl border p-2.5 transition-colors ${
                     overColumn === column
-                      ? "border-clay-500 bg-clay-50"
+                      ? "border-brand-600 bg-brand-50"
                       : "border-brand-900/8 bg-white/60"
                   }`}
                 >
@@ -306,7 +306,7 @@ export function LeadBoard({
                               </span>
                               <span
                                 title={adminById(lead.assigned_to)?.name}
-                                className="grid h-5 w-5 place-items-center rounded-full bg-brand-800 text-[0.5rem] font-bold text-clay-300"
+                                className="grid h-5 w-5 place-items-center rounded-full bg-brand-800 text-[0.5rem] font-bold text-brand-100"
                               >
                                 {adminById(lead.assigned_to)?.initials}
                               </span>

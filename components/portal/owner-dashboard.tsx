@@ -41,7 +41,7 @@ export function OwnerDashboard({
       <div className="mt-8 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
         <section>
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
-            <h2 className="font-display text-[1.35rem] tracking-[-0.015em] text-brand-900">
+            <h2 className="font-display text-[1.1875rem] font-semibold tracking-[-0.015em] text-brand-900">
               My listings
             </h2>
             <ButtonLink href="/list-your-property" size="sm" arrow>
@@ -50,8 +50,8 @@ export function OwnerDashboard({
           </div>
 
           {listings.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-brand-900/15 bg-sand-100 px-6 py-12 text-center">
-              <p className="font-display text-[1.15rem] text-brand-900">
+            <div className="rounded-lg border border-dashed border-sand-300 bg-white px-6 py-10 text-center">
+              <p className="font-display text-[1.0625rem] font-semibold text-brand-900">
                 Nothing listed yet.
               </p>
               <p className="mx-auto mt-2.5 max-w-sm text-[0.875rem] leading-relaxed text-ink-500">
@@ -77,10 +77,10 @@ export function OwnerDashboard({
                 return (
                   <li
                     key={uuid}
-                    className="rounded-3xl border border-brand-900/8 bg-white p-4 shadow-soft sm:p-5"
+                    className="rounded-lg border border-sand-200 bg-white p-4 sm:p-5"
                   >
                     <div className="flex flex-col gap-4 sm:flex-row">
-                      <span className="relative h-32 w-full shrink-0 overflow-hidden rounded-2xl bg-brand-100 sm:h-24 sm:w-32">
+                      <span className="relative h-32 w-full shrink-0 overflow-hidden rounded border border-sand-200 bg-sand-100 sm:h-24 sm:w-32">
                         {cover ? (
                           <Photo
                             publicId={cover.cloudinary_public_id}
@@ -102,11 +102,11 @@ export function OwnerDashboard({
                           </span>
                         </div>
 
-                        <h3 className="mt-2 text-[0.9375rem] font-bold leading-snug tracking-tight text-brand-900">
+                        <h3 className="mt-2 text-[0.9375rem] font-semibold leading-snug tracking-tight text-brand-900">
                           {property.status === "published" ? (
                             <Link
                               href={`/properties/${property.slug}`}
-                              className="hover:text-clay-600"
+                              className="hover:text-brand-700"
                             >
                               {property.title}
                             </Link>
@@ -137,8 +137,8 @@ export function OwnerDashboard({
           )}
 
           {/* The guarantee that makes owners hand us the good stock. */}
-          <p className="mt-5 rounded-2xl bg-sand-100 px-5 py-4 text-[0.75rem] leading-relaxed text-ink-500">
-            <span className="font-bold text-brand-900">
+          <p className="mt-5 rounded-lg border border-sand-200 bg-white px-5 py-4 text-[0.75rem] leading-relaxed text-ink-500">
+            <span className="font-semibold text-brand-900">
               You see enquiry counts, not enquirers.
             </span>{" "}
             Buyer names and contact details stay with our desk until you agree to
@@ -150,9 +150,9 @@ export function OwnerDashboard({
         <div className="space-y-4">
           <ProfilePanel session={session} />
 
-          <section className="rounded-3xl border border-brand-900/8 bg-white p-5 shadow-soft">
+          <section className="rounded-lg border border-sand-200 bg-white p-5">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="text-[0.9375rem] font-bold tracking-tight text-brand-900">
+              <h2 className="text-[0.9375rem] font-semibold tracking-tight text-brand-900">
                 Verification
               </h2>
               {session.kycStatus ? <KycBadge status={session.kycStatus} /> : null}
@@ -175,7 +175,7 @@ export function OwnerDashboard({
                 >
                   <span
                     aria-hidden="true"
-                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-clay-300"
+                    className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-600"
                   />
                   {doc}
                 </li>
@@ -204,7 +204,7 @@ function Metric({ label, value }: { label: string; value: string }) {
       <span className="block text-[0.625rem] font-bold uppercase tracking-[0.12em] text-ink-300">
         {label}
       </span>
-      <span className="mt-0.5 block text-[0.875rem] font-bold tabular-nums text-brand-900">
+      <span className="mt-0.5 block text-[0.875rem] font-semibold tabular-nums text-brand-900">
         {value}
       </span>
     </span>

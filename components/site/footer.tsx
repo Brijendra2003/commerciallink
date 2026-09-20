@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { Logo } from "@/components/site/logo";
 import { Arrow } from "@/components/ui/button";
 import { Container } from "@/components/ui/section";
@@ -42,17 +42,17 @@ export function Footer() {
             </p>
             <ul className="mt-6 space-y-3 text-[0.8125rem] text-sand-200/70">
               <li className="flex items-start gap-2.5">
-                <PinIcon className="mt-px h-4 w-4 shrink-0 text-clay-300" />
+                <PinIcon className="mt-px h-4 w-4 shrink-0 text-brand-100" />
                 <span>{site.address}</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <PhoneIcon className="h-4 w-4 shrink-0 text-clay-300" />
+                <PhoneIcon className="h-4 w-4 shrink-0 text-brand-100" />
                 <a href={`tel:${site.phone.replace(/\s/g, "")}`} className="hover:text-sand-50">
                   {site.phone}
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
-                <MailIcon className="h-4 w-4 shrink-0 text-clay-300" />
+                <MailIcon className="h-4 w-4 shrink-0 text-brand-100" />
                 <a href={`mailto:${site.email}`} className="hover:text-sand-50">
                   {site.email}
                 </a>
@@ -62,7 +62,7 @@ export function Footer() {
 
           {columns.map((col) => (
             <div key={col.title}>
-              <h3 className="kicker text-clay-300">{col.title}</h3>
+              <h3 className="kicker text-brand-100">{col.title}</h3>
               <ul className="mt-5 space-y-3">
                 {col.links.map((link) => (
                   <li key={link.href + link.label}>
@@ -79,13 +79,13 @@ export function Footer() {
           ))}
 
           <div>
-            <h3 className="kicker text-clay-300">Market Notes</h3>
+            <h3 className="kicker text-brand-100">Market Notes</h3>
             <p className="mt-5 text-[0.875rem] leading-relaxed text-sand-200/65">
               Quarterly rent benchmarks and absorption data for the MMR
               markets. No listings, no sales pitch.
             </p>
             <form className="mt-5" aria-label="Subscribe to market notes">
-              <div className="flex items-center gap-2 rounded-full border border-sand-200/18 bg-white/6 p-1.5 pl-4 transition-colors focus-within:border-clay-300/60">
+              <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 p-1.5 pl-3.5 transition-colors focus-within:border-brand-100/60">
                 <label htmlFor="footer-email" className="sr-only">
                   Work email
                 </label>
@@ -100,7 +100,7 @@ export function Footer() {
                 <button
                   type="submit"
                   aria-label="Subscribe"
-                  className="group/btn grid h-8 w-8 shrink-0 place-items-center rounded-full bg-clay-500 text-white transition-colors hover:bg-clay-600"
+                  className="group/btn grid h-8 w-8 shrink-0 place-items-center rounded bg-brand-600 text-white transition-colors hover:bg-brand-500"
                 >
                   <Arrow />
                 </button>
@@ -108,13 +108,13 @@ export function Footer() {
             </form>
 
             <div className="mt-7">
-              <h3 className="kicker text-clay-300">By Asset Class</h3>
+              <h3 className="kicker text-brand-100">By Asset Class</h3>
               <ul className="mt-4 flex flex-wrap gap-1.5">
                 {PROPERTY_TYPES.map((t) => (
                   <li key={t.value}>
                     <Link
                       href={`/properties?type=${t.value}`}
-                      className="inline-block rounded-full border border-sand-200/15 px-3 py-1.5 text-[0.6875rem] font-medium text-sand-200/70 transition-colors hover:border-clay-300/50 hover:text-sand-50"
+                      className="inline-block rounded border border-white/15 px-2.5 py-1 text-[0.6875rem] font-medium text-sand-200/70 transition-colors hover:border-brand-100/50 hover:text-white"
                     >
                       {t.short}
                     </Link>
@@ -125,9 +125,9 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-sand-200/12 pt-7 text-[0.75rem] text-sand-200/50 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-12 flex flex-col gap-4 border-t border-white/10 pt-7 text-[0.75rem] text-sand-200/50 sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {new Date().getFullYear()} {site.name}. RERA-registered advisory.
+            Â© {new Date().getFullYear()} {site.name}. RERA-registered advisory.
             All rights reserved.
           </p>
           <ul className="flex flex-wrap gap-x-6 gap-y-2">

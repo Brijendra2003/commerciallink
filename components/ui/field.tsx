@@ -21,22 +21,38 @@ export function Field({
     <div className={className}>
       <label
         htmlFor={name}
-        className="mb-1.5 block text-[0.8125rem] font-semibold text-brand-900"
+        className="mb-1.5 block text-[0.8125rem] font-semibold text-ink-700"
       >
         {label}
-        {required ? <span className="ml-0.5 text-clay-500">*</span> : null}
+        {required ? (
+          <span aria-hidden="true" className="ml-0.5 text-clay-600">
+            *
+          </span>
+        ) : null}
       </label>
       {children}
       {error ? (
         <p
           id={`${name}-error`}
           role="alert"
-          className="mt-1.5 text-[0.75rem] font-medium text-clay-700"
+          className="mt-1.5 flex items-start gap-1.5 text-[0.75rem] font-medium text-clay-700"
         >
+          <svg
+            viewBox="0 0 16 16"
+            aria-hidden="true"
+            className="mt-px h-3.5 w-3.5 shrink-0"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.6"
+            strokeLinecap="round"
+          >
+            <circle cx="8" cy="8" r="6.4" />
+            <path d="M8 5v3.6M8 11h.01" />
+          </svg>
           {error}
         </p>
       ) : hint ? (
-        <p className="mt-1.5 text-[0.75rem] text-ink-300">{hint}</p>
+        <p className="mt-1.5 text-[0.75rem] leading-relaxed text-ink-300">{hint}</p>
       ) : null}
     </div>
   );
@@ -100,11 +116,7 @@ export function Consent({ error }: { error?: string }) {
   return (
     <div>
       <label className="flex cursor-pointer items-start gap-2.5 text-[0.75rem] leading-relaxed text-ink-500">
-        <input
-          type="checkbox"
-          name="consent"
-          className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-sand-300 accent-clay-500"
-        />
+        <input type="checkbox" name="consent" className="control-box mt-0.5" />
         <span>
           I agree to be contacted by CommercialLink about this enquiry. My
           details are held under the firm&apos;s DPDP-compliant retention policy
@@ -131,8 +143,8 @@ export function SubmissionSuccess({
   onReset?: () => void;
 }) {
   return (
-    <div className="rounded-3xl border border-brand-100 bg-brand-50 p-7 text-center">
-      <span className="mx-auto grid h-12 w-12 place-items-center rounded-full bg-brand-700 text-sand-50">
+    <div className="rounded-lg border border-brand-100 bg-brand-50 p-7 text-center">
+      <span className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-brand-700 text-white">
         <svg
           viewBox="0 0 24 24"
           className="h-5 w-5"
@@ -146,14 +158,14 @@ export function SubmissionSuccess({
           <path d="m5 12.5 4.5 4.5L19 7.5" />
         </svg>
       </span>
-      <p className="mt-4 font-display text-lg text-brand-900">
-        You&apos;re on our desk.
+      <p className="mt-4 font-display text-[1.0625rem] font-semibold text-brand-900">
+        Submission received
       </p>
       <p className="mx-auto mt-2 max-w-sm text-[0.875rem] leading-relaxed text-ink-500">
         {message}
       </p>
       {reference ? (
-        <p className="mt-4 inline-block rounded-full bg-white px-4 py-1.5 text-[0.75rem] font-semibold tracking-wide text-brand-700">
+        <p className="mt-4 inline-block rounded border border-brand-100 bg-white px-3 py-1.5 text-[0.75rem] font-semibold tracking-wide text-brand-700 tnum">
           Reference {reference}
         </p>
       ) : null}

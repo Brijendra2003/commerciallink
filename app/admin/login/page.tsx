@@ -29,11 +29,10 @@ export default async function AdminLoginPage({
           <Logo tone="light" />
         </div>
 
-        <div className="rounded-4xl border border-brand-900/8 bg-white p-7 shadow-lift sm:p-9">
-          <p className="kicker text-clay-600">Advisory desk</p>
-          <h1 className="mt-3 font-display text-[1.6rem] leading-tight tracking-[-0.02em] text-brand-900">
-            Sign in to the{" "}
-            <span className="italic text-brand-700">admin panel.</span>
+        <div className="rounded-lg border border-sand-200 bg-white p-7 shadow-lift sm:p-8">
+          <p className="kicker text-brand-600">Advisory desk</p>
+          <h1 className="mt-3 font-display text-[1.5rem] font-semibold leading-tight tracking-[-0.02em] text-brand-900">
+            Sign in to the admin console
           </h1>
           <p className="mt-2.5 text-[0.8125rem] leading-relaxed text-ink-500">
             Staff accounts only. Buyer and owner logins use the public site.
@@ -48,7 +47,7 @@ export default async function AdminLoginPage({
           Not staff?{" "}
           <Link
             href="/"
-            className="font-semibold text-clay-300 underline underline-offset-4 hover:text-clay-100"
+            className="font-semibold text-brand-100 underline underline-offset-4 hover:text-white"
           >
             Back to the public site
           </Link>

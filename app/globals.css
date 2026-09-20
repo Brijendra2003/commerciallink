@@ -2,75 +2,96 @@
 
 /* ------------------------------------------------------------------
    CommercialLink design tokens
-   Warm-editorial CRE palette: deep teal authority + terracotta CTA
-   on a cream ground. Derived from the reference boards in /public/images.
+
+   Institutional CRE system: navy authority, a single corporate blue
+   for action, cool neutral greys for surfaces. Red is reserved for
+   errors and destructive intent, amber for verification marks.
+
+   The scale names are shared with the admin console so the public
+   site and the staff panel read as one product.
    ------------------------------------------------------------------ */
 @theme {
-  --color-ink-900: #0a2624;
-  --color-ink-700: #14413d;
-  --color-ink-500: #2d5a55;
-  --color-ink-300: #7a9691;
+  /* Text — cool near-black through to muted placeholder grey. */
+  --color-ink-900: #0b1524;
+  --color-ink-700: #1e2d42;
+  --color-ink-500: #52627a;
+  --color-ink-300: #8593a6;
 
-  --color-brand-900: #0c3330;
-  --color-brand-800: #11423d;
-  --color-brand-700: #16544d;
-  --color-brand-600: #1c6b62;
-  --color-brand-500: #238679;
-  --color-brand-100: #d9e9e5;
-  --color-brand-50: #eef5f3;
+  /* Brand — navy chrome at the dark end, corporate blue for action. */
+  --color-brand-900: #0a1c35;
+  --color-brand-800: #102c50;
+  --color-brand-700: #17406f;
+  --color-brand-600: #1d5490;
+  --color-brand-500: #2469b4;
+  --color-brand-100: #d2e1f2;
+  --color-brand-50: #eef4fb;
 
-  --color-clay-700: #b4441f;
-  --color-clay-600: #cf5730;
-  --color-clay-500: #e0653a;
-  --color-clay-300: #f2a880;
-  --color-clay-100: #fbe3d5;
-  --color-clay-50: #fdf1e9;
+  /* Surfaces — neutral greys with a faint blue cast, never cream. */
+  --color-sand-50: #f6f8fa;
+  --color-sand-100: #eef1f5;
+  --color-sand-200: #e1e6ec;
+  --color-sand-300: #cbd3dd;
 
-  --color-sand-50: #fdfaf5;
-  --color-sand-100: #faf5ec;
-  --color-sand-200: #f3ebdd;
-  --color-sand-300: #e8dcc8;
+  /* Red — errors, required marks, destructive actions. Not decoration. */
+  --color-clay-700: #8f1a26;
+  --color-clay-600: #ad2231;
+  --color-clay-500: #c92a3a;
+  --color-clay-300: #e99aa2;
+  --color-clay-100: #f8dcdf;
+  --color-clay-50: #fdf3f4;
 
-  --color-gold-500: #c98a1f;
-  --color-gold-100: #f7e9c9;
+  /* Amber — verification and premium marks only. */
+  --color-gold-600: #8a6212;
+  --color-gold-500: #b07d17;
+  --color-gold-100: #f7ecd2;
 
   /* ---- Data-viz tokens ----------------------------------------------
-     Validated with the dataviz skill's checker against the white chart
-     surface. Ordinal ramp: monotone L, adjacent ΔL ≥ 0.06, light end 2.22:1.
-     Categorical pair: worst all-pairs CVD ΔE 11.5, normal-vision ΔE 25.2.
-     Do not hand-edit these — re-run the validator if they change. */
-  --color-viz-step-1: #6cbcae;
-  --color-viz-step-2: #48a697;
-  --color-viz-step-3: #2b8d7f;
-  --color-viz-step-4: #1c766a;
-  --color-viz-step-5: #175f55;
-  --color-viz-step-6: #114a41;
+     Ordinal ramp: monotone lightness, adjacent ΔL ≥ 0.06, so a six-step
+     series stays separable in greyscale and for CVD viewers.
+     Categorical pair: blue against amber, distinct under all three
+     common CVD simulations rather than only to normal vision. */
+  --color-viz-step-1: #9dc0e6;
+  --color-viz-step-2: #74a3d6;
+  --color-viz-step-3: #4f86c2;
+  --color-viz-step-4: #356aa4;
+  --color-viz-step-5: #244f80;
+  --color-viz-step-6: #17365c;
 
-  --color-viz-series-1: #0f8f7d;
-  --color-viz-series-2: #cf5730;
+  --color-viz-series-1: #1d5490;
+  --color-viz-series-2: #b07d17;
 
   /* Status scale — reserved meaning, always shipped with an icon + label. */
-  --color-status-good: #0ca30c;
-  --color-status-warning: #fab219;
-  --color-status-serious: #ec835a;
-  --color-status-critical: #d03b3b;
+  --color-status-good: #17734a;
+  --color-status-warning: #a9761a;
+  --color-status-serious: #b4551d;
+  --color-status-critical: #b0202f;
 
-  --color-viz-grid: #e7e2d7;
-  --color-viz-axis: #c8c0b0;
-  --color-viz-muted: #8a8578;
+  --color-viz-grid: #e6eaf0;
+  --color-viz-axis: #c2cad6;
+  --color-viz-muted: #7b8798;
 
-  --radius-4xl: 2rem;
-  --radius-5xl: 2.75rem;
+  /* Radii — deliberately tight. Overriding Tailwind's own scale keeps
+     every existing `rounded-*` utility on the same restrained system
+     instead of the pill-and-blob geometry this replaced. */
+  --radius-sm: 0.1875rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.375rem;
+  --radius-xl: 0.5rem;
+  --radius-2xl: 0.625rem;
+  --radius-3xl: 0.75rem;
+  --radius-4xl: 0.875rem;
+  --radius-5xl: 1rem;
 
-  --shadow-soft: 0 1px 2px rgba(10, 38, 36, 0.04), 0 12px 32px -12px rgba(10, 38, 36, 0.14);
-  --shadow-lift: 0 2px 4px rgba(10, 38, 36, 0.05), 0 28px 56px -20px rgba(10, 38, 36, 0.24);
+  /* Shadows — elevation is a hairline border's job here; these stay faint. */
+  --shadow-soft: 0 1px 2px rgba(11, 21, 36, 0.04), 0 1px 3px rgba(11, 21, 36, 0.06);
+  --shadow-lift: 0 1px 2px rgba(11, 21, 36, 0.05), 0 10px 24px -14px rgba(11, 21, 36, 0.22);
 
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @theme inline {
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-serif), ui-serif, Georgia, serif;
+  --font-display: var(--font-display-sans), var(--font-body), ui-sans-serif, sans-serif;
 }
 
 @layer base {
@@ -85,67 +106,83 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Preflight resets headings to inherit their weight. Rather than annotate
+     every heading in the console, semibold is the default and a utility class
+     still overrides it. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 600;
+  }
+
+  /* Figures compare down a column across the whole product — listings,
+     dashboards, tables. Lining tabular digits everywhere avoids the
+     ragged alignment proportional numerals give. */
+  th,
+  td,
+  time,
+  output {
+    font-variant-numeric: tabular-nums;
+  }
+
   ::selection {
-    background-color: var(--color-clay-500);
-    color: #fff;
+    background-color: var(--color-brand-100);
+    color: var(--color-brand-900);
   }
 
   :focus-visible {
     outline: 2px solid var(--color-brand-600);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: 3px;
   }
 }
 
 @layer components {
-  /* Small uppercase eyebrow used above every section heading — a motif
-     lifted from all four reference layouts. */
+  /* Small uppercase eyebrow above a section heading. Carries a rule on
+     its left so it reads as a label, not a shouted subtitle. */
   .kicker {
     font-size: 0.6875rem;
-    font-weight: 600;
-    letter-spacing: 0.18em;
+    font-weight: 700;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
   }
 
-  /* Hand-drawn underline behind the italic accent word in headlines. */
-  .accent-underline {
-    background-image: linear-gradient(
-      to top,
-      var(--color-clay-300) 0,
-      var(--color-clay-300) 0.22em,
-      transparent 0.22em
-    );
-    background-repeat: no-repeat;
-    background-position: 0 0.86em;
-    background-size: 100% 100%;
-  }
-
+  /* Form control. One radius, one focus treatment, used by every input,
+     select and textarea on both the public site and the console. */
   .field-input {
     width: 100%;
-    border-radius: 0.875rem;
+    border-radius: 0.375rem;
     border: 1px solid var(--color-sand-300);
     background-color: #fff;
-    padding: 0.75rem 0.9375rem;
-    font-size: 0.9375rem;
+    padding: 0.625rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
     color: var(--color-ink-900);
-    transition: border-color 160ms var(--ease-out-soft), box-shadow 160ms var(--ease-out-soft);
+    transition: border-color 140ms ease, box-shadow 140ms ease;
   }
 
   .field-input::placeholder {
     color: var(--color-ink-300);
   }
 
-  .field-input:hover {
-    border-color: var(--color-brand-100);
+  .field-input:hover:not(:focus) {
+    border-color: var(--color-ink-300);
   }
 
   .field-input:focus {
     outline: none;
-    border-color: var(--color-brand-500);
-    box-shadow: 0 0 0 3px var(--color-brand-50);
+    border-color: var(--color-brand-600);
+    box-shadow: 0 0 0 3px rgba(29, 84, 144, 0.14);
   }
 
-  /* Borderless select used inside the hero search pill. */
+  .field-input:disabled {
+    background-color: var(--color-sand-100);
+    color: var(--color-ink-300);
+    cursor: not-allowed;
+  }
+
+  /* Borderless select used inside the hero search rail. */
   .hero-select {
     width: 100%;
     appearance: none;
@@ -154,39 +191,58 @@
     padding: 0.125rem 1.25rem 0 0;
     font-size: 0.875rem;
     font-weight: 600;
-    letter-spacing: -0.01em;
-    color: var(--color-brand-900);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%237a9691' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+    letter-spacing: -0.005em;
+    color: var(--color-ink-900);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%238593a6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0 center;
-    background-size: 0.6875rem;
+    background-size: 0.625rem;
     cursor: pointer;
   }
 
   .hero-select:focus {
     outline: none;
-    color: var(--color-clay-600);
+    color: var(--color-brand-700);
   }
 
   select.field-input {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%232d5a55' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%2352627a' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.9375rem center;
-    background-size: 0.75rem;
-    padding-right: 2.25rem;
+    background-position: right 0.75rem center;
+    background-size: 0.6875rem;
+    padding-right: 2rem;
+  }
+
+  /* Set on a form once a step has been submitted with gaps in it. Native
+     validity does the work, so every required control flags at once and the
+     styling disappears as each one is filled. */
+  .validate-visible :is(input, select, textarea):invalid {
+    border-color: var(--color-clay-500);
+    box-shadow: 0 0 0 3px rgba(201, 42, 58, 0.12);
+  }
+
+  /* Checkbox and radio, sized to sit on a 14px label's baseline. */
+  .control-box {
+    height: 1rem;
+    width: 1rem;
+    flex-shrink: 0;
+    cursor: pointer;
+    border-radius: 0.1875rem;
+    border-color: var(--color-sand-300);
+    accent-color: var(--color-brand-600);
   }
 }
 
-@utility grain {
-  /* Faint paper tooth so large cream fields don't read as flat #fff. */
-  position: relative;
+/* Figures inside prose, where the base rule above does not reach. */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
 }
 
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
@@ -195,7 +251,7 @@
 }
 
 .rise-in {
-  animation: rise-in 640ms var(--ease-out-soft) both;
+  animation: rise-in 420ms var(--ease-out-soft) both;
 }
 
 @media (prefers-reduced-motion: reduce) {

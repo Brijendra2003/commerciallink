@@ -26,9 +26,8 @@ export default async function SignupPage({
   return (
     <div className="mx-auto max-w-sm">
       <Kicker className="mb-3">Create an account</Kicker>
-      <h1 className="font-display text-[1.8rem] leading-tight tracking-[-0.025em] text-brand-900">
-        Two minutes, and{" "}
-        <span className="italic text-brand-700">you&apos;re in.</span>
+      <h1 className="font-display text-[1.625rem] font-semibold leading-tight tracking-[-0.025em] text-brand-900">
+        Create your account
       </h1>
       <p className="mt-3 text-[0.875rem] leading-relaxed text-ink-500">
         Registration is what ties a listing to a verified owner and a

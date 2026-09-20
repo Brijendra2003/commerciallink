@@ -18,38 +18,38 @@ type Tone = "good" | "warning" | "serious" | "critical" | "neutral" | "active";
 const TONES: Record<Tone, { dot: string; text: string; bg: string; glyph: string }> = {
   good: {
     dot: "var(--color-status-good)",
-    text: "#0a6b0a",
-    bg: "rgba(12,163,12,0.10)",
+    text: "#125236",
+    bg: "rgba(23,115,74,0.10)",
     glyph: "✓",
   },
   warning: {
     dot: "var(--color-status-warning)",
-    text: "#7a5300",
-    bg: "rgba(250,178,25,0.16)",
+    text: "#7d5611",
+    bg: "rgba(169,118,26,0.14)",
     glyph: "◔",
   },
   serious: {
     dot: "var(--color-status-serious)",
-    text: "#9b4520",
-    bg: "rgba(236,131,90,0.16)",
+    text: "#8c4116",
+    bg: "rgba(180,85,29,0.12)",
     glyph: "!",
   },
   critical: {
     dot: "var(--color-status-critical)",
-    text: "#a02020",
-    bg: "rgba(208,59,59,0.12)",
+    text: "#8f1a26",
+    bg: "rgba(176,32,47,0.10)",
     glyph: "×",
   },
   active: {
-    dot: "var(--color-viz-series-1)",
-    text: "#0d5e52",
-    bg: "rgba(15,143,125,0.12)",
+    dot: "var(--color-brand-600)",
+    text: "#17406f",
+    bg: "rgba(29,84,144,0.10)",
     glyph: "→",
   },
   neutral: {
-    dot: "#8a8578",
-    text: "#5a5548",
-    bg: "rgba(138,133,120,0.12)",
+    dot: "var(--color-ink-300)",
+    text: "#52627a",
+    bg: "rgba(82,98,122,0.10)",
     glyph: "·",
   },
 };
@@ -58,7 +58,7 @@ function Badge({ tone, label }: { tone: Tone; label: string }) {
   const t = TONES[tone];
   return (
     <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[0.6875rem] font-bold tracking-tight"
+      className="inline-flex items-center gap-1.5 rounded px-2 py-0.5 text-[0.6875rem] font-semibold tracking-tight"
       style={{ background: t.bg, color: t.text }}
     >
       <span aria-hidden="true" style={{ color: t.dot }}>

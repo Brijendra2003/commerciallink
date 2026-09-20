@@ -107,9 +107,13 @@ export function FilePicker({
   return (
     <div>
       <div className="mb-1.5 flex items-baseline justify-between gap-3">
-        <label htmlFor={inputId} className="block text-[0.8125rem] font-semibold text-brand-900">
+        <label htmlFor={inputId} className="block text-[0.8125rem] font-semibold text-ink-700">
           {label}
-          {required ? <span className="ml-0.5 text-clay-500">*</span> : null}
+          {required ? (
+            <span aria-hidden="true" className="ml-0.5 text-clay-600">
+              *
+            </span>
+          ) : null}
         </label>
         <span className="text-[0.6875rem] tabular-nums text-ink-300">
           {value.length} / {max}
@@ -129,7 +133,7 @@ export function FilePicker({
                 <img src={item.preview} alt="" className="h-full w-full object-cover" />
               ) : null}
               {showCover && i === 0 ? (
-                <span className="absolute left-1.5 top-1.5 rounded-full bg-brand-900/85 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-sand-50">
+                <span className="absolute left-1.5 top-1.5 rounded bg-brand-900/85 px-2 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
                   Cover
                 </span>
               ) : null}
@@ -160,7 +164,7 @@ export function FilePicker({
             <li>
               <label
                 htmlFor={inputId}
-                className={`flex aspect-[4/3] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed text-ink-300 transition-colors hover:border-clay-300 hover:text-clay-600 ${
+                className={`flex aspect-[4/3] w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed text-ink-300 transition-colors hover:border-brand-500 hover:text-brand-700 ${
                   shownError ? "border-clay-500" : "border-sand-300"
                 }`}
               >
@@ -199,7 +203,7 @@ export function FilePicker({
           {value.length < max ? (
             <label
               htmlFor={inputId}
-              className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-sand-300 px-4 py-4 text-[0.8125rem] font-semibold text-ink-500 transition-colors hover:border-clay-300 hover:text-clay-600"
+              className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed border-sand-300 px-4 py-4 text-[0.8125rem] font-semibold text-ink-500 transition-colors hover:border-brand-500 hover:text-brand-700"
             >
               {busy ? "Processing…" : "Choose a PDF"}
             </label>

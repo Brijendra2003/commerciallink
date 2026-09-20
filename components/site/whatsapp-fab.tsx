@@ -16,9 +16,9 @@ export function WhatsAppFab() {
       href={`https://wa.me/${number}?text=${message}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="group fixed bottom-5 right-5 z-40 flex items-center gap-2.5 rounded-full bg-brand-800 py-3 pl-3.5 pr-4 text-sand-50 shadow-lift transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:bg-brand-700 sm:bottom-7 sm:right-7"
+      className="group fixed bottom-5 right-5 z-40 flex items-center gap-2.5 rounded-lg bg-brand-800 py-3 pl-3.5 pr-4 text-white shadow-lift transition-colors duration-200 hover:bg-brand-700 sm:bottom-7 sm:right-7"
     >
-      <WhatsAppIcon className="h-5 w-5 text-clay-300" />
+      <WhatsAppIcon className="h-5 w-5 text-white" />
       <span className="max-w-0 overflow-hidden whitespace-nowrap text-[0.8125rem] font-semibold opacity-0 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:max-w-[10rem] group-hover:opacity-100">
         Chat with the desk
       </span>

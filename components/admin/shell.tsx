@@ -91,11 +91,11 @@ export function AdminShell({
               >
                 <Icon
                   name={item.icon}
-                  className={`h-4 w-4 shrink-0 ${active ? "text-clay-300" : ""}`}
+                  className={`h-4 w-4 shrink-0 ${active ? "text-brand-100" : ""}`}
                 />
                 <span className="min-w-0 flex-1 truncate">{item.label}</span>
                 {"badge" in item && item.badge ? (
-                  <span className="rounded-full bg-clay-500 px-1.5 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
+                  <span className="rounded bg-brand-600 px-1.5 py-0.5 text-[0.5625rem] font-bold uppercase tracking-wider text-white">
                     {item.badge}
                   </span>
                 ) : null}
@@ -127,7 +127,7 @@ export function AdminShell({
 
         <div className="rounded-xl bg-white/6 px-3 py-2.5">
           <div className="flex items-center gap-2.5">
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-clay-500 text-[0.6875rem] font-bold text-white">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded bg-brand-600 text-[0.6875rem] font-bold text-white">
               {session.initials}
             </span>
             <span className="min-w-0 flex-1">
@@ -141,7 +141,7 @@ export function AdminShell({
           </div>
 
           {session.demo ? (
-            <p className="mt-2.5 border-t border-sand-200/12 pt-2.5 text-[0.625rem] leading-relaxed text-clay-300">
+            <p className="mt-2.5 border-t border-white/10 pt-2.5 text-[0.625rem] leading-relaxed text-brand-100">
               Demo mode — no Supabase credentials, so the panel is unlocked and
               reading mock data.
             </p>
@@ -149,7 +149,7 @@ export function AdminShell({
             <form action={signOut} className="mt-2.5 border-t border-sand-200/12 pt-2.5">
               <button
                 type="submit"
-                className="w-full text-left text-[0.6875rem] font-semibold text-sand-200/60 transition-colors hover:text-clay-300"
+                className="w-full text-left text-[0.6875rem] font-semibold text-sand-200/60 transition-colors hover:text-white"
               >
                 Sign out
               </button>

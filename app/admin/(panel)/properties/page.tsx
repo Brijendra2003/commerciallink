@@ -57,7 +57,7 @@ export default async function AdminPropertiesPage({
         action={
           <button
             type="button"
-            className="rounded-full bg-clay-500 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-clay-600"
+            className="rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
           >
             + New listing
           </button>
@@ -136,7 +136,7 @@ export default async function AdminPropertiesPage({
               }`}
             >
               {f.label}
-              <span className={`ml-1.5 tabular-nums ${active ? "text-clay-300" : "text-ink-300"}`}>
+              <span className={`ml-1.5 tabular-nums ${active ? "text-brand-100" : "text-ink-300"}`}>
                 {count}
               </span>
             </Link>

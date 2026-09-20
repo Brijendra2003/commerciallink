@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Photo } from "@/components/ui/photo";
 import { ButtonLink } from "@/components/ui/button";
 import { Container, Kicker, Section, SectionHeading } from "@/components/ui/section";
-import { WaveTop, WaveBottom } from "@/components/ui/wave";
 import { faqs, processSteps, stats, trustPoints } from "@/lib/data/site";
 
 export const metadata: Metadata = {
@@ -30,16 +29,13 @@ export default function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
       />
 
-      <section className="py-12 sm:py-16">
+      <section className="border-b border-sand-200 bg-white py-12 sm:py-16">
         <Container>
           <div className="mx-auto max-w-3xl text-center">
-            <Kicker className="mb-4">About the desk</Kicker>
-            <h1 className="font-display text-[2.1rem] leading-[1.1] tracking-[-0.03em] text-brand-900 sm:text-[3rem]">
-              A marketplace works better
-              <br />
-              <span className="accent-underline italic text-brand-700">
-                with someone in the middle.
-              </span>
+            <Kicker className="mb-4">About the firm</Kicker>
+            <h1 className="font-display text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em] text-brand-900 sm:text-[2.75rem]">
+              A marketplace works better{" "}
+              <span className="text-brand-600">with someone accountable in the middle.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-[0.9375rem] leading-relaxed text-ink-500 sm:text-base">
               Most property portals are classifieds: they publish a number and
@@ -65,7 +61,7 @@ export default function AboutPage() {
             ].map((img) => (
               <div
                 key={img.id}
-                className={`relative overflow-hidden rounded-4xl bg-brand-100 shadow-soft ${img.span}`}
+                className={`relative overflow-hidden rounded-lg border border-sand-200 bg-sand-100 ${img.span}`}
               >
                 <Photo
                   publicId={img.id}
@@ -79,8 +75,7 @@ export default function AboutPage() {
         </Container>
       </section>
 
-      <WaveTop fill="var(--color-sand-100)" />
-      <section className="bg-sand-100 pb-16">
+      <section className="py-14 sm:py-16">
         <Container>
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <SectionHeading
@@ -111,15 +106,15 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <dl className="mt-14 grid grid-cols-2 gap-px overflow-hidden rounded-4xl border border-brand-900/10 bg-brand-900/10 lg:grid-cols-4">
+          <dl className="mt-12 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-sand-200 bg-sand-200 lg:grid-cols-4">
             {stats.map((stat) => (
-              <div key={stat.label} className="bg-sand-50 px-6 py-8 text-center">
+              <div key={stat.label} className="bg-white px-6 py-7 text-center">
                 <dt className="sr-only">{stat.label}</dt>
                 <dd>
-                  <span className="block font-display text-[2rem] leading-none tracking-[-0.02em] text-brand-800 sm:text-[2.4rem]">
+                  <span className="block font-display text-[1.75rem] font-semibold leading-none tracking-[-0.02em] text-brand-800 tnum sm:text-[2rem]">
                     {stat.value}
                   </span>
-                  <span className="mt-2.5 block text-[0.75rem] font-medium text-ink-500">
+                  <span className="mt-2.5 block text-[0.75rem] text-ink-500">
                     {stat.label}
                   </span>
                 </dd>
@@ -128,9 +123,8 @@ export default function AboutPage() {
           </dl>
         </Container>
       </section>
-      <WaveBottom fill="var(--color-sand-100)" />
 
-      <Section className="pt-4">
+      <Section className="border-y border-sand-200 bg-white">
         <Container>
           <SectionHeading
             kicker="Our principles"
@@ -138,16 +132,16 @@ export default function AboutPage() {
             accent="bend."
             align="center"
           />
-          <ul className="mt-11 grid gap-5 sm:grid-cols-2">
+          <ul className="mt-10 grid gap-4 sm:grid-cols-2">
             {trustPoints.map((point, i) => (
               <li
                 key={point.title}
-                className="rounded-4xl border border-brand-900/8 bg-white p-7 shadow-soft"
+                className="rounded-lg border border-sand-200 bg-white p-6"
               >
-                <span className="font-display text-[0.875rem] text-clay-500">
+                <span className="font-display text-[0.8125rem] font-bold tracking-[0.08em] text-brand-600 tnum">
                   {String(i + 1).padStart(2, "0")}
                 </span>
-                <h3 className="mt-3 font-display text-[1.125rem] tracking-[-0.01em] text-brand-900">
+                <h3 className="mt-3 font-display text-[1.0625rem] font-semibold tracking-[-0.01em] text-brand-900">
                   {point.title}
                 </h3>
                 <p className="mt-2.5 text-[0.875rem] leading-relaxed text-ink-500">
@@ -159,7 +153,7 @@ export default function AboutPage() {
         </Container>
       </Section>
 
-      <Section className="bg-sand-100 pt-0">
+      <Section>
         <Container>
           <SectionHeading
             kicker="The process"
@@ -167,16 +161,16 @@ export default function AboutPage() {
             accent="looks like."
             align="center"
           />
-          <ol className="mt-11 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
+          <ol className="mt-10 grid gap-px overflow-hidden rounded-lg border border-sand-200 bg-sand-200 sm:grid-cols-2 lg:grid-cols-4">
             {processSteps.map((step) => (
-              <li key={step.number}>
-                <span className="grid h-[3.1rem] w-[3.1rem] place-items-center rounded-full bg-brand-800 font-display text-[1rem] text-clay-300">
-                  {step.number}
+              <li key={step.number} className="bg-white p-6">
+                <span className="inline-flex h-7 items-center rounded border border-brand-100 bg-brand-50 px-2.5 font-display text-[0.75rem] font-bold tracking-[0.08em] text-brand-700 tnum">
+                  STEP {step.number}
                 </span>
-                <h3 className="mt-5 font-display text-[1.0625rem] tracking-[-0.01em] text-brand-900">
+                <h3 className="mt-4 font-display text-[1.0625rem] font-semibold tracking-[-0.01em] text-brand-900">
                   {step.title}
                 </h3>
-                <p className="mt-2.5 text-[0.8125rem] leading-relaxed text-ink-500">
+                <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-500">
                   {step.body}
                 </p>
               </li>
@@ -185,7 +179,7 @@ export default function AboutPage() {
         </Container>
       </Section>
 
-      <Section id="faqs" className="scroll-mt-20 pt-0">
+      <Section id="faqs" className="scroll-mt-28 border-t border-sand-200 bg-white">
         <Container>
           <div className="mx-auto max-w-3xl">
             <SectionHeading
@@ -197,10 +191,10 @@ export default function AboutPage() {
             <ul className="mt-10 space-y-3">
               {faqs.map((faq) => (
                 <li key={faq.q}>
-                  <details className="group/faq rounded-3xl border border-brand-900/8 bg-white px-6 py-5 shadow-soft transition-colors open:bg-white">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[0.9375rem] font-bold tracking-tight text-brand-900 [&::-webkit-details-marker]:hidden">
+                  <details className="group/faq rounded-lg border border-sand-200 bg-white px-5 py-4">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-[0.9375rem] font-semibold tracking-tight text-brand-900 [&::-webkit-details-marker]:hidden">
                       {faq.q}
-                      <span className="relative grid h-7 w-7 shrink-0 place-items-center rounded-full bg-sand-100 text-brand-800 transition-colors group-open/faq:bg-clay-500 group-open/faq:text-white">
+                      <span className="relative grid h-6 w-6 shrink-0 place-items-center rounded border border-sand-200 bg-sand-50 text-brand-700 transition-colors group-open/faq:border-brand-700 group-open/faq:bg-brand-700 group-open/faq:text-white">
                         <span className="absolute h-[1.5px] w-3 rounded bg-current" />
                         <span className="absolute h-3 w-[1.5px] rounded bg-current transition-transform duration-300 group-open/faq:scale-y-0" />
                       </span>

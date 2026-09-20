@@ -1,16 +1,21 @@
 import type { Metadata } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import { Inter, Inter_Tight } from "next/font/google";
 import { site } from "@/lib/data/site";
 import "./globals.css";
 
-const serif = Fraunces({
-  variable: "--font-serif",
+/**
+ * Two cuts of one family: the tighter display face for headings, the text
+ * face for everything else. A serif display was doing the work before and
+ * read editorial rather than institutional.
+ */
+const display = Inter_Tight({
+  variable: "--font-display-sans",
   subsets: ["latin"],
-  style: ["normal", "italic"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const body = Plus_Jakarta_Sans({
+const body = Inter({
   variable: "--font-body",
   subsets: ["latin"],
   display: "swap",
@@ -55,7 +60,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en-IN"
       data-scroll-behavior="smooth"
-      className={`${serif.variable} ${body.variable} h-full antialiased`}
+      className={`${display.variable} ${body.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-sand-50">{children}</body>
     </html>

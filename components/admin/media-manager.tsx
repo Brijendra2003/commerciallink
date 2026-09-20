@@ -104,7 +104,7 @@ export function MediaManager({
             onDrop={() => drop(i)}
             onDragEnd={() => setDragging(null)}
             className={`group/media relative aspect-[4/3] cursor-grab overflow-hidden rounded-xl bg-brand-100 transition-all active:cursor-grabbing ${
-              dragging === i ? "opacity-40 ring-2 ring-clay-500" : ""
+              dragging === i ? "opacity-40 ring-2 ring-brand-600" : ""
             }`}
           >
             <Photo publicId={m.cloudinary_public_id} alt={m.alt} sizes="200px" width={400} />
@@ -122,7 +122,7 @@ export function MediaManager({
             type="button"
             disabled={pending}
             onClick={() => photoInput.current?.click()}
-            className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-sand-300 text-ink-300 transition-colors hover:border-clay-300 hover:text-clay-600 disabled:opacity-50"
+            className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-sand-300 text-ink-300 transition-colors hover:border-brand-500 hover:text-brand-700 disabled:opacity-50"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
               <path d="M12 5v14M5 12h14" />
@@ -214,7 +214,7 @@ function SmallButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="rounded-full border border-brand-900/15 bg-white px-3.5 py-1.5 text-[0.6875rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100 disabled:opacity-50"
+      className="rounded border border-sand-300 bg-white px-3 py-1.5 text-[0.6875rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100 disabled:opacity-50"
     >
       {children}
     </button>

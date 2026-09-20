@@ -29,7 +29,7 @@ export default async function OwnersPage() {
         action={
           <button
             type="button"
-            className="rounded-full bg-clay-500 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-clay-600"
+            className="rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
           >
             + Onboard owner
           </button>
@@ -87,7 +87,7 @@ export default async function OwnersPage() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand-800 text-[0.8125rem] font-bold text-clay-300">
+                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded bg-brand-800 text-[0.8125rem] font-bold text-white">
                     {owner.name
                       .split(" ")
                       .map((n) => n[0])

@@ -208,7 +208,7 @@ export default async function AnalyticsPage() {
                       <td className="px-4 py-3">
                         <Link
                           href={`/admin/properties/${p.id}`}
-                          className="block max-w-[20rem] truncate text-[0.8125rem] font-semibold text-brand-900 hover:text-clay-600"
+                          className="block max-w-[20rem] truncate text-[0.8125rem] font-semibold text-brand-900 hover:text-brand-700"
                         >
                           {p.title}
                         </Link>

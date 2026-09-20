@@ -40,7 +40,12 @@ export function RequirementForm() {
   return (
     <form key={dismissed?.reference ?? "form"} action={action} className="space-y-5">
       <fieldset className="space-y-3.5">
-        <legend className="kicker mb-3 text-clay-600">1 · What you need</legend>
+        <legend className="mb-3.5 flex w-full items-center gap-2.5 border-b border-sand-200 pb-2.5 text-[0.8125rem] font-semibold text-brand-900">
+          <span className="grid h-5 w-5 place-items-center rounded-full bg-brand-700 text-[0.625rem] font-bold text-white tnum">
+            1
+          </span>
+          Requirement
+        </legend>
 
         <div className="grid gap-3.5 sm:grid-cols-2">
           <Field
@@ -139,7 +144,12 @@ export function RequirementForm() {
       </fieldset>
 
       <fieldset className="space-y-3.5 border-t border-sand-200 pt-6">
-        <legend className="kicker mb-3 text-clay-600">2 · Where to reach you</legend>
+        <legend className="mb-3.5 flex w-full items-center gap-2.5 border-b border-sand-200 pb-2.5 text-[0.8125rem] font-semibold text-brand-900">
+          <span className="grid h-5 w-5 place-items-center rounded-full bg-brand-700 text-[0.625rem] font-bold text-white tnum">
+            2
+          </span>
+          Where to reach you
+        </legend>
 
         <Field label="Full name" name="name" required error={errors.name}>
           <Input name="name" required autoComplete="name" placeholder="Your name" error={errors.name} />

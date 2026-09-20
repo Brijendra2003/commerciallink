@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { RequirementForm } from "@/components/forms/requirement-form";
 import { Container, Kicker } from "@/components/ui/section";
-import { Blob } from "@/components/ui/wave";
 import { CheckIcon, ShieldIcon } from "@/components/ui/icons";
 
 export const metadata: Metadata = {
@@ -20,23 +19,14 @@ const promises = [
 
 export default function PostRequirementPage() {
   return (
-    <section className="relative overflow-hidden py-12 sm:py-16">
-      <Blob className="-right-40 -top-32 h-[26rem] w-[26rem] opacity-60" />
-      <Blob
-        className="-left-32 bottom-0 h-[20rem] w-[20rem] opacity-50"
-        color="var(--color-brand-100)"
-      />
-
-      <Container className="relative">
+    <section className="py-12 sm:py-16">
+      <Container>
         <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:gap-14">
           <div className="lg:sticky lg:top-[5.5rem] lg:self-start">
             <Kicker className="mb-4">Didn&apos;t find a match?</Kicker>
-            <h1 className="font-display text-[2.1rem] leading-[1.1] tracking-[-0.03em] text-brand-900 sm:text-[2.7rem]">
-              Tell us the brief.
-              <br />
-              <span className="accent-underline italic text-brand-700">
-                We&apos;ll go find it.
-              </span>
+            <h1 className="font-display text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em] text-brand-900 sm:text-[2.5rem]">
+              Send us the brief.{" "}
+              <span className="text-brand-600">We will source against it.</span>
             </h1>
             <p className="mt-5 max-w-md text-[0.9375rem] leading-relaxed text-ink-500">
               Roughly a third of what we transact never appears as a public
@@ -58,10 +48,10 @@ export default function PostRequirementPage() {
               ))}
             </ul>
 
-            <div className="mt-9 rounded-3xl border border-brand-900/8 bg-white p-6 shadow-soft">
+            <div className="mt-8 rounded-lg border border-sand-200 bg-white p-5">
               <ShieldIcon className="h-5 w-5 text-brand-600" />
               <p className="mt-3 text-[0.8125rem] leading-relaxed text-ink-500">
-                <span className="font-bold text-brand-900">
+                <span className="font-semibold text-brand-900">
                   Requirements are confidential.
                 </span>{" "}
                 When we take your brief to an owner we describe the requirement,
@@ -71,7 +61,7 @@ export default function PostRequirementPage() {
             </div>
           </div>
 
-          <div className="rounded-4xl border border-brand-900/8 bg-white p-6 shadow-lift sm:p-9">
+          <div className="rounded-lg border border-sand-200 bg-white p-6 shadow-soft sm:p-8">
             <RequirementForm />
           </div>
         </div>

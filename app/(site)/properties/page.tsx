@@ -60,22 +60,22 @@ export default async function PropertiesPage({
 
   return (
     <>
-      <section className="border-b border-brand-900/8 bg-sand-100 pb-9 pt-10 sm:pb-11 sm:pt-14">
+      <section className="border-b border-sand-200 bg-white pb-8 pt-9 sm:pb-10 sm:pt-12">
         <Container>
           <Kicker className="mb-3">Live mandates</Kicker>
           <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
             <div>
-              <h1 className="max-w-2xl font-display text-[2rem] leading-[1.12] tracking-[-0.025em] text-brand-900 sm:text-[2.6rem]">
+              <h1 className="max-w-2xl font-display text-[1.875rem] font-semibold leading-[1.12] tracking-[-0.025em] text-brand-900 sm:text-[2.25rem]">
                 {heading}
               </h1>
               <p className="mt-3 max-w-xl text-[0.9375rem] leading-relaxed text-ink-500">
-                Every listing below sits inside the MMR and is verified for title and approvals. Contact
-                details sit with our desk — submit an enquiry and a named advisor
-                responds.
+                Every listing sits inside the MMR and is verified for title and
+                approvals. Contact details stay with our desk — submit an enquiry
+                and a named advisor responds.
               </p>
             </div>
-            <p className="shrink-0 text-[0.8125rem] font-semibold text-ink-500">
-              <span className="font-display text-2xl text-brand-800">
+            <p className="shrink-0 rounded-lg border border-sand-200 bg-sand-50 px-4 py-2.5 text-[0.8125rem] text-ink-500">
+              <span className="font-display text-[1.25rem] font-semibold text-brand-800 tnum">
                 {results.length}
               </span>{" "}
               {results.length === 1 ? "property" : "properties"} matched
@@ -89,7 +89,7 @@ export default async function PropertiesPage({
 
         {results.length > 0 ? (
           <>
-            <ul className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {results.map((property, i) => (
                 <li key={property.id}>
                   <PropertyCard property={property} priority={i < 3} />
@@ -97,18 +97,18 @@ export default async function PropertiesPage({
               ))}
             </ul>
 
-            <div className="mt-11 rounded-4xl border border-dashed border-brand-900/15 bg-sand-100 px-7 py-9 text-center">
-              <h2 className="font-display text-[1.35rem] tracking-[-0.015em] text-brand-900">
+            <div className="mt-10 rounded-lg border border-sand-200 bg-white px-7 py-8 text-center">
+              <h2 className="font-display text-[1.1875rem] font-semibold tracking-[-0.015em] text-brand-900">
                 Not seeing the right fit?
               </h2>
               <p className="mx-auto mt-2.5 max-w-md text-[0.875rem] leading-relaxed text-ink-500">
-                About a third of what we transact is off-market. Post your
+                About a third of what we transact is off-market. Submit your
                 requirement and we will match it against stock that never
                 reaches this page.
               </p>
               <div className="mt-6">
                 <ButtonLink href="/post-requirement" arrow>
-                  Post Your Requirement
+                  Submit a requirement
                 </ButtonLink>
               </div>
             </div>
@@ -127,26 +127,25 @@ export default async function PropertiesPage({
  */
 function EmptyState() {
   return (
-    <div className="mt-8 rounded-4xl border border-brand-900/8 bg-white px-7 py-14 text-center shadow-soft">
-      <span className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-clay-50 text-clay-500">
-        <SearchIcon className="h-6 w-6" />
+    <div className="mt-8 rounded-lg border border-sand-200 bg-white px-7 py-12 text-center">
+      <span className="mx-auto grid h-12 w-12 place-items-center rounded-lg border border-sand-200 bg-sand-50 text-brand-700">
+        <SearchIcon className="h-5 w-5" />
       </span>
-      <h2 className="mt-6 font-display text-[1.6rem] leading-tight tracking-[-0.02em] text-brand-900">
-        Nothing live matches that brief —{" "}
-        <span className="italic text-clay-600">yet.</span>
+      <h2 className="mt-6 font-display text-[1.375rem] font-semibold leading-tight tracking-[-0.02em] text-brand-900">
+        No live listing matches that brief
       </h2>
       <p className="mx-auto mt-3 max-w-md text-[0.9375rem] leading-relaxed text-ink-500">
-        That is worth telling us about. Post the requirement and our desk will
+        That is worth telling us about. Submit the requirement and our desk will
         work it against off-market mandates, upcoming completions and owner
         stock that has not gone live.
       </p>
       <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
         <ButtonLink href="/post-requirement" size="lg" arrow>
-          Post Your Requirement
+          Submit a requirement
         </ButtonLink>
         <Link
           href="/properties"
-          className="rounded-full border border-brand-900/15 px-6 py-3 text-sm font-semibold text-brand-900 transition-colors hover:bg-brand-900/5"
+          className="rounded-lg border border-sand-300 bg-white px-6 py-3 text-sm font-semibold text-brand-900 transition-colors hover:bg-sand-100"
         >
           Clear all filters
         </Link>

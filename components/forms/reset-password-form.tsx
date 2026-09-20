@@ -56,7 +56,7 @@ export function ResetPasswordForm() {
       <p className="pt-1 text-center text-[0.8125rem] text-ink-500">
         <Link
           href="/login"
-          className="font-semibold text-clay-600 underline underline-offset-4 hover:text-clay-700"
+          className="font-semibold text-brand-700 underline underline-offset-4 hover:text-brand-800"
         >
           Back to sign in
         </Link>

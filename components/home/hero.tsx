@@ -1,8 +1,7 @@
 import Form from "next/form";
 import { Photo } from "@/components/ui/photo";
 import { ButtonLink, Button } from "@/components/ui/button";
-import { Container, Kicker } from "@/components/ui/section";
-import { Blob } from "@/components/ui/wave";
+import { Container } from "@/components/ui/section";
 import { SearchIcon, ShieldIcon } from "@/components/ui/icons";
 import {
   AREA_BANDS,
@@ -12,90 +11,88 @@ import {
   ZONE_LABEL,
 } from "@/lib/data/taxonomy";
 
+/** Credibility markers, stated as facts rather than decoration. */
+const credentials = [
+  { value: "1,240", label: "Verified mandates" },
+  { value: "38 mn", label: "Sq.ft. transacted" },
+  { value: "26", label: "MMR micro-markets" },
+  { value: "3.9 hrs", label: "Median first response" },
+];
+
 export function Hero() {
   return (
-    <section className="relative overflow-hidden pb-10 pt-8 sm:pt-12 lg:pb-16">
-      <Blob className="-left-40 -top-32 h-[26rem] w-[26rem] opacity-70" />
-      <Blob
-        className="-right-32 top-24 h-[22rem] w-[22rem] opacity-60"
-        color="var(--color-brand-100)"
-      />
-
-      <Container className="relative">
-        <div className="grid items-center gap-10 lg:grid-cols-[1.02fr_1fr] lg:gap-14">
+    <section className="border-b border-sand-200 bg-white">
+      <Container>
+        <div className="grid items-center gap-10 py-12 sm:py-16 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:py-20">
           <div className="rise-in">
-            <Kicker className="mb-5">
-              Mumbai Metropolitan Region · 26 micro-markets
-            </Kicker>
+            <p className="inline-flex items-center gap-2 rounded border border-sand-200 bg-sand-50 px-2.5 py-1 text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-ink-500">
+              <span
+                aria-hidden="true"
+                className="h-1.5 w-1.5 rounded-full bg-status-good"
+              />
+              RERA-registered advisory · Mumbai Metropolitan Region
+            </p>
 
-            <h1 className="font-display text-[2.4rem] leading-[1.06] tracking-[-0.03em] text-brand-900 sm:text-[3.15rem] lg:text-[3.65rem]">
-              Mumbai commercial space,
-              <br />
-              <span className="accent-underline italic text-brand-700">
-                brokered properly.
-              </span>
+            <h1 className="mt-5 font-display text-[2.125rem] font-semibold leading-[1.08] tracking-[-0.03em] text-brand-900 sm:text-[2.75rem] lg:text-[3.125rem]">
+              Commercial real estate advisory for the{" "}
+              <span className="text-brand-600">Mumbai market</span>
             </h1>
 
-            <p className="mt-6 max-w-lg text-[0.9375rem] leading-relaxed text-ink-500 sm:text-base">
-              1,240 verified mandates from Nariman Point to Panvel — every one
-              checked for title and approvals before it reaches this page. One
-              advisor holds your search from first shortlist to fit-out handover.
+            <p className="mt-5 max-w-xl text-[0.9375rem] leading-relaxed text-ink-500 sm:text-base">
+              1,240 mandates across office, retail, warehousing, industrial and
+              land — each checked for title and approvals before publication. A
+              named advisor holds your transaction from shortlist to handover.
             </p>
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <ButtonLink href="/properties" size="lg" arrow>
-                Browse Properties
+                Browse properties
               </ButtonLink>
               <ButtonLink href="/post-requirement" variant="ghost" size="lg">
-                Post a Requirement
+                Submit a requirement
               </ButtonLink>
             </div>
 
-            <p className="mt-7 flex items-start gap-2.5 text-[0.75rem] leading-relaxed text-ink-500">
-              <ShieldIcon className="mt-px h-4 w-4 shrink-0 text-brand-500" />
-              <span className="max-w-sm">
-                Owner contact details are never published. Enquiries route
-                through our desk, which is exactly why owners give us the good
-                stock first.
+            <p className="mt-7 flex items-start gap-2.5 border-t border-sand-200 pt-6 text-[0.8125rem] leading-relaxed text-ink-500">
+              <ShieldIcon className="mt-px h-4 w-4 shrink-0 text-brand-600" />
+              <span className="max-w-lg">
+                Owner contact details are never published. Every enquiry is
+                qualified by our desk on budget, timeline and decision authority
+                before an introduction is made.
               </span>
             </p>
           </div>
 
-          {/* Image collage — the organic overlapping arrangement from the
-              reference boards, rebuilt with commercial subject matter. */}
-          <div className="relative lg:h-[30rem]">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-[2.5rem_2.5rem_2.5rem_5rem] shadow-lift lg:absolute lg:inset-y-0 lg:right-0 lg:aspect-auto lg:w-[86%]">
+          <div className="relative">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-sand-200 bg-sand-100 shadow-soft">
               <Photo
                 publicId="photo-1497366754035-f200968a6e72"
                 alt="Grade-A office floor plate with glazed meeting rooms"
-                sizes="(max-width: 1024px) 100vw, 480px"
+                sizes="(max-width: 1024px) 100vw, 560px"
                 priority
                 width={1100}
               />
             </div>
 
-            <div className="absolute -bottom-6 left-0 hidden h-40 w-40 overflow-hidden rounded-[2rem_3.5rem_2rem_2rem] border-[6px] border-sand-50 shadow-lift lg:block xl:h-48 xl:w-48">
-              <Photo
-                publicId="photo-1553413077-190dd305871c"
-                alt="Grade-A warehouse interior with pallet racking"
-                sizes="200px"
-                width={500}
-              />
-            </div>
-
-            <div className="absolute -left-2 top-8 hidden rounded-3xl bg-brand-900 px-5 py-4 text-sand-50 shadow-lift lg:block">
-              <p className="font-display text-2xl leading-none">38 mn</p>
-              <p className="mt-1.5 text-[0.6875rem] font-medium uppercase tracking-[0.14em] text-sand-200/60">
-                sq.ft. transacted
-              </p>
-            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-sand-200 bg-sand-200 sm:grid-cols-4">
+              {credentials.map((item) => (
+                <div key={item.label} className="bg-white px-4 py-3.5">
+                  <dd className="font-display text-[1.125rem] font-semibold leading-none tracking-[-0.01em] text-brand-800 tnum">
+                    {item.value}
+                  </dd>
+                  <dt className="mt-1.5 text-[0.6875rem] leading-tight text-ink-500">
+                    {item.label}
+                  </dt>
+                </div>
+              ))}
+            </dl>
           </div>
         </div>
 
-        {/* Search bar — the primary conversion surface on the page. */}
+        {/* Search rail — the primary conversion surface on the page. */}
         <Form
           action="/properties"
-          className="relative mt-12 rounded-[1.75rem] border border-brand-900/8 bg-white p-3 shadow-lift sm:mt-14 sm:rounded-full sm:p-2.5"
+          className="relative -mb-7 rounded-lg border border-sand-200 bg-white p-2 shadow-lift"
         >
           <div className="grid gap-2 sm:grid-cols-[1.15fr_1fr_1fr_1fr_auto] sm:items-center sm:gap-0 sm:divide-x sm:divide-sand-200">
             <SearchCell label="Micro-market">
@@ -142,7 +139,7 @@ export function Hero() {
               </select>
             </SearchCell>
 
-            <div className="sm:pl-2.5">
+            <div className="sm:pl-2">
               <Button type="submit" size="lg" className="w-full sm:w-auto">
                 <SearchIcon className="h-4 w-4" />
                 Search
@@ -163,8 +160,8 @@ function SearchCell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl px-4 py-2.5 transition-colors hover:bg-sand-100/70 sm:rounded-none sm:px-5 sm:py-1.5 sm:first:pl-6">
-      <p className="text-[0.625rem] font-bold uppercase tracking-[0.14em] text-ink-300">
+    <div className="rounded px-3.5 py-2 transition-colors hover:bg-sand-50 sm:rounded-none sm:px-4 sm:py-1.5 sm:first:pl-4">
+      <p className="text-[0.625rem] font-bold uppercase tracking-[0.12em] text-ink-300">
         {label}
       </p>
       {children}

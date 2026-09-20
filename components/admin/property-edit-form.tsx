@@ -68,7 +68,7 @@ export function PropertyEditForm({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-full bg-clay-500 px-5 py-2 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-clay-600 disabled:opacity-60"
+          className="rounded-lg bg-brand-700 px-5 py-2 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800 disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save changes"}
         </button>

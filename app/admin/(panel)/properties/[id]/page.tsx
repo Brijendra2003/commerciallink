@@ -278,7 +278,7 @@ export default async function EditPropertyPage({
                   type="checkbox"
                   name="featured"
                   defaultChecked={property.featured}
-                  className="h-4 w-4 cursor-pointer rounded border-sand-300 accent-clay-500"
+                  className="control-box"
                 />
                 Feature on the homepage carousel
               </label>
@@ -287,7 +287,7 @@ export default async function EditPropertyPage({
                   type="checkbox"
                   name="verified"
                   defaultChecked={property.verified}
-                  className="h-4 w-4 cursor-pointer rounded border-sand-300 accent-clay-500"
+                  className="control-box"
                 />
                 Documents verified — show the verified badge
               </label>
@@ -324,7 +324,7 @@ export default async function EditPropertyPage({
                   ) : null}
                   <Link
                     href="/admin/owners"
-                    className="mt-4 block rounded-full border border-brand-900/15 px-4 py-2 text-center text-[0.75rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
+                    className="mt-4 block rounded-lg border border-sand-300 px-4 py-2 text-center text-[0.75rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
                   >
                     Open owner record
                   </Link>

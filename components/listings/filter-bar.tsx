@@ -72,7 +72,7 @@ export function FilterBar({ initial }: { initial: Filters }) {
 
   return (
     <div
-      className={`rounded-4xl border border-brand-900/8 bg-white p-4 shadow-soft transition-opacity sm:p-5 ${
+      className={`rounded-lg border border-sand-200 bg-white p-4 transition-opacity sm:p-5 ${
         pending ? "opacity-60" : ""
       }`}
     >
@@ -84,7 +84,7 @@ export function FilterBar({ initial }: { initial: Filters }) {
         className="flex flex-col gap-3"
       >
         <div className="relative">
-          <SearchIcon className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-300" />
+          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-300" />
           <label htmlFor="filter-q" className="sr-only">
             Search listings
           </label>
@@ -94,7 +94,7 @@ export function FilterBar({ initial }: { initial: Filters }) {
             value={filters.q}
             onChange={(e) => setFilters({ ...filters, q: e.target.value })}
             placeholder="Search by micro-market, zoning or amenity — try “dock leveller” or “BKC”"
-            className="field-input pl-11"
+            className="field-input pl-9"
           />
         </div>
 
@@ -189,14 +189,14 @@ export function FilterBar({ initial }: { initial: Filters }) {
               <button
                 type="button"
                 onClick={() => apply({ ...EMPTY, sort: filters.sort })}
-                className="text-[0.75rem] font-semibold text-ink-500 underline underline-offset-4 transition-colors hover:text-clay-600"
+                className="text-[0.75rem] font-semibold text-ink-500 underline underline-offset-4 transition-colors hover:text-brand-700"
               >
                 Clear {active.length} filter{active.length > 1 ? "s" : ""}
               </button>
             ) : null}
             <button
               type="submit"
-              className="rounded-full bg-brand-900 px-5 py-2.5 text-[0.8125rem] font-semibold text-sand-50 transition-colors hover:bg-brand-800"
+              className="rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
             >
               Apply
             </button>

@@ -8,7 +8,7 @@ export function OwnerCta() {
   return (
     <Section>
       <Container>
-        <div className="overflow-hidden rounded-[2.5rem] border border-brand-900/8 bg-white shadow-soft">
+        <div className="overflow-hidden rounded-lg border border-sand-200 bg-white shadow-soft">
           <div className="grid lg:grid-cols-[1fr_0.85fr]">
             <div className="p-8 sm:p-11 lg:p-14">
               <SectionHeading
@@ -24,8 +24,8 @@ export function OwnerCta() {
                 {ownerBenefits.map((b) => (
                   <li key={b.title}>
                     <div className="flex items-center gap-2">
-                      <CheckIcon className="h-4 w-4 shrink-0 text-clay-500" />
-                      <h3 className="text-[0.875rem] font-bold tracking-tight text-brand-900">
+                      <CheckIcon className="h-4 w-4 shrink-0 text-brand-600" />
+                      <h3 className="text-[0.875rem] font-semibold tracking-tight text-brand-900">
                         {b.title}
                       </h3>
                     </div>
@@ -51,7 +51,7 @@ export function OwnerCta() {
               </p>
             </div>
 
-            <div className="relative min-h-[16rem] bg-brand-100 lg:min-h-full">
+            <div className="relative min-h-[16rem] border-t border-sand-200 bg-sand-100 lg:min-h-full lg:border-l lg:border-t-0">
               <Photo
                 publicId="photo-1497604401993-f2e922e5cb0a"
                 alt="Commercial office campus exterior"
@@ -60,7 +60,7 @@ export function OwnerCta() {
               />
               <div className="absolute inset-0 bg-gradient-to-t from-brand-900/55 via-brand-900/5 to-transparent" />
               <div className="absolute inset-x-0 bottom-0 p-7">
-                <p className="font-display text-[1.35rem] leading-tight text-sand-50">
+                <p className="font-display text-[1.25rem] font-semibold leading-tight text-white tnum">
                   412 deals closed
                 </p>
                 <p className="mt-1.5 text-[0.75rem] text-sand-200/80">

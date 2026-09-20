@@ -28,9 +28,8 @@ export default function SiteError({
       <Container>
         <div className="mx-auto max-w-xl text-center">
           <Kicker className="mb-4">Something went wrong</Kicker>
-          <h1 className="font-display text-[2rem] leading-[1.12] tracking-[-0.03em] text-brand-900 sm:text-[2.5rem]">
-            We can&apos;t load listings{" "}
-            <span className="italic text-brand-700">right now.</span>
+          <h1 className="font-display text-[1.875rem] font-semibold leading-[1.12] tracking-[-0.03em] text-brand-900 sm:text-[2.25rem]">
+            We can&apos;t load listings right now
           </h1>
           <p className="mt-5 text-[0.9375rem] leading-relaxed text-ink-500">
             This is on us, not you. The desk is still open — call or message and
@@ -40,7 +39,7 @@ export default function SiteError({
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a
               href={`tel:${site.phone.replace(/\s/g, "")}`}
-              className="inline-flex items-center gap-2 rounded-full bg-clay-500 px-7 py-3.5 text-[0.9375rem] font-semibold text-white transition-colors hover:bg-clay-600"
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-700 px-6 py-3 text-[0.9375rem] font-semibold text-white transition-colors hover:bg-brand-800"
             >
               <PhoneIcon className="h-4 w-4" />
               {site.phone}

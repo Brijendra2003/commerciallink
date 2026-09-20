@@ -163,7 +163,7 @@ export default async function AdminDashboard() {
           action={
             <Link
               href="/admin/leads?status=new"
-              className="text-[0.75rem] font-semibold text-clay-600 underline underline-offset-4 hover:text-clay-700"
+              className="text-[0.75rem] font-semibold text-brand-700 underline underline-offset-4 hover:text-brand-800"
             >
               View all
             </Link>
@@ -181,7 +181,7 @@ export default async function AdminDashboard() {
                     href={`/admin/leads?lead=${lead.id}`}
                     className="flex items-center gap-4 px-5 py-3.5 transition-colors hover:bg-sand-50"
                   >
-                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-clay-50 text-[0.6875rem] font-bold text-clay-700">
+                    <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-brand-50 text-[0.6875rem] font-bold text-brand-700">
                       {lead.buyer_name
                         .split(" ")
                         .map((n) => n[0])
@@ -300,12 +300,12 @@ function QueueRow({
     <li>
       <Link
         href={href}
-        className="group/row flex items-center gap-3 rounded-2xl border border-sand-200 px-4 py-3 transition-colors hover:border-brand-900/15 hover:bg-sand-50"
+        className="group/row flex items-center gap-3 rounded-lg border border-sand-200 px-4 py-3 transition-colors hover:border-brand-600 hover:bg-sand-50"
       >
         <span
-          className={`grid h-7 w-7 shrink-0 place-items-center rounded-full text-[0.75rem] font-bold tabular-nums ${
+          className={`grid h-7 w-7 shrink-0 place-items-center rounded text-[0.75rem] font-bold tabular-nums ${
             count > 0
-              ? "bg-clay-500 text-white"
+              ? "bg-brand-700 text-white"
               : "bg-sand-100 text-ink-300"
           }`}
         >

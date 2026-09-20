@@ -80,12 +80,12 @@ export function LoginForm({ next }: { next: string }) {
             htmlFor="password"
             className="text-[0.8125rem] font-semibold text-brand-900"
           >
-            Password<span className="ml-0.5 text-clay-500">*</span>
+            Password<span className="ml-0.5 text-clay-600">*</span>
           </label>
           <button
             type="button"
             onClick={() => setMode("reset")}
-            className="text-[0.75rem] font-semibold text-clay-600 underline underline-offset-4 transition-colors hover:text-clay-700"
+            className="text-[0.75rem] font-semibold text-brand-700 underline underline-offset-4 transition-colors hover:text-brand-800"
           >
             Forgot password?
           </button>

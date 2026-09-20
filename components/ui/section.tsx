@@ -8,7 +8,7 @@ export function Container({
   className?: string;
 }) {
   return (
-    <div className={`mx-auto w-full max-w-[1180px] px-5 sm:px-8 ${className}`}>
+    <div className={`mx-auto w-full max-w-[1200px] px-5 sm:px-8 ${className}`}>
       {children}
     </div>
   );
@@ -16,26 +16,26 @@ export function Container({
 
 export function Kicker({
   children,
-  tone = "clay",
+  tone = "brand",
   className = "",
 }: {
   children: ReactNode;
+  /** `clay` is kept for callers that predate the palette change. */
   tone?: "clay" | "brand" | "light";
   className?: string;
 }) {
   const tones = {
-    clay: "text-clay-600",
+    clay: "text-brand-600",
     brand: "text-brand-600",
-    light: "text-clay-300",
+    light: "text-brand-100",
   };
-  return (
-    <p className={`kicker ${tones[tone]} ${className}`}>{children}</p>
-  );
+  return <p className={`kicker ${tones[tone]} ${className}`}>{children}</p>;
 }
 
 /**
- * Headline with an italic serif accent clause — the device every reference
- * board uses to keep a heading from reading as a plain label.
+ * Section heading. `accent` continues the title in the brand blue — a weight
+ * and colour shift rather than the italic serif clause this replaced, which
+ * read as editorial styling instead of a product.
  */
 export function SectionHeading({
   kicker,
@@ -63,24 +63,20 @@ export function SectionHeading({
       ].join(" ")}
     >
       {kicker ? (
-        <Kicker tone={tone === "light" ? "light" : "clay"} className="mb-3">
+        <Kicker tone={tone === "light" ? "light" : "brand"} className="mb-3">
           {kicker}
         </Kicker>
       ) : null}
       <h2
-        className={`font-display text-[1.75rem] leading-[1.15] tracking-[-0.02em] sm:text-[2.25rem] lg:text-[2.6rem] ${
-          tone === "light" ? "text-sand-50" : "text-brand-900"
+        className={`font-display text-[1.5rem] font-semibold leading-[1.18] tracking-[-0.02em] sm:text-[1.875rem] lg:text-[2.125rem] ${
+          tone === "light" ? "text-white" : "text-brand-900"
         }`}
       >
         {title}
         {accent ? (
           <>
             {" "}
-            <span
-              className={`italic ${
-                tone === "light" ? "text-clay-300" : "accent-underline text-brand-700"
-              }`}
-            >
+            <span className={tone === "light" ? "text-brand-100" : "text-brand-600"}>
               {accent}
             </span>
           </>
@@ -88,8 +84,8 @@ export function SectionHeading({
       </h2>
       {lead ? (
         <p
-          className={`mt-4 text-[0.9375rem] leading-relaxed sm:text-base ${
-            tone === "light" ? "text-sand-200/80" : "text-ink-500"
+          className={`mt-4 text-[0.9375rem] leading-relaxed ${
+            tone === "light" ? "text-sand-200/75" : "text-ink-500"
           }`}
         >
           {lead}
@@ -109,7 +105,7 @@ export function Section({
   id?: string;
 }) {
   return (
-    <section id={id} className={`py-16 sm:py-20 lg:py-24 ${className}`}>
+    <section id={id} className={`py-14 sm:py-16 lg:py-20 ${className}`}>
       {children}
     </section>
   );

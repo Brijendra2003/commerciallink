@@ -5,24 +5,26 @@ type Variant = "primary" | "secondary" | "ghost" | "light";
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "group/btn inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-tight " +
-  "transition-all duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] disabled:cursor-not-allowed disabled:opacity-55";
+  "group/btn inline-flex items-center justify-center gap-2 rounded-lg font-semibold " +
+  "transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-55";
 
+/**
+ * One saturated blue carries every primary action. The dark navy is for
+ * actions sitting on a light surface that must not compete with a primary,
+ * and `light` is the inverse for use on navy bands.
+ */
 const variants: Record<Variant, string> = {
-  primary:
-    "bg-clay-500 text-white shadow-[0_10px_24px_-12px_rgba(224,101,58,0.9)] hover:bg-clay-600 hover:shadow-[0_16px_34px_-14px_rgba(224,101,58,0.95)] active:bg-clay-700",
-  secondary:
-    "bg-brand-900 text-sand-50 hover:bg-brand-800 shadow-[0_10px_24px_-14px_rgba(12,51,48,0.9)]",
+  primary: "bg-brand-700 text-white hover:bg-brand-800 active:bg-brand-900",
+  secondary: "bg-brand-900 text-white hover:bg-brand-800",
   ghost:
-    "border border-brand-900/15 bg-transparent text-brand-900 hover:border-brand-900/35 hover:bg-brand-900/5",
-  light:
-    "bg-white text-brand-900 shadow-soft hover:bg-sand-100",
+    "border border-sand-300 bg-white text-brand-900 hover:border-ink-300 hover:bg-sand-100",
+  light: "bg-white text-brand-900 hover:bg-sand-100",
 };
 
 const sizes: Record<Size, string> = {
-  sm: "px-4 py-2 text-[0.8125rem]",
-  md: "px-6 py-3 text-sm",
-  lg: "px-7 py-3.5 text-[0.9375rem]",
+  sm: "px-3.5 py-2 text-[0.8125rem]",
+  md: "px-5 py-2.5 text-sm",
+  lg: "px-6 py-3 text-[0.9375rem]",
 };
 
 function classes(variant: Variant, size: Size, className?: string) {

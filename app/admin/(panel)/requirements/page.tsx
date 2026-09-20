@@ -111,7 +111,7 @@ export default async function RequirementsPage() {
 
               {/* Contact block sits behind the admin-role RLS policy. */}
               <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-[0.75rem]">
-                <span className="text-[0.625rem] font-bold uppercase tracking-[0.12em] text-clay-600">
+                <span className="text-[0.625rem] font-bold uppercase tracking-[0.12em] text-brand-600">
                   Admin-only
                 </span>
                 <a
@@ -141,7 +141,7 @@ export default async function RequirementsPage() {
                           href={`/admin/properties/${p.id}`}
                           className="flex items-center gap-3 rounded-xl border border-brand-100 bg-brand-50 px-3.5 py-2.5 transition-colors hover:border-brand-500/40"
                         >
-                          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-700 text-[0.5625rem] font-bold text-clay-300">
+                          <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-brand-700 text-[0.5625rem] font-bold text-brand-100">
                             ✓
                           </span>
                           <span className="min-w-0 flex-1 truncate text-[0.8125rem] font-semibold text-brand-900">
@@ -170,7 +170,7 @@ export default async function RequirementsPage() {
                         <li key={p.id}>
                           <Link
                             href={`/admin/properties/${p.id}`}
-                            className="inline-block max-w-[22rem] truncate rounded-full border border-dashed border-sand-300 px-3.5 py-1.5 text-[0.6875rem] font-medium text-ink-500 transition-colors hover:border-clay-300 hover:text-clay-700"
+                            className="inline-block max-w-[22rem] truncate rounded border border-dashed border-sand-300 px-3 py-1.5 text-[0.6875rem] font-medium text-ink-500 transition-colors hover:border-brand-500 hover:text-brand-700"
                           >
                             + {p.title}
                           </Link>

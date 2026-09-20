@@ -22,7 +22,7 @@ export default function AdminError({
       >
         !
       </span>
-      <h1 className="mt-5 font-display text-[1.5rem] leading-tight tracking-[-0.02em] text-brand-900">
+      <h1 className="mt-5 font-display text-[1.375rem] font-semibold leading-tight tracking-[-0.02em] text-brand-900">
         This view didn&apos;t load.
       </h1>
       <p className="mt-3 text-[0.875rem] leading-relaxed text-ink-500">

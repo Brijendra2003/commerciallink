@@ -7,33 +7,33 @@ import { getPublishedProperties } from "@/lib/data/queries";
 import { describeError } from "@/lib/log";
 
 export async function AssetClasses() {
-  // Counts are decoration; an unreachable database shows zeros, not an error.
+  // Counts are supporting detail; an unreachable database shows zeros, not an error.
   const all = await getPublishedProperties().catch((error) => {
     console.error("[home] listing counts unavailable:", describeError(error));
     return [];
   });
 
   return (
-    <Section className="pt-6 sm:pt-8 lg:pt-10">
+    <Section className="pt-16 sm:pt-20">
       <Container>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <SectionHeading
-            kicker="What we broker"
+            kicker="Coverage"
             title="Six asset classes,"
-            accent="one desk."
-            lead="Each class is run by advisors who transact in it every week — not a
+            accent="one advisory desk."
+            lead="Each class is run by advisors who transact in it weekly — not a
               generalist working from a listing feed."
           />
           <Link
             href="/properties"
-            className="group/btn inline-flex shrink-0 items-center gap-2 text-[0.8125rem] font-semibold text-brand-800 transition-colors hover:text-clay-600"
+            className="group/btn inline-flex shrink-0 items-center gap-2 text-[0.8125rem] font-semibold text-brand-700 transition-colors hover:text-brand-800"
           >
             View all properties
             <Arrow />
           </Link>
         </div>
 
-        <ul className="mt-10 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-10 grid gap-px overflow-hidden rounded-lg border border-sand-200 bg-sand-200 sm:grid-cols-2 lg:grid-cols-3">
           {PROPERTY_TYPES.map((type) => {
             const Icon = PROPERTY_TYPE_ICON[type.value];
             const count = all.filter((p) => p.type === type.value).length;
@@ -42,29 +42,29 @@ export async function AssetClasses() {
               <li key={type.value}>
                 <Link
                   href={`/properties?type=${type.value}`}
-                  className="group/tile flex h-full flex-col rounded-3xl border border-brand-900/7 bg-white p-6 shadow-soft transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-1 hover:border-brand-900/12 hover:shadow-lift"
+                  className="group/tile flex h-full flex-col bg-white p-6 transition-colors duration-150 hover:bg-sand-50"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <span className="grid h-11 w-11 place-items-center rounded-2xl bg-brand-50 text-brand-700 transition-colors duration-300 group-hover/tile:bg-brand-800 group-hover/tile:text-clay-300">
-                      <Icon className="h-[1.35rem] w-[1.35rem]" />
+                    <span className="grid h-10 w-10 place-items-center rounded border border-sand-200 bg-sand-50 text-brand-700 transition-colors duration-150 group-hover/tile:border-brand-100 group-hover/tile:bg-brand-50">
+                      <Icon className="h-[1.25rem] w-[1.25rem]" />
                     </span>
-                    <span className="rounded-full bg-sand-100 px-2.5 py-1 text-[0.6875rem] font-semibold text-ink-500">
+                    <span className="rounded border border-sand-200 px-2 py-0.5 text-[0.6875rem] font-semibold text-ink-500 tnum">
                       {count} live
                     </span>
                   </div>
 
-                  <h3 className="mt-5 font-display text-[1.125rem] tracking-[-0.01em] text-brand-900">
+                  <h3 className="mt-5 font-display text-[1.0625rem] font-semibold tracking-[-0.01em] text-brand-900">
                     {type.label}
                   </h3>
                   <p className="mt-2 flex-1 text-[0.8125rem] leading-relaxed text-ink-500">
                     {type.blurb}
                   </p>
 
-                  <span className="mt-5 inline-flex items-center gap-1.5 text-[0.75rem] font-bold uppercase tracking-[0.1em] text-clay-600">
-                    Explore
+                  <span className="mt-5 inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-brand-700">
+                    View listings
                     <svg
                       viewBox="0 0 16 16"
-                      className="h-3 w-3 transition-transform duration-200 group-hover/tile:translate-x-1"
+                      className="h-3 w-3 transition-transform duration-150 group-hover/tile:translate-x-0.5"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="1.8"

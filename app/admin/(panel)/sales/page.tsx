@@ -216,7 +216,7 @@ export default async function SalesPage() {
                       ) : (
                         <button
                           type="button"
-                          className="rounded-full bg-clay-500 px-3 py-1.5 text-[0.6875rem] font-semibold text-white transition-colors hover:bg-clay-600"
+                          className="rounded bg-brand-700 px-3 py-1.5 text-[0.6875rem] font-semibold text-white transition-colors hover:bg-brand-800"
                         >
                           Mark settled
                         </button>

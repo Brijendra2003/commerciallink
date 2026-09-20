@@ -119,7 +119,7 @@ export function LeadDrawer({
               <h3 className="text-[0.6875rem] font-bold uppercase tracking-[0.13em] text-ink-300">
                 Contact
               </h3>
-              <span className="text-[0.625rem] font-semibold text-clay-600">
+              <span className="text-[0.625rem] font-semibold text-brand-600">
                 Admin-only field
               </span>
             </div>
@@ -174,7 +174,7 @@ export function LeadDrawer({
                 href={`/admin/properties/${lead.property_id}`}
                 className="mt-4 flex items-center gap-3 rounded-xl bg-sand-100 px-3.5 py-3 transition-colors hover:bg-sand-200"
               >
-                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-800 text-[0.625rem] font-bold text-clay-300">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-800 text-[0.625rem] font-bold text-brand-100">
                   {lead.property_id.replace("p-", "")}
                 </span>
                 <span className="min-w-0 flex-1">
@@ -189,8 +189,8 @@ export function LeadDrawer({
             ) : null}
 
             {requirement ? (
-              <div className="mt-4 rounded-xl border border-clay-100 bg-clay-50 p-3.5">
-                <p className="text-[0.625rem] font-bold uppercase tracking-[0.12em] text-clay-700">
+              <div className="mt-4 rounded-lg border border-brand-100 bg-brand-50 p-3.5">
+                <p className="text-[0.625rem] font-bold uppercase tracking-[0.12em] text-brand-700">
                   Requirement brief · {requirement.id}
                 </p>
                 <dl className="mt-2.5 grid grid-cols-2 gap-2.5 text-[0.75rem]">
@@ -207,7 +207,7 @@ export function LeadDrawer({
                   <Pair label="Budget" value={requirement.budget_label} />
                   <Pair label="Timeline" value={requirement.timeline} />
                 </dl>
-                <p className="mt-3 border-t border-clay-100 pt-2.5 text-[0.75rem] leading-relaxed text-ink-500">
+                <p className="mt-3 border-t border-brand-100 pt-2.5 text-[0.75rem] leading-relaxed text-ink-500">
                   {requirement.notes}
                 </p>
               </div>
@@ -248,7 +248,7 @@ export function LeadDrawer({
             <ol className="relative space-y-4 border-l border-sand-300 pl-6">
               {[...lead.activities].reverse().map((a) => (
                 <li key={a.id} className="relative">
-                  <span className="absolute -left-[1.9rem] grid h-6 w-6 place-items-center rounded-full border-2 border-sand-50 bg-brand-800 text-[0.625rem] text-clay-300">
+                  <span className="absolute -left-[1.9rem] grid h-6 w-6 place-items-center rounded-full border-2 border-sand-50 bg-brand-800 text-[0.625rem] text-brand-100">
                     {ACTIVITY_GLYPH[a.type]}
                   </span>
                   <p className="text-[0.8125rem] leading-relaxed text-ink-500">
@@ -269,13 +269,13 @@ export function LeadDrawer({
         <footer className="flex gap-2 border-t border-sand-200 bg-white px-6 py-4">
           <a
             href={`tel:${lead.buyer_phone.replace(/\s/g, "")}`}
-            className="flex-1 rounded-full bg-clay-500 px-5 py-2.5 text-center text-[0.8125rem] font-semibold text-white transition-colors hover:bg-clay-600"
+            className="flex-1 rounded-lg bg-brand-700 px-5 py-2.5 text-center text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
           >
             Call now
           </a>
           <a
             href={`mailto:${lead.buyer_email}`}
-            className="flex-1 rounded-full border border-brand-900/15 px-5 py-2.5 text-center text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
+            className="flex-1 rounded-lg border border-sand-300 px-5 py-2.5 text-center text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
           >
             Email
           </a>

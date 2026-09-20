@@ -26,8 +26,8 @@ export default async function LoginPage({
   return (
     <div className="mx-auto max-w-sm">
       <Kicker className="mb-3">Welcome back</Kicker>
-      <h1 className="font-display text-[1.8rem] leading-tight tracking-[-0.025em] text-brand-900">
-        Log in to your <span className="italic text-brand-700">account.</span>
+      <h1 className="font-display text-[1.625rem] font-semibold leading-tight tracking-[-0.025em] text-brand-900">
+        Log in to your account
       </h1>
       <p className="mt-3 text-[0.875rem] leading-relaxed text-ink-500">
         Buyers land on their enquiries and requirements. Owners land on their

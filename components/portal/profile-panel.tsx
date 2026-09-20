@@ -14,8 +14,8 @@ export function ProfilePanel({ session }: { session: PortalSession }) {
   const errors = state?.fieldErrors ?? {};
 
   return (
-    <section className="rounded-3xl border border-brand-900/8 bg-white p-5 shadow-soft">
-      <h2 className="text-[0.9375rem] font-bold tracking-tight text-brand-900">
+    <section className="rounded-lg border border-sand-200 bg-white p-5">
+      <h2 className="text-[0.9375rem] font-semibold tracking-tight text-brand-900">
         Profile
       </h2>
 
@@ -51,10 +51,8 @@ export function ProfilePanel({ session }: { session: PortalSession }) {
         </Field>
 
         <div>
-          <p className="mb-1.5 text-[0.8125rem] font-semibold text-brand-900">
-            Email
-          </p>
-          <p className="rounded-xl bg-sand-100 px-4 py-2.5 text-[0.8125rem] text-ink-500">
+          <p className="mb-1.5 text-[0.8125rem] font-semibold text-ink-700">Email</p>
+          <p className="rounded-md border border-sand-200 bg-sand-100 px-3 py-2.5 text-[0.8125rem] text-ink-500">
             {session.email}
           </p>
           <p className="mt-1.5 text-[0.6875rem] text-ink-300">

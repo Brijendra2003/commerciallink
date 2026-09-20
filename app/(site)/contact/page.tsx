@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ContactForm } from "@/components/forms/contact-form";
 import { Container, Kicker } from "@/components/ui/section";
-import { Blob } from "@/components/ui/wave";
 import {
   MailIcon,
   PhoneIcon,
@@ -22,19 +21,14 @@ export default function ContactPage() {
   const whatsappHref = `https://wa.me/${site.whatsapp.replace(/[^\d]/g, "")}`;
 
   return (
-    <section className="relative overflow-hidden py-12 sm:py-16">
-      <Blob className="-left-40 -top-28 h-[24rem] w-[24rem] opacity-60" />
-
-      <Container className="relative">
+    <section className="py-12 sm:py-16">
+      <Container>
         <div className="grid gap-10 lg:grid-cols-[1fr_1fr] lg:gap-16">
           <div>
-            <Kicker className="mb-4">Get in touch</Kicker>
-            <h1 className="font-display text-[2.1rem] leading-[1.1] tracking-[-0.03em] text-brand-900 sm:text-[2.8rem]">
-              One desk.
-              <br />
-              <span className="accent-underline italic text-brand-700">
-                One person who answers.
-              </span>
+            <Kicker className="mb-4">Contact</Kicker>
+            <h1 className="font-display text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em] text-brand-900 sm:text-[2.5rem]">
+              One desk.{" "}
+              <span className="text-brand-600">One person who answers.</span>
             </h1>
             <p className="mt-5 max-w-md text-[0.9375rem] leading-relaxed text-ink-500">
               No call centre, no ticket queue. Send a message and an advisor
@@ -73,8 +67,8 @@ export default function ContactPage() {
               />
             </ul>
 
-            <div className="mt-9 rounded-3xl border border-brand-900/8 bg-sand-100 p-6">
-              <p className="text-[0.875rem] font-bold tracking-tight text-brand-900">
+            <div className="mt-8 rounded-lg border border-sand-200 bg-white p-5">
+              <p className="text-[0.875rem] font-semibold tracking-tight text-brand-900">
                 Looking for something specific?
               </p>
               <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-500">
@@ -84,15 +78,15 @@ export default function ContactPage() {
               </p>
               <Link
                 href="/post-requirement"
-                className="mt-3.5 inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-clay-600 underline underline-offset-4 transition-colors hover:text-clay-700"
+                className="mt-3.5 inline-flex items-center gap-1.5 text-[0.8125rem] font-semibold text-brand-700 underline underline-offset-4 transition-colors hover:text-brand-800"
               >
-                Post a requirement instead
+                Submit a requirement instead
               </Link>
             </div>
           </div>
 
-          <div className="rounded-4xl border border-brand-900/8 bg-white p-6 shadow-lift sm:p-9">
-            <h2 className="font-display text-[1.35rem] leading-tight tracking-[-0.015em] text-brand-900">
+          <div className="rounded-lg border border-sand-200 bg-white p-6 shadow-soft sm:p-8">
+            <h2 className="font-display text-[1.25rem] font-semibold leading-tight tracking-[-0.015em] text-brand-900">
               Send us a message
             </h2>
             <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-500">
@@ -125,7 +119,7 @@ function ContactRow({
 }) {
   const body = (
     <>
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-brand-50 text-brand-700">
+      <span className="grid h-9 w-9 shrink-0 place-items-center rounded border border-sand-200 bg-sand-50 text-brand-700">
         {icon}
       </span>
       <span className="min-w-0">
@@ -143,7 +137,7 @@ function ContactRow({
   );
 
   const className =
-    "flex items-start gap-3.5 rounded-3xl border border-brand-900/8 bg-white p-4 shadow-soft transition-colors";
+    "flex items-start gap-3.5 rounded-lg border border-sand-200 bg-white p-4 transition-colors";
 
   return (
     <li>
@@ -153,7 +147,7 @@ function ContactRow({
           {...(external
             ? { target: "_blank", rel: "noopener noreferrer" }
             : {})}
-          className={`${className} hover:border-brand-900/15 hover:bg-sand-50`}
+          className={`${className} hover:border-brand-600 hover:bg-sand-50`}
         >
           {body}
         </a>

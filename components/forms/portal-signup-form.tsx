@@ -56,15 +56,15 @@ export function PortalSignupForm({
             <path d="m3.6 7 8.4 6 8.4-6" />
           </svg>
         </span>
-        <p className="mt-4 font-display text-lg text-brand-900">
-          Check your inbox.
+        <p className="mt-4 font-display text-[1.0625rem] font-semibold text-brand-900">
+          Check your inbox
         </p>
         <p className="mx-auto mt-2 max-w-sm text-[0.875rem] leading-relaxed text-ink-500">
           {state.message}
         </p>
         <Link
           href="/login"
-          className="mt-5 inline-block text-[0.8125rem] font-semibold text-clay-600 underline underline-offset-4 hover:text-clay-700"
+          className="mt-5 inline-block text-[0.8125rem] font-semibold text-brand-700 underline underline-offset-4 hover:text-brand-800"
         >
           Go to sign in
         </Link>
@@ -75,14 +75,14 @@ export function PortalSignupForm({
   return (
     <form action={action} className="space-y-4">
       <fieldset>
-        <legend className="mb-2.5 text-[0.8125rem] font-semibold text-brand-900">
+        <legend className="mb-2.5 text-[0.8125rem] font-semibold text-ink-700">
           I am here to…
         </legend>
         <div className="grid gap-2.5">
           {ROLES.map((r) => (
             <label
               key={r.value}
-              className="flex cursor-pointer items-start gap-3 rounded-2xl border border-sand-300 bg-white p-4 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 has-[:checked]:shadow-soft"
+              className="flex cursor-pointer items-start gap-3 rounded-lg border border-sand-300 bg-white p-4 transition-colors has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"
             >
               <input
                 type="radio"
@@ -90,10 +90,10 @@ export function PortalSignupForm({
                 value={r.value}
                 checked={role === r.value}
                 onChange={() => setRole(r.value)}
-                className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-clay-500"
+                className="control-box mt-0.5 rounded-full"
               />
               <span className="min-w-0 flex-1">
-                <span className="flex items-center gap-2 text-[0.875rem] font-bold tracking-tight text-brand-900">
+                <span className="flex items-center gap-2 text-[0.875rem] font-semibold tracking-tight text-brand-900">
                   <r.Icon className="h-4 w-4 text-brand-600" />
                   {r.title}
                 </span>
@@ -168,7 +168,7 @@ export function PortalSignupForm({
           <input
             type="checkbox"
             name="terms"
-            className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-sand-300 accent-clay-500"
+            className="control-box mt-0.5"
           />
           <span>
             I agree to the terms of use and the DPDP-compliant privacy policy.
@@ -203,7 +203,7 @@ export function PortalSignupForm({
         Already registered?{" "}
         <Link
           href="/login"
-          className="font-semibold text-clay-600 underline underline-offset-4 transition-colors hover:text-clay-700"
+          className="font-semibold text-brand-700 underline underline-offset-4 transition-colors hover:text-brand-800"
         >
           Log in
         </Link>

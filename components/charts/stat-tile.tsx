@@ -25,17 +25,17 @@ export function StatTile({
   const good = delta === undefined ? null : delta >= 0 === upIsGood;
 
   return (
-    <div className="rounded-3xl border border-brand-900/8 bg-white p-5 shadow-soft">
+    <div className="rounded-lg border border-sand-200 bg-white p-5">
       <div className="flex items-start justify-between gap-3">
         <p className="text-[0.75rem] font-medium text-ink-500">{label}</p>
         {icon ? (
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-700">
+          <span className="grid h-8 w-8 shrink-0 place-items-center rounded border border-sand-200 bg-sand-50 text-brand-700">
             {icon}
           </span>
         ) : null}
       </div>
 
-      <p className="mt-3 text-[1.75rem] font-bold leading-none tracking-[-0.02em] text-brand-900">
+      <p className="mt-3 font-display text-[1.625rem] font-semibold leading-none tracking-[-0.02em] text-brand-900">
         {value}
       </p>
 

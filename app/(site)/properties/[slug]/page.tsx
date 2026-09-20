@@ -222,21 +222,21 @@ export default async function PropertyPage({
           {/* ---- Main column ---- */}
           <div>
             <div className="mb-6 flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-brand-900 px-3 py-1.5 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-sand-50">
+              <span className="rounded bg-brand-900 px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-white">
                 {PURPOSE_LABEL[property.purpose]}
               </span>
-              <span className="rounded-full bg-brand-50 px-3 py-1.5 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-brand-700">
+              <span className="rounded border border-brand-100 bg-brand-50 px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-brand-700">
                 {PROPERTY_TYPE_LABEL[property.type]}
               </span>
               {property.verified ? (
-                <span className="flex items-center gap-1.5 rounded-full bg-clay-50 px-3 py-1.5 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-clay-700">
+                <span className="flex items-center gap-1.5 rounded border border-gold-500/35 bg-gold-100 px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-gold-600">
                   <ShieldIcon className="h-3 w-3" />
                   Documents verified
                 </span>
               ) : null}
             </div>
 
-            <h1 className="font-display text-[1.9rem] leading-[1.12] tracking-[-0.025em] text-brand-900 sm:text-[2.4rem]">
+            <h1 className="font-display text-[1.75rem] font-semibold leading-[1.12] tracking-[-0.025em] text-brand-900 sm:text-[2.125rem]">
               {property.title}
             </h1>
 
@@ -251,7 +251,7 @@ export default async function PropertyPage({
 
             <section className="mt-10">
               <Kicker className="mb-3">The brief</Kicker>
-              <p className="font-display text-[1.15rem] leading-relaxed tracking-[-0.01em] text-brand-900">
+              <p className="font-display text-[1.0625rem] font-medium leading-relaxed tracking-[-0.01em] text-brand-900">
                 {property.summary}
               </p>
               <div className="mt-5 space-y-4">
@@ -265,7 +265,7 @@ export default async function PropertyPage({
 
             <section className="mt-10">
               <Kicker className="mb-4">Key specifications</Kicker>
-              <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-3xl border border-brand-900/8 bg-brand-900/8 sm:grid-cols-4">
+              <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-sand-200 bg-sand-200 sm:grid-cols-4">
                 {specs.map((spec) => (
                   <div key={spec.label} className="bg-white px-4 py-4">
                     <dt className="text-[0.6875rem] font-semibold uppercase tracking-[0.1em] text-ink-300">
@@ -286,7 +286,7 @@ export default async function PropertyPage({
                   {floorPlans.map((m) => (
                     <li
                       key={m.id}
-                      className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-brand-900/8 bg-white"
+                      className="relative aspect-[4/3] overflow-hidden rounded-lg border border-sand-200 bg-white"
                     >
                       <Photo
                         publicId={m.cloudinary_public_id}
@@ -310,7 +310,7 @@ export default async function PropertyPage({
                       key={a}
                       className="flex items-center gap-2.5 text-[0.875rem] text-ink-500"
                     >
-                      <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand-100 text-brand-700">
+                      <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand-50 text-brand-700">
                         <CheckIcon className="h-3 w-3" />
                       </span>
                       {a}
@@ -320,11 +320,11 @@ export default async function PropertyPage({
               </section>
             ) : null}
 
-            <section className="mt-10 rounded-3xl border border-brand-900/8 bg-sand-100 p-6 sm:p-7">
+            <section className="mt-10 rounded-lg border border-sand-200 bg-white p-6">
               <div className="flex items-start gap-3">
-                <DocumentIcon className="mt-0.5 h-5 w-5 shrink-0 text-clay-600" />
+                <DocumentIcon className="mt-0.5 h-5 w-5 shrink-0 text-brand-600" />
                 <div>
-                  <h2 className="text-[0.9375rem] font-bold tracking-tight text-brand-900">
+                  <h2 className="text-[0.9375rem] font-semibold tracking-tight text-brand-900">
                     Document pack available on enquiry
                   </h2>
                   <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-500">
@@ -336,7 +336,7 @@ export default async function PropertyPage({
                   <div className="mt-4 flex flex-wrap gap-2.5">
                     <a
                       href="#enquire"
-                      className="rounded-full bg-brand-900 px-5 py-2.5 text-[0.8125rem] font-semibold text-sand-50 transition-colors hover:bg-brand-800"
+                      className="rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
                     >
                       Request the pack
                     </a>
@@ -344,7 +344,7 @@ export default async function PropertyPage({
                       href={whatsappHref}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border border-brand-900/15 px-5 py-2.5 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-white"
+                      className="inline-flex items-center gap-2 rounded-lg border border-sand-300 bg-white px-5 py-2.5 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
                     >
                       <WhatsAppIcon className="h-4 w-4" />
                       Ask on WhatsApp
@@ -361,13 +361,13 @@ export default async function PropertyPage({
               id="enquire"
               className="lg:sticky lg:top-[5.5rem] scroll-mt-24"
             >
-              <div className="rounded-4xl border border-brand-900/8 bg-white p-6 shadow-lift sm:p-7">
+              <div className="rounded-lg border border-sand-200 bg-white p-6 shadow-soft">
                 <div className="mb-6 border-b border-sand-200 pb-6">
                   <p className="text-[0.6875rem] font-bold uppercase tracking-[0.13em] text-ink-300">
                     {property.purpose === "lease" ? "Asking rent" : "Asking price"}
                   </p>
                   <p
-                    className={`mt-2 font-display text-[2rem] leading-none tracking-[-0.02em] ${
+                    className={`mt-2 font-display text-[1.75rem] font-semibold leading-none tracking-[-0.02em] tnum ${
                       price.gated ? "text-ink-500" : "text-brand-800"
                     }`}
                   >
@@ -401,14 +401,14 @@ export default async function PropertyPage({
       </Container>
 
       {similar.length > 0 ? (
-        <section className="border-t border-brand-900/8 bg-sand-100 py-14 sm:py-16">
+        <section className="border-t border-sand-200 bg-white py-14 sm:py-16">
           <Container>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <Kicker className="mb-3">Comparable stock</Kicker>
-                <h2 className="font-display text-[1.6rem] leading-tight tracking-[-0.02em] text-brand-900 sm:text-[2rem]">
+                <h2 className="font-display text-[1.375rem] font-semibold leading-tight tracking-[-0.02em] text-brand-900 sm:text-[1.75rem]">
                   Similar space we are{" "}
-                  <span className="italic text-brand-700">also holding.</span>
+                  <span className="text-brand-600">also holding.</span>
                 </h2>
               </div>
               <ButtonLink href="/properties" variant="ghost" arrow>
@@ -416,7 +416,7 @@ export default async function PropertyPage({
               </ButtonLink>
             </div>
 
-            <ul className="mt-9 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {similar.map((p) => (
                 <li key={p.id}>
                   <PropertyCard property={p} />

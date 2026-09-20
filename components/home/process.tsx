@@ -3,31 +3,25 @@ import { processSteps } from "@/lib/data/site";
 
 export function Process() {
   return (
-    <Section className="bg-sand-100">
+    <Section className="border-y border-sand-200 bg-white">
       <Container>
         <SectionHeading
-          kicker="How a search runs"
-          title="Four steps, and a named advisor"
-          accent="on every one."
+          kicker="Engagement process"
+          title="Four stages, with a named advisor"
+          accent="accountable at each one."
           align="center"
         />
 
-        <ol className="relative mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-4 lg:gap-5">
-          {/* Connector rail behind the numbered markers on wide screens. */}
-          <span
-            aria-hidden="true"
-            className="absolute left-0 right-0 top-[1.65rem] hidden h-px bg-gradient-to-r from-transparent via-brand-900/15 to-transparent lg:block"
-          />
-
+        <ol className="mt-12 grid gap-px overflow-hidden rounded-lg border border-sand-200 bg-sand-200 sm:grid-cols-2 lg:grid-cols-4">
           {processSteps.map((step) => (
-            <li key={step.number} className="relative">
-              <span className="relative z-10 grid h-[3.3rem] w-[3.3rem] place-items-center rounded-full border-[5px] border-sand-100 bg-brand-800 font-display text-[1.0625rem] text-clay-300">
-                {step.number}
+            <li key={step.number} className="bg-white p-6">
+              <span className="inline-flex h-7 items-center rounded border border-brand-100 bg-brand-50 px-2.5 font-display text-[0.75rem] font-bold tracking-[0.08em] text-brand-700 tnum">
+                STEP {step.number}
               </span>
-              <h3 className="mt-5 font-display text-[1.0625rem] tracking-[-0.01em] text-brand-900">
+              <h3 className="mt-4 font-display text-[1.0625rem] font-semibold tracking-[-0.01em] text-brand-900">
                 {step.title}
               </h3>
-              <p className="mt-2.5 max-w-xs text-[0.8125rem] leading-relaxed text-ink-500">
+              <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-500">
                 {step.body}
               </p>
             </li>

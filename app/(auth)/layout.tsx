@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
           <Logo />
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[0.8125rem] font-semibold text-ink-500 transition-colors hover:text-brand-800"
+            className="inline-flex items-center gap-1.5 rounded px-3 py-2 text-[0.8125rem] font-semibold text-ink-500 transition-colors hover:text-brand-800"
           >
             <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M10 3 5 8l5 5" />
@@ -48,13 +48,13 @@ export default function AuthLayout({ children }: LayoutProps<"/">) {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-brand-900 via-brand-900/70 to-brand-900/30" />
         <div className="relative flex h-full flex-col justify-end p-12">
-          <QuoteMark className="h-5 w-7 text-clay-300" />
-          <p className="mt-4 max-w-md font-display text-[1.2rem] leading-relaxed text-sand-50">
+          <QuoteMark className="h-5 w-7 text-brand-100" />
+          <p className="mt-4 max-w-md font-display text-[1.125rem] leading-relaxed text-white">
             An account is what ties a listing to a verified owner, and a
             requirement to a real buyer. It is the reason nothing on this
             platform is anonymous.
           </p>
-          <p className="mt-4 text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-clay-300">
+          <p className="mt-4 text-[0.75rem] font-semibold uppercase tracking-[0.14em] text-brand-100">
             The CommercialLink desk
           </p>
         </div>

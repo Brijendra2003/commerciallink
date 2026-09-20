@@ -44,7 +44,7 @@ export default async function SettingsPage() {
         action={
           <button
             type="button"
-            className="rounded-full bg-clay-500 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-clay-600"
+            className="rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
           >
             + Invite user
           </button>
@@ -64,7 +64,7 @@ export default async function SettingsPage() {
                   <span
                     className={`grid h-10 w-10 shrink-0 place-items-center rounded-full text-[0.75rem] font-bold ${
                       user.is_active
-                        ? "bg-brand-800 text-clay-300"
+                        ? "bg-brand-800 text-brand-100"
                         : "bg-sand-200 text-ink-300"
                     }`}
                   >
