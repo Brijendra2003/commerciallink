@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { compressImage } from "@/lib/image-compress";
+import { MAX_IMAGE_BYTES } from "@/lib/media";
 
 export interface PickedFile {
   id: string;
@@ -82,7 +83,7 @@ export function FilePicker({
         setLocalError(`"${raw.name}" is not a PDF.`);
         continue;
       }
-      const file = kind === "image" ? await compressImage(raw) : raw;
+      const file = kind === "image" ? await compressImage(raw, MAX_IMAGE_BYTES) : raw;
       next.push({
         id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
         file,

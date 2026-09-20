@@ -15,7 +15,8 @@ import type { Database } from "@/lib/supabase/types";
 export const MEDIA_BUCKET = "property-media";
 export const DOCUMENT_BUCKET = "property-documents";
 
-export const MAX_IMAGE_BYTES = 6 * 1024 * 1024;
+/** Matches the product-wide cap in lib/media.ts and the bucket's own limit. */
+export const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 export const MAX_PDF_BYTES = 12 * 1024 * 1024;
 export const MAX_PHOTOS = 12;
 export const MAX_FLOOR_PLANS = 4;

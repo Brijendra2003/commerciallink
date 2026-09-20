@@ -46,6 +46,12 @@ const nextConfig: NextConfig = {
       ...(supabaseHost
         ? [{ ...supabaseHost, pathname: "/storage/v1/object/public/**" }]
         : []),
+      // Listing photography and video posters.
+      {
+        protocol: "https" as const,
+        hostname: "res.cloudinary.com",
+        pathname: "/**",
+      },
     ],
     formats: ["image/avif", "image/webp"],
   },

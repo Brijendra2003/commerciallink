@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { PageHeader, Panel } from "@/components/admin/page-header";
+import { InviteUserButton } from "@/components/admin/quick-actions";
+import { getAdminSession } from "@/lib/auth";
 import { getAdmins, getAuditLog, getLeads } from "@/lib/data/queries";
 import type { AdminRole } from "@/lib/admin-types";
 
@@ -30,25 +33,23 @@ const PERMISSIONS: {
 ];
 
 export default async function SettingsPage() {
-  const [admins, auditLog, leads] = await Promise.all([
+  const [session, admins, auditLog, leads] = await Promise.all([
+    getAdminSession(),
     getAdmins(),
     getAuditLog(),
     getLeads(),
   ]);
+
+  // The layout already gates the panel; this keeps the invite control off the
+  // page for roles that the action would refuse anyway.
+  if (!session) notFound();
 
   return (
     <>
       <PageHeader
         title="Users & access"
         lead="Role-based access control, and the audit trail behind it. In production these roles map to Supabase RLS policies, so a permission removed here is enforced at the database, not just in the UI."
-        action={
-          <button
-            type="button"
-            className="rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
-          >
-            + Invite user
-          </button>
-        }
+        action={session.role === "super_admin" ? <InviteUserButton /> : null}
       />
 
       <div className="grid gap-4 xl:grid-cols-[1.15fr_1fr]">

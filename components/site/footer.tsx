@@ -1,6 +1,6 @@
 ﻿import Link from "next/link";
 import { Logo } from "@/components/site/logo";
-import { Arrow } from "@/components/ui/button";
+import { MarketNotesForm } from "@/components/site/market-notes-form";
 import { Container } from "@/components/ui/section";
 import { MailIcon, PhoneIcon, PinIcon } from "@/components/ui/icons";
 import { site } from "@/lib/data/site";
@@ -84,28 +84,7 @@ export function Footer() {
               Quarterly rent benchmarks and absorption data for the MMR
               markets. No listings, no sales pitch.
             </p>
-            <form className="mt-5" aria-label="Subscribe to market notes">
-              <div className="flex items-center gap-2 rounded-lg border border-white/15 bg-white/5 p-1.5 pl-3.5 transition-colors focus-within:border-brand-100/60">
-                <label htmlFor="footer-email" className="sr-only">
-                  Work email
-                </label>
-                <input
-                  id="footer-email"
-                  type="email"
-                  name="email"
-                  required
-                  placeholder="Your work email"
-                  className="min-w-0 flex-1 bg-transparent text-[0.8125rem] text-sand-50 placeholder:text-sand-200/40 focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  aria-label="Subscribe"
-                  className="group/btn grid h-8 w-8 shrink-0 place-items-center rounded bg-brand-600 text-white transition-colors hover:bg-brand-500"
-                >
-                  <Arrow />
-                </button>
-              </div>
-            </form>
+            <MarketNotesForm />
 
             <div className="mt-7">
               <h3 className="kicker text-brand-100">By Asset Class</h3>
@@ -142,10 +121,14 @@ export function Footer() {
               </Link>
             </li>
             <li>
-              <span className="cursor-default">Privacy &amp; DPDP policy</span>
+              <Link href="/privacy" className="hover:text-sand-200">
+                Privacy &amp; DPDP policy
+              </Link>
             </li>
             <li>
-              <span className="cursor-default">Terms of use</span>
+              <Link href="/terms" className="hover:text-sand-200">
+                Terms of use
+              </Link>
             </li>
           </ul>
         </div>

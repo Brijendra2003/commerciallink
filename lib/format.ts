@@ -50,10 +50,49 @@ export function formatDate(iso: string): string {
 }
 
 /**
- * Media references are either an absolute URL (uploads served from Supabase
- * Storage) or a bare Unsplash photo id (the seeded catalogue).
+ * Media references come in three shapes:
+ *
+ *  - a Cloudinary public_id with folders (`All Properties Assets/… /images/photo-01`)
+ *    — everything uploaded through the listing form;
+ *  - an absolute URL — legacy uploads served from Supabase Storage;
+ *  - a bare Unsplash photo id — the seeded demo catalogue.
  */
+const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ?? "";
+
+/** Public ids carry spaces and brackets, so each segment is encoded. */
+function encodePublicId(publicId: string): string {
+  return publicId.split("/").map(encodeURIComponent).join("/");
+}
+
+function isCloudinaryId(publicId: string): boolean {
+  return Boolean(CLOUD_NAME) && publicId.includes("/");
+}
+
 export function imageUrl(publicId: string, width = 1200): string {
   if (/^https?:\/\//.test(publicId)) return publicId;
+  if (isCloudinaryId(publicId)) {
+    return (
+      `https://res.cloudinary.com/${CLOUD_NAME}/image/upload` +
+      `/f_auto,q_auto,c_limit,w_${width}/${encodePublicId(publicId)}`
+    );
+  }
   return `https://images.unsplash.com/${publicId}?auto=format&fit=crop&w=${width}&q=75`;
+}
+
+/** Streamable MP4 rendition of an uploaded walkthrough. */
+export function videoUrl(publicId: string): string {
+  if (/^https?:\/\//.test(publicId)) return publicId;
+  return (
+    `https://res.cloudinary.com/${CLOUD_NAME}/video/upload` +
+    `/f_auto,q_auto/${encodePublicId(publicId)}.mp4`
+  );
+}
+
+/** Still frame two seconds in, used as the poster before playback starts. */
+export function videoPosterUrl(publicId: string, width = 1200): string {
+  if (/^https?:\/\//.test(publicId)) return "";
+  return (
+    `https://res.cloudinary.com/${CLOUD_NAME}/video/upload` +
+    `/so_2,f_auto,q_auto,c_limit,w_${width}/${encodePublicId(publicId)}.jpg`
+  );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader, Panel } from "@/components/admin/page-header";
+import { NewListingButton } from "@/components/admin/quick-actions";
 import { PropertyStatusBadge } from "@/components/admin/status-badge";
 import { StatTile } from "@/components/charts/stat-tile";
 import { Photo } from "@/components/ui/photo";
@@ -23,6 +24,30 @@ const FILTERS: { value: string; label: string }[] = [
 
 function one(v: string | string[] | undefined): string {
   return Array.isArray(v) ? (v[0] ?? "") : (v ?? "");
+}
+
+/** Opens the desk's mail client with the verification request drafted. */
+function requestDocsHref(title: string, ownerEmail: string | undefined): string {
+  const subject = `Documents needed to publish: ${title}`;
+  const body = [
+    "Hello,",
+    "",
+    `Thank you for submitting "${title}" to CommercialLink.`,
+    "",
+    "Before it can publish we need to verify ownership. Please reply with:",
+    "  • Title deed or share certificate",
+    "  • Latest property tax receipt",
+    "  • Photo ID of the signatory",
+    "  • Occupancy certificate, where issued",
+    "",
+    "Once these are with us we will confirm the details on a short call and",
+    "arrange photography at our cost.",
+    "",
+    "Regards,",
+    "CommercialLink onboarding desk",
+  ].join("\n");
+
+  return `mailto:${ownerEmail ?? ""}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 export default async function AdminPropertiesPage({
@@ -55,12 +80,13 @@ export default async function AdminPropertiesPage({
         title="Property management"
         lead="Listings, the owner-submission approval queue, and media. Nothing publishes until documents are verified."
         action={
-          <button
-            type="button"
-            className="rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
-          >
-            + New listing
-          </button>
+          <NewListingButton
+            owners={owners.map((o) => ({
+              id: o.id,
+              name: o.name,
+              company: o.company ?? "",
+            }))}
+          />
         }
       />
 
@@ -95,18 +121,18 @@ export default async function AdminPropertiesPage({
                     </span>
                   </span>
                   <span className="flex shrink-0 gap-2">
-                    <button
-                      type="button"
-                      className="rounded-full bg-brand-900 px-4 py-2 text-[0.75rem] font-semibold text-sand-50 transition-colors hover:bg-brand-800"
+                    <Link
+                      href={`/admin/properties/${p.id}`}
+                      className="rounded-lg bg-brand-700 px-4 py-2 text-[0.75rem] font-semibold text-white transition-colors hover:bg-brand-800"
                     >
                       Review &amp; publish
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-full border border-brand-900/15 px-4 py-2 text-[0.75rem] font-semibold text-ink-500 transition-colors hover:bg-sand-100"
+                    </Link>
+                    <a
+                      href={requestDocsHref(p.title, ownerById(p.owner_id)?.email)}
+                      className="rounded-lg border border-sand-300 px-4 py-2 text-[0.75rem] font-semibold text-ink-500 transition-colors hover:bg-sand-100"
                     >
                       Request docs
-                    </button>
+                    </a>
                   </span>
                 </li>
               ))}

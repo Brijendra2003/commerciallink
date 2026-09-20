@@ -15,6 +15,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${site.url}/post-requirement`, changeFrequency: "monthly", priority: 0.8, lastModified: now },
     { url: `${site.url}/about`, changeFrequency: "monthly", priority: 0.6, lastModified: now },
     { url: `${site.url}/contact`, changeFrequency: "monthly", priority: 0.6, lastModified: now },
+    { url: `${site.url}/privacy`, changeFrequency: "yearly", priority: 0.2, lastModified: now },
+    { url: `${site.url}/terms`, changeFrequency: "yearly", priority: 0.2, lastModified: now },
   ];
 
   // Static routes still ship if the database is unreachable when this renders.

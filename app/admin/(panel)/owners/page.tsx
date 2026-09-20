@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHeader } from "@/components/admin/page-header";
+import { LogOwnerNoteButton, NewOwnerButton } from "@/components/admin/quick-actions";
 import { KycBadge } from "@/components/admin/status-badge";
 import { StatTile } from "@/components/charts/stat-tile";
 import { getAllProperties, getDeals, getOwners } from "@/lib/data/queries";
@@ -10,6 +11,31 @@ export const metadata: Metadata = { title: "Owner Management" };
 
 function commission(value: number, pct: number) {
   return (value * pct) / 100;
+}
+
+/** Drafts the KYC chase, or a plain message once the owner is verified. */
+function chaseDocsHref(name: string, email: string, kyc: string): string {
+  const verified = kyc === "verified";
+  const subject = verified
+    ? "CommercialLink — your listings"
+    : "CommercialLink — ownership documents outstanding";
+  const body = verified
+    ? `Hello ${name},\n\n\n\nRegards,\nCommercialLink advisory desk`
+    : [
+        `Hello ${name},`,
+        "",
+        "Before we can publish your listing we need to complete verification.",
+        "Please reply with:",
+        "  • Title deed or share certificate",
+        "  • Latest property tax receipt",
+        "  • Photo ID of the signatory",
+        "  • Occupancy certificate, where issued",
+        "",
+        "Regards,",
+        "CommercialLink onboarding desk",
+      ].join("\n");
+
+  return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
 export default async function OwnersPage() {
@@ -26,14 +52,7 @@ export default async function OwnersPage() {
       <PageHeader
         title="Owner management"
         lead="The supply side. Verification status, the properties each owner has with us, and the running conversation — buyer identities never appear in any of it."
-        action={
-          <button
-            type="button"
-            className="rounded-lg bg-brand-700 px-5 py-2.5 text-[0.8125rem] font-semibold text-white transition-colors hover:bg-brand-800"
-          >
-            + Onboard owner
-          </button>
-        }
+        action={<NewOwnerButton />}
       />
 
       <div className="mb-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -185,18 +204,13 @@ export default async function OwnersPage() {
               </div>
 
               <div className="mt-4 flex gap-2 border-t border-sand-200 pt-4">
-                <button
-                  type="button"
-                  className="flex-1 rounded-full border border-brand-900/15 px-4 py-2 text-[0.75rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
+                <LogOwnerNoteButton ownerId={owner.id} ownerName={owner.name} />
+                <a
+                  href={chaseDocsHref(owner.name, owner.email, owner.kyc_status)}
+                  className="flex-1 rounded-lg border border-sand-300 px-4 py-2 text-center text-[0.75rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
                 >
-                  Log a note
-                </button>
-                <button
-                  type="button"
-                  className="flex-1 rounded-full border border-brand-900/15 px-4 py-2 text-[0.75rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
-                >
-                  {owner.kyc_status === "verified" ? "View documents" : "Chase documents"}
-                </button>
+                  {owner.kyc_status === "verified" ? "Email owner" : "Chase documents"}
+                </a>
               </div>
             </li>
           );

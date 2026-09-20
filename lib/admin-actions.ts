@@ -24,6 +24,14 @@ import {
   upload,
   validateFiles,
 } from "@/lib/storage";
+import {
+  MEDIA_ROOT,
+  destroyAsset,
+  destroyAssets,
+  fileUnderProperty,
+  verifySubmittedMedia,
+} from "@/lib/cloudinary";
+import { LIMIT, type UploadedAsset } from "@/lib/media";
 import type {
   FurnishingDb,
   PossessionDb,
@@ -303,6 +311,78 @@ export async function uploadPropertyMedia(
   return { ok: true, message: "Uploaded." };
 }
 
+/**
+ * Adds media that the browser already uploaded to Cloudinary, filing it under
+ * the listing's own folder. Photos, videos and floor plans take this path;
+ * the brochure stays in the private Supabase bucket, which is what keeps it
+ * gated behind a qualified enquiry.
+ */
+export async function attachPropertyMedia(
+  ref: string,
+  assets: UploadedAsset[],
+): Promise<AdminActionState> {
+  if (!isSupabaseConfigured) return DEMO;
+  const session = await requireEditor();
+
+  const supabase = await createClient();
+  const { data: property } = await supabase
+    .from("properties")
+    .select("id, title")
+    .eq("ref", ref)
+    .maybeSingle();
+  if (!property) return { ok: false, message: "Listing not found." };
+
+  const verified = await verifySubmittedMedia(JSON.stringify(assets));
+  if (verified.error) return { ok: false, message: verified.error };
+  if (verified.assets.length === 0) return { ok: false, message: "Nothing to attach." };
+
+  const { data: existing } = await supabase
+    .from("property_media")
+    .select("id, type, sort_order")
+    .eq("property_id", property.id);
+
+  // Respect the same per-kind ceilings the public form enforces.
+  for (const kind of ["image", "video", "floor_plan"] as const) {
+    const have = (existing ?? []).filter((m) => m.type === kind).length;
+    const adding = verified.assets.filter((a) => a.kind === kind).length;
+    if (have + adding > LIMIT[kind].count) {
+      return {
+        ok: false,
+        message: `That would exceed the limit of ${LIMIT[kind].count} ${kind.replace("_", " ")} files.`,
+      };
+    }
+  }
+
+  const filed = await fileUnderProperty(verified.assets, property.title, ref);
+
+  const BASE: Record<string, number> = { image: 0, video: 50, floor_plan: 100 };
+  const next: Record<string, number> = {};
+  for (const kind of ["image", "video", "floor_plan"] as const) {
+    next[kind] = (existing ?? [])
+      .filter((m) => m.type === kind)
+      .reduce((max, m) => Math.max(max, m.sort_order + 1), BASE[kind]);
+  }
+
+  const rows = filed.map((asset) => ({
+    property_id: property.id,
+    cloudinary_public_id: asset.publicId,
+    type: asset.kind,
+    alt: `${property.title} — ${asset.kind.replace("_", " ")}`,
+    sort_order: next[asset.kind]++,
+  }));
+
+  const { error } = await supabase.from("property_media").insert(rows);
+  if (error) {
+    console.error("[admin] media attach failed", error);
+    await destroyAssets(filed);
+    return { ok: false, message: "Could not save the media." };
+  }
+
+  await audit(session, `Added ${rows.length} media file(s)`, ref);
+  refresh(ref);
+  return { ok: true, message: `Added ${rows.length} file${rows.length === 1 ? "" : "s"}.` };
+}
+
 async function removeMediaRows(rows: { id: string; ref: string; type: string }[]) {
   const supabase = await createClient();
   const storage = createAdminClient();
@@ -312,10 +392,15 @@ async function removeMediaRows(rows: { id: string; ref: string; type: string }[]
   for (const row of rows) {
     if (row.type === "brochure" && row.ref.startsWith(`${DOCUMENT_BUCKET}/`)) {
       await storage.storage.from(DOCUMENT_BUCKET).remove([row.ref.slice(DOCUMENT_BUCKET.length + 1)]);
-    } else {
-      const path = pathFromPublicUrl(row.ref);
-      if (path) await storage.storage.from(MEDIA_BUCKET).remove([path]);
+      continue;
     }
+    // Cloudinary ids carry the media root; legacy uploads are Storage URLs.
+    if (row.ref.startsWith(`${MEDIA_ROOT}/`)) {
+      await destroyAsset(row.ref, row.type === "video" ? "video" : "image");
+      continue;
+    }
+    const path = pathFromPublicUrl(row.ref);
+    if (path) await storage.storage.from(MEDIA_BUCKET).remove([path]);
   }
 }
 
@@ -369,4 +454,271 @@ export async function reorderPropertyMedia(ref: string, orderedIds: string[]): P
 
   refresh(ref);
   return { ok: true, message: "Order saved." };
+}
+
+/* ------------------------------------------------------------------ *
+ * Owners, deals and staff
+ * ------------------------------------------------------------------ */
+
+/** Sales actions are not listing edits, so they take the wider staff check. */
+async function requireStaff(...roles: AdminSession["role"][]): Promise<AdminSession> {
+  const session = await getAdminSession();
+  if (!session) throw new Error("Not signed in.");
+  if (roles.length > 0 && !hasRole(session, ...roles)) {
+    throw new Error("Your role cannot perform that action.");
+  }
+  return session;
+}
+
+export async function createOwner(
+  _prev: AdminActionState | null,
+  data: FormData,
+): Promise<AdminActionState> {
+  if (!isSupabaseConfigured) return DEMO;
+  const session = await requireStaff("super_admin", "sales_exec");
+
+  const name = text(data, "name");
+  const email = text(data, "email").toLowerCase();
+  const phone = text(data, "phone");
+  const company = text(data, "company");
+
+  const fieldErrors: Record<string, string> = {};
+  if (name.length < 2) fieldErrors.name = "Enter the owner's full name.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) fieldErrors.email = "Enter a valid email.";
+  if (!/^[+]?[\d\s-]{8,15}$/.test(phone)) fieldErrors.phone = "Enter a valid phone number.";
+  if (Object.keys(fieldErrors).length > 0) {
+    return { ok: false, message: "Please correct the highlighted fields.", fieldErrors };
+  }
+
+  const supabase = await createClient();
+  const { data: existing } = await supabase
+    .from("owners")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+  if (existing) {
+    return { ok: false, message: "An owner with that email is already on the book." };
+  }
+
+  const { error } = await supabase.from("owners").insert({
+    name,
+    email,
+    phone,
+    company: company || null,
+    city: "Mumbai",
+    kyc_status: "pending",
+  });
+
+  if (error) {
+    console.error("[admin] owner insert failed", error);
+    return { ok: false, message: "Could not create the owner record." };
+  }
+
+  await audit(session, "Onboarded owner", email);
+  revalidatePath("/admin/owners");
+  return { ok: true, message: `${name} added, KYC pending.` };
+}
+
+export async function addOwnerNote(
+  _prev: AdminActionState | null,
+  data: FormData,
+): Promise<AdminActionState> {
+  if (!isSupabaseConfigured) return DEMO;
+  const session = await requireStaff();
+
+  const ownerId = text(data, "owner_id");
+  const note = text(data, "text");
+  if (!ownerId) return { ok: false, message: "Owner not found." };
+  if (note.length < 3) {
+    return { ok: false, message: "Write a note first.", fieldErrors: { text: "Too short." } };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("owner_notes").insert({
+    owner_id: ownerId,
+    author: session.name,
+    text: note.slice(0, 2000),
+  });
+
+  if (error) {
+    console.error("[admin] owner note insert failed", error);
+    return { ok: false, message: "Could not save the note." };
+  }
+
+  await audit(session, "Logged owner note", ownerId);
+  revalidatePath("/admin/owners");
+  return { ok: true, message: "Note saved." };
+}
+
+/** Marks a won deal's brokerage as paid out to the owner. */
+export async function settleDealPayout(dealRef: string): Promise<AdminActionState> {
+  if (!isSupabaseConfigured) return DEMO;
+  const session = await requireStaff("super_admin", "sales_exec");
+
+  const supabase = await createClient();
+  const { data: deal, error: lookupError } = await supabase
+    .from("deals")
+    .select("id, status, payout_settled")
+    .eq("ref", dealRef)
+    .maybeSingle();
+
+  if (lookupError || !deal) return { ok: false, message: "Deal not found." };
+  if (deal.status !== "won") {
+    return { ok: false, message: "Only a won deal can be settled." };
+  }
+  if (deal.payout_settled) return { ok: true, message: "Already settled." };
+
+  const { error } = await supabase
+    .from("deals")
+    .update({ payout_settled: true })
+    .eq("id", deal.id);
+
+  if (error) {
+    console.error("[admin] deal settle failed", error);
+    return { ok: false, message: "Could not mark the payout settled." };
+  }
+
+  await audit(session, "Settled payout", dealRef);
+  revalidatePath("/admin/sales");
+  return { ok: true, message: "Payout marked settled." };
+}
+
+/**
+ * Invites a staff member. Creates the auth user through Supabase's invite flow
+ * and the `admin_users` row that actually grants access — membership of that
+ * table is the admin grant, so both have to exist.
+ */
+export async function inviteStaffUser(
+  _prev: AdminActionState | null,
+  data: FormData,
+): Promise<AdminActionState> {
+  if (!isSupabaseConfigured) return DEMO;
+  const session = await requireStaff("super_admin");
+
+  const name = text(data, "name");
+  const email = text(data, "email").toLowerCase();
+  const role = text(data, "role") as AdminSession["role"];
+
+  const fieldErrors: Record<string, string> = {};
+  if (name.length < 2) fieldErrors.name = "Enter their full name.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) fieldErrors.email = "Enter a valid email.";
+  if (!["super_admin", "sales_exec", "content_editor"].includes(role)) {
+    fieldErrors.role = "Pick a role.";
+  }
+  if (Object.keys(fieldErrors).length > 0) {
+    return { ok: false, message: "Please correct the highlighted fields.", fieldErrors };
+  }
+
+  const admin = createAdminClient();
+  const { data: existing } = await admin
+    .from("admin_users")
+    .select("id")
+    .eq("email", email)
+    .maybeSingle();
+  if (existing) return { ok: false, message: "That address already has a staff account." };
+
+  const redirectTo = process.env.NEXT_PUBLIC_SITE_URL
+    ? `${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`
+    : undefined;
+
+  const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(email, {
+    data: { name },
+    redirectTo,
+  });
+
+  if (inviteError || !invited?.user) {
+    console.error("[admin] invite failed", inviteError);
+    return {
+      ok: false,
+      message:
+        inviteError?.message ??
+        "Could not send the invitation. Check the Supabase email settings.",
+    };
+  }
+
+  const initials = name
+    .split(/\s+/)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("")
+    .slice(0, 2);
+
+  const { error } = await admin.from("admin_users").insert({
+    auth_user_id: invited.user.id,
+    name,
+    initials,
+    email,
+    role,
+    is_active: true,
+  });
+
+  if (error) {
+    console.error("[admin] staff row insert failed", error);
+    return { ok: false, message: "Invitation sent, but the staff record failed to save." };
+  }
+
+  await audit(session, `Invited ${role.replace("_", " ")}`, email);
+  revalidatePath("/admin/settings");
+  return { ok: true, message: `Invitation sent to ${email}.` };
+}
+
+/**
+ * Starts a listing from the desk rather than from an owner submission. It
+ * lands as a draft so the rest of the detail is filled in on the edit screen,
+ * which is where every other listing change already happens.
+ */
+export async function createDraftListing(
+  _prev: AdminActionState | null,
+  data: FormData,
+): Promise<AdminActionState & { ref?: string }> {
+  if (!isSupabaseConfigured) return DEMO;
+  const session = await requireEditor();
+
+  const title = text(data, "title");
+  const ownerId = text(data, "owner_id");
+  const type = text(data, "type") as PropertyTypeDb;
+  const purpose = text(data, "purpose") as PurposeDb;
+
+  const fieldErrors: Record<string, string> = {};
+  if (title.length < 6) fieldErrors.title = "Give the listing a working title.";
+  if (!ownerId) fieldErrors.owner_id = "Pick the owner this sits with.";
+  if (!["office", "retail", "warehouse", "industrial", "land", "coworking"].includes(type)) {
+    fieldErrors.type = "Pick an asset class.";
+  }
+  if (!["buy", "lease"].includes(purpose)) fieldErrors.purpose = "Sale or lease?";
+  if (Object.keys(fieldErrors).length > 0) {
+    return { ok: false, message: "Please correct the highlighted fields.", fieldErrors };
+  }
+
+  const ref = `PRP-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+  const slug = `${title
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 60)}-${ref.slice(-6)}`;
+
+  const supabase = await createClient();
+  const { error } = await supabase.from("properties").insert({
+    ref,
+    slug,
+    title,
+    type,
+    purpose,
+    city: "Mumbai",
+    zone: "central",
+    locality: "To be confirmed",
+    address: "To be confirmed",
+    area_sqft: 0,
+    status: "draft",
+    owner_id: ownerId,
+    created_by: session.id,
+  });
+
+  if (error) {
+    console.error("[admin] draft listing insert failed", error);
+    return { ok: false, message: "Could not create the draft." };
+  }
+
+  await audit(session, "Created draft listing", ref);
+  revalidatePath("/admin/properties");
+  return { ok: true, message: "Draft created.", ref };
 }

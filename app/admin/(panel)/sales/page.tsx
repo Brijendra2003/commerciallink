@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader, Panel } from "@/components/admin/page-header";
+import { ExportDealsButton, SettleDealButton } from "@/components/admin/quick-actions";
 import { DealStatusBadge } from "@/components/admin/status-badge";
 import { ChartCard } from "@/components/charts/chart-card";
 import { ColumnChart } from "@/components/charts/column-chart";
@@ -79,12 +80,17 @@ export default async function SalesPage() {
         title="Sales & revenue"
         lead="Deals linked to a lead and a property, with commission tracked from close through owner payout."
         action={
-          <button
-            type="button"
-            className="rounded-full border border-brand-900/15 px-5 py-2.5 text-[0.8125rem] font-semibold text-brand-900 transition-colors hover:bg-white"
-          >
-            Export report
-          </button>
+          <ExportDealsButton
+            rows={deals.map((d) => ({
+              ref: d.id,
+              client: d.client,
+              value: d.value,
+              commission_pct: d.commission_pct,
+              status: d.status,
+              closed_at: d.closed_at,
+              payout_settled: d.payout_settled,
+            }))}
+          />
         }
       />
 
@@ -214,12 +220,7 @@ export default async function SalesPage() {
                           Settled
                         </span>
                       ) : (
-                        <button
-                          type="button"
-                          className="rounded bg-brand-700 px-3 py-1.5 text-[0.6875rem] font-semibold text-white transition-colors hover:bg-brand-800"
-                        >
-                          Mark settled
-                        </button>
+                        <SettleDealButton dealRef={d.id} />
                       )}
                     </td>
                   </tr>

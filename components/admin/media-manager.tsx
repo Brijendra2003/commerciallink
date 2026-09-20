@@ -3,20 +3,29 @@
 import { useRef, useState, useTransition } from "react";
 import { Photo } from "@/components/ui/photo";
 import {
+  MediaUploader,
+  newDraftRef,
+  type MediaItem,
+} from "@/components/ui/media-uploader";
+import {
+  attachPropertyMedia,
   deletePropertyMedia,
   reorderPropertyMedia,
   uploadPropertyMedia,
   type AdminActionState,
 } from "@/lib/admin-actions";
-import { compressImage } from "@/lib/image-compress";
+import { videoPosterUrl } from "@/lib/format";
+import type { MediaKind, UploadedAsset } from "@/lib/media";
 import type { PropertyMedia } from "@/lib/types";
-
-type Kind = "image" | "floor_plan" | "brochure";
 
 /**
  * Listing media: upload, remove and drag-to-reorder, each persisted straight
  * away through the admin server actions. Sits inside the listing <form>, so
  * every control here is type="button" and the file inputs carry no `name`.
+ *
+ * Photos, videos and floor plans go from the browser to Cloudinary and are
+ * then filed under the listing's folder, the same path the public listing
+ * form uses. The brochure still posts to the private Supabase bucket.
  */
 export function MediaManager({
   propertyRef,
@@ -36,14 +45,13 @@ export function MediaManager({
   }
 
   const plans = media.filter((m) => m.type === "floor_plan");
+  const videos = media.filter((m) => m.type === "video");
   const brochure = media.find((m) => m.type === "brochure");
 
   const [dragging, setDragging] = useState<number | null>(null);
   const [status, setStatus] = useState<AdminActionState | null>(null);
   const [pending, startTransition] = useTransition();
 
-  const photoInput = useRef<HTMLInputElement>(null);
-  const planInput = useRef<HTMLInputElement>(null);
   const brochureInput = useRef<HTMLInputElement>(null);
 
   function run(task: () => Promise<AdminActionState>) {
@@ -52,17 +60,19 @@ export function MediaManager({
     });
   }
 
-  function onFiles(kind: Kind, list: FileList | null, input: HTMLInputElement | null) {
+  function onBrochure(list: FileList | null, input: HTMLInputElement | null) {
     if (!list || list.length === 0) return;
     const chosen = Array.from(list);
     if (input) input.value = "";
     run(async () => {
       const data = new FormData();
-      for (const file of chosen) {
-        data.append("files", kind === "brochure" ? file : await compressImage(file));
-      }
-      return uploadPropertyMedia(propertyRef, kind, data);
+      for (const file of chosen) data.append("files", file);
+      return uploadPropertyMedia(propertyRef, "brochure", data);
     });
+  }
+
+  function attach(assets: UploadedAsset[]) {
+    run(() => attachPropertyMedia(propertyRef, assets));
   }
 
   function drop(target: number) {
@@ -117,58 +127,59 @@ export function MediaManager({
           </li>
         ))}
 
-        <li>
-          <button
-            type="button"
-            disabled={pending}
-            onClick={() => photoInput.current?.click()}
-            className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-1.5 rounded-lg border-2 border-dashed border-sand-300 text-ink-300 transition-colors hover:border-brand-500 hover:text-brand-700 disabled:opacity-50"
-          >
-            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            <span className="text-[0.6875rem] font-semibold">Add photos</span>
-          </button>
-          <input
-            ref={photoInput}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            multiple
-            className="sr-only"
-            tabIndex={-1}
-            onChange={(e) => onFiles("image", e.target.files, e.currentTarget)}
-          />
-        </li>
       </ul>
 
-      <div className="mt-4 rounded-2xl border border-sand-200 bg-sand-50 p-4">
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-[0.625rem] font-bold uppercase tracking-[0.12em] text-ink-300">
-            Floor plans · {plans.length}
-          </p>
-          <SmallButton disabled={pending} onClick={() => planInput.current?.click()}>
-            Upload
-          </SmallButton>
-          <input
-            ref={planInput}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            multiple
-            className="sr-only"
-            tabIndex={-1}
-            onChange={(e) => onFiles("floor_plan", e.target.files, e.currentTarget)}
-          />
+      <div className="mt-4">
+        <AttachUploader kind="image" label="Add photographs" onAttach={attach} busy={pending} />
+      </div>
+
+      <div className="mt-4 rounded-lg border border-sand-200 bg-sand-50 p-4">
+        <p className="text-[0.625rem] font-bold uppercase tracking-[0.12em] text-ink-300">
+          Video walkthroughs · {videos.length}
+        </p>
+        {videos.length > 0 ? (
+          <ul className="mt-3 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            {videos.map((m, i) => (
+              <li
+                key={m.id}
+                className="group/media relative aspect-[4/3] overflow-hidden rounded border border-sand-200 bg-white"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={videoPosterUrl(m.cloudinary_public_id, 400)}
+                  alt={m.alt}
+                  className="h-full w-full object-cover"
+                />
+                <RemoveButton
+                  label={`Remove video ${i + 1}`}
+                  onClick={() => remove(m.id, `video ${i + 1}`)}
+                />
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <div className="mt-3">
+          <AttachUploader kind="video" label="Add a walkthrough" onAttach={attach} busy={pending} />
         </div>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-sand-200 bg-sand-50 p-4">
+        <p className="text-[0.625rem] font-bold uppercase tracking-[0.12em] text-ink-300">
+          Floor plans · {plans.length}
+        </p>
         {plans.length > 0 ? (
           <ul className="mt-3 grid grid-cols-3 gap-2.5 sm:grid-cols-4">
             {plans.map((m, i) => (
-              <li key={m.id} className="group/media relative aspect-[4/3] overflow-hidden rounded-xl bg-white">
+              <li key={m.id} className="group/media relative aspect-[4/3] overflow-hidden rounded border border-sand-200 bg-white">
                 <Photo publicId={m.cloudinary_public_id} alt={m.alt} sizes="160px" width={400} className="object-contain!" />
                 <RemoveButton label={`Remove floor plan ${i + 1}`} onClick={() => remove(m.id, `floor plan ${i + 1}`)} />
               </li>
             ))}
           </ul>
         ) : null}
+        <div className="mt-3">
+          <AttachUploader kind="floor_plan" label="Add floor plans" onAttach={attach} busy={pending} />
+        </div>
 
         <div className="mt-4 flex items-center justify-between gap-3 border-t border-sand-200 pt-4">
           <span className="text-[0.8125rem] text-ink-500">
@@ -192,10 +203,48 @@ export function MediaManager({
             accept="application/pdf"
             className="sr-only"
             tabIndex={-1}
-            onChange={(e) => onFiles("brochure", e.target.files, e.currentTarget)}
+            onChange={(e) => onBrochure(e.target.files, e.currentTarget)}
           />
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Uploads to Cloudinary, then hands the finished assets to the server the
+ * moment the last one lands — staff should not have to press a second button
+ * to confirm what they just dropped in.
+ */
+function AttachUploader({
+  kind,
+  label,
+  onAttach,
+  busy,
+}: {
+  kind: MediaKind;
+  label: string;
+  onAttach: (assets: UploadedAsset[]) => void;
+  busy: boolean;
+}) {
+  const [items, setItems] = useState<MediaItem[]>([]);
+  const [draftRef] = useState(newDraftRef);
+
+  return (
+    <div aria-busy={busy}>
+      <MediaUploader
+        kind={kind}
+        label={label}
+        draftRef={draftRef}
+        value={items}
+        onChange={setItems}
+        // Attach as soon as the batch lands — staff should not need a second
+        // button to confirm what they just dropped in.
+        onBatchComplete={(assets) => {
+          setItems([]);
+          onAttach(assets);
+        }}
+      />
     </div>
   );
 }

@@ -19,6 +19,14 @@ import {
 } from "@/components/ui/field";
 import { FilePicker, type PickedFile } from "@/components/ui/file-picker";
 import {
+  MediaUploader,
+  completedAssets,
+  isUploading,
+  newDraftRef,
+  type MediaItem,
+} from "@/components/ui/media-uploader";
+import { MAX_FLOOR_PLANS, MAX_PHOTOS, MAX_VIDEOS } from "@/lib/media";
+import {
   AMENITY_OPTIONS,
   FURNISHING_LABEL,
   MICRO_MARKETS,
@@ -31,12 +39,6 @@ import {
 import { submitPropertyListing } from "@/lib/actions";
 import { formatINR } from "@/lib/format";
 import type { LeadSubmission } from "@/lib/types";
-
-/** Keep in step with MAX_PHOTOS / MAX_FLOOR_PLANS in lib/storage.ts. */
-const MAX_PHOTOS = 12;
-const MAX_FLOOR_PLANS = 4;
-/** Stays under serverActions.bodySizeLimit in next.config.ts. */
-const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
 
 export interface ListingOwner {
   name: string;
@@ -72,9 +74,13 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
   const [showInvalid, setShowInvalid] = useState(false);
   const [purpose, setPurpose] = useState("");
   const [price, setPrice] = useState("");
-  const [photos, setPhotos] = useState<PickedFile[]>([]);
-  const [plans, setPlans] = useState<PickedFile[]>([]);
+  const [photos, setPhotos] = useState<MediaItem[]>([]);
+  const [videos, setVideos] = useState<MediaItem[]>([]);
+  const [plans, setPlans] = useState<MediaItem[]>([]);
   const [brochure, setBrochure] = useState<PickedFile[]>([]);
+  // Groups this submission's files in one Cloudinary draft folder until the
+  // listing row exists and they can be filed under the property.
+  const [draftRef] = useState(newDraftRef);
   const [clientError, setClientError] = useState<string | null>(null);
 
   const formRef = useRef<HTMLFormElement>(null);
@@ -85,6 +91,12 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
   const wantsLease = purpose === "lease" || purpose === "either";
   const priceValue = Number(price.replace(/[₹,\s]/g, ""));
   const last = STEPS.length - 1;
+
+  /** Each step hands its fieldset back here on mount, so validation can scope
+   *  itself to one step's controls. */
+  function registerStep(index: number, node: HTMLFieldSetElement | null) {
+    stepRefs.current[index] = node;
+  }
 
   /**
    * Native validity on the controls inside one step. Returns the first
@@ -116,11 +128,29 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
       invalid.focus();
       return;
     }
-    if (step === 4 && photos.length === 0) {
-      setClientError("Add at least one photo of the property.");
-      return;
+    if (step === 4) {
+      const mediaIssue = checkMedia();
+      if (mediaIssue) {
+        setClientError(mediaIssue);
+        return;
+      }
     }
     goTo(Math.min(step + 1, last));
+  }
+
+  /** The media step's own rules — uploads must have finished, and a listing
+   *  without a photograph is not reviewable. */
+  function checkMedia(): string | null {
+    if (isUploading(photos, videos, plans)) {
+      return "Uploads are still running. They finish in a moment.";
+    }
+    if ([...photos, ...videos, ...plans].some((i) => i.status === "error")) {
+      return "Some files didn't upload. Remove or replace the ones marked in red.";
+    }
+    if (completedAssets(photos).length === 0) {
+      return "Add at least one photograph of the property.";
+    }
+    return null;
   }
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -144,31 +174,33 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
       }
     }
 
-    if (photos.length === 0) {
+    const mediaIssue = checkMedia();
+    if (mediaIssue) {
       setStep(4);
-      setClientError("Add at least one photo of the property.");
-      return;
-    }
-
-    const all = [...photos, ...plans, ...brochure];
-    const total = all.reduce((sum, f) => sum + f.file.size, 0);
-    if (total > MAX_TOTAL_BYTES) {
-      setStep(4);
-      setClientError(
-        `Attachments add up to ${(total / 1024 / 1024).toFixed(1)} MB — the limit is 20 MB. Remove a few photos or use a smaller brochure.`,
-      );
+      setClientError(mediaIssue);
       return;
     }
 
     const data = new FormData(event.currentTarget);
-    for (const p of photos) data.append("photos", p.file);
-    for (const p of plans) data.append("floor_plans", p.file);
+    // Photos, videos and floor plans are already on Cloudinary; only their
+    // identifiers travel with the form. The brochure still uploads here
+    // because it is filed in a private bucket, not a public CDN.
+    data.set(
+      "media",
+      JSON.stringify([
+        ...completedAssets(photos),
+        ...completedAssets(videos),
+        ...completedAssets(plans),
+      ]),
+    );
+    data.set("draft_ref", draftRef);
     for (const p of brochure) data.append("brochure", p.file);
     startTransition(() => action(data));
   }
 
   function reset() {
     setPhotos([]);
+    setVideos([]);
     setPlans([]);
     setBrochure([]);
     setPurpose("");
@@ -211,7 +243,7 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
 
           <div className="pt-6">
             {/* ------------------------------------------------ 1. Property */}
-            <Step index={0} current={step} refs={stepRefs} label="Property">
+            <Step index={0} current={step} register={registerStep} label="Property">
               <Field
                 label="Listing title"
                 name="title"
@@ -340,7 +372,7 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
             </Step>
 
             {/* ------------------------------------------------ 2. Location */}
-            <Step index={1} current={step} refs={stepRefs} label="Location">
+            <Step index={1} current={step} register={registerStep} label="Location">
               <Grid>
                 <Field label="Micro-market" name="market" required error={errors.market}>
                   <Select name="market" defaultValue="" required error={errors.market}>
@@ -412,7 +444,7 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
             </Step>
 
             {/* --------------------------------------------- 3. Commercials */}
-            <Step index={2} current={step} refs={stepRefs} label="Commercials">
+            <Step index={2} current={step} register={registerStep} label="Commercials">
               {!purpose ? (
                 <p className="rounded-lg border border-sand-200 bg-sand-50 px-4 py-3 text-[0.8125rem] text-ink-500">
                   Set the transaction type on step 1 and the relevant pricing
@@ -539,7 +571,7 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
             </Step>
 
             {/* ------------------------------------------ 4. Specifications */}
-            <Step index={3} current={step} refs={stepRefs} label="Specifications">
+            <Step index={3} current={step} register={registerStep} label="Specifications">
               <div className="grid gap-4 sm:grid-cols-3">
                 <Field label="Parking slots" name="parking_slots" error={errors.parking_slots}>
                   <Input
@@ -599,26 +631,35 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
             </Step>
 
             {/* -------------------------------------------------- 5. Media */}
-            <Step index={4} current={step} refs={stepRefs} label="Media">
-              <FilePicker
-                label="Photos"
+            <Step index={4} current={step} register={registerStep} label="Media">
+              <MediaUploader
+                kind="image"
+                label="Photographs"
                 required
-                accept="image/jpeg,image/png,image/webp"
-                max={MAX_PHOTOS}
+                showCover
+                draftRef={draftRef}
                 value={photos}
                 onChange={setPhotos}
-                showCover
                 error={errors.photos}
-                hint="JPG, PNG or WebP. The first photo is the cover — use the arrows to reorder. Phone photos are acceptable; we reshoot before publishing."
+                hint={`Up to ${MAX_PHOTOS}. The first is the cover — use the arrows to reorder. Phone photographs are fine and are resized for you; we reshoot before publishing.`}
               />
-              <FilePicker
+              <MediaUploader
+                kind="video"
+                label="Video walkthrough"
+                draftRef={draftRef}
+                value={videos}
+                onChange={setVideos}
+                error={errors.videos}
+                hint={`Optional, up to ${MAX_VIDEOS}. A steady walk through the floor plate converts far better than stills alone.`}
+              />
+              <MediaUploader
+                kind="floor_plan"
                 label="Floor plans"
-                accept="image/jpeg,image/png,image/webp"
-                max={MAX_FLOOR_PLANS}
+                draftRef={draftRef}
                 value={plans}
                 onChange={setPlans}
                 error={errors.floor_plans}
-                hint="Optional. Images of the layout, or a photograph of the plan."
+                hint={`Optional, up to ${MAX_FLOOR_PLANS}. An image of the layout, or a photograph of the printed plan.`}
               />
               <FilePicker
                 label="Brochure"
@@ -640,7 +681,7 @@ export function ListPropertyForm({ owner }: { owner?: ListingOwner | null }) {
             </Step>
 
             {/* ------------------------------------------------- 6. Review */}
-            <Step index={5} current={step} refs={stepRefs} label="Review">
+            <Step index={5} current={step} register={registerStep} label="Review">
               <Field
                 label="Describe the property"
                 name="description"
@@ -898,21 +939,20 @@ function StepRail({
 function Step({
   index,
   current,
-  refs,
+  register,
   label,
   children,
 }: {
   index: number;
   current: number;
-  refs: React.RefObject<(HTMLFieldSetElement | null)[]>;
+  /** Hands the element back to the form, which owns the step registry. */
+  register: (index: number, node: HTMLFieldSetElement | null) => void;
   label: string;
   children: ReactNode;
 }) {
   return (
     <fieldset
-      ref={(node) => {
-        refs.current[index] = node;
-      }}
+      ref={(node) => register(index, node)}
       hidden={index !== current}
       className="space-y-4"
     >

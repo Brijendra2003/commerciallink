@@ -206,6 +206,16 @@ export type AuditLogRow = {
   created_at: string;
 }
 
+/** Added in 0004_market_notes.sql. */
+export type MarketNotesSubscriberRow = {
+  id: string;
+  email: string;
+  source: string;
+  confirmed: boolean;
+  unsubscribed_at: string | null;
+  created_at: string;
+}
+
 type Table<Row, Insert = Partial<Row>> = {
   Row: Row;
   Insert: Insert;
@@ -227,6 +237,7 @@ export type Database = {
       deals: Table<DealRow>;
       owner_notes: Table<OwnerNoteRow>;
       audit_log: Table<AuditLogRow>;
+      market_notes_subscribers: Table<MarketNotesSubscriberRow>;
     };
     Views: Record<never, never>;
     Functions: {

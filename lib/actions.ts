@@ -14,16 +14,17 @@ import {
 } from "@/lib/data/taxonomy";
 import {
   DOCUMENT_BUCKET,
-  MAX_FLOOR_PLANS,
-  MAX_IMAGE_BYTES,
   MAX_PDF_BYTES,
-  MAX_PHOTOS,
-  MEDIA_BUCKET,
   files,
-  publicUrl,
   upload,
   validateFiles,
 } from "@/lib/storage";
+import {
+  deleteDraftFolder,
+  destroyAssets,
+  fileUnderProperty,
+  verifySubmittedMedia,
+} from "@/lib/cloudinary";
 import type { LeadSubmission } from "@/lib/types";
 import type {
   FurnishingDb,
@@ -113,6 +114,50 @@ const THROTTLED: LeadSubmission = {
   ok: false,
   message: "That's a lot of submissions in a short window. Please try again in a minute.",
 };
+
+/**
+ * Footer subscribe form. A duplicate address is reported as success — telling
+ * a stranger whether an email is already on the list would leak membership.
+ */
+export async function subscribeToMarketNotes(
+  _prev: LeadSubmission | null,
+  data: FormData,
+): Promise<LeadSubmission> {
+  const email = text(data, "email").toLowerCase();
+
+  if (!EMAIL.test(email)) {
+    return { ok: false, message: "Please enter a valid email address." };
+  }
+  if (await rateLimited()) return THROTTLED;
+
+  const done: LeadSubmission = {
+    ok: true,
+    message: "You're on the list. The next quarterly note goes out at the end of the quarter.",
+  };
+
+  if (!isSupabaseConfigured) {
+    console.info("[market-notes] subscription captured (demo mode)", { email });
+    return done;
+  }
+
+  const supabase = createAdminClient();
+  const { error } = await supabase
+    .from("market_notes_subscribers")
+    .upsert(
+      { email, source: text(data, "source") || "footer", unsubscribed_at: null },
+      { onConflict: "email" },
+    );
+
+  if (error) {
+    console.error("[market-notes] subscribe failed", error);
+    return {
+      ok: false,
+      message: "We couldn't save that just now. Please try again in a moment.",
+    };
+  }
+
+  return done;
+}
 
 async function propertyIdFromRef(ref: string): Promise<string | null> {
   if (!ref) return null;
@@ -420,23 +465,15 @@ export async function submitPropertyListing(
   const deskNotes = text(data, "notes");
   const company = text(data, "company");
 
-  /* ---- Media ---- */
-  const photos = await validateFiles(files(data, "photos"), {
-    accept: "image",
-    maxBytes: MAX_IMAGE_BYTES,
-    maxCount: MAX_PHOTOS,
-    label: "photos",
-  });
-  if (photos.error) errors.photos = photos.error;
-  else if (photos.files.length === 0) errors.photos = "Add at least one photo of the property.";
-
-  const plans = await validateFiles(files(data, "floor_plans"), {
-    accept: "image",
-    maxBytes: MAX_IMAGE_BYTES,
-    maxCount: MAX_FLOOR_PLANS,
-    label: "floor plans",
-  });
-  if (plans.error) errors.floor_plans = plans.error;
+  /* ---- Media ----
+     Photos, videos and floor plans were uploaded straight to Cloudinary by the
+     browser; the form carries only their identifiers, which are re-read from
+     Cloudinary here rather than trusted. */
+  const media = await verifySubmittedMedia(text(data, "media"));
+  if (media.error) errors.photos = media.error;
+  else if (!media.assets.some((a) => a.kind === "image")) {
+    errors.photos = "Add at least one photograph of the property.";
+  }
 
   const brochure = await validateFiles(files(data, "brochure"), {
     accept: "pdf",
@@ -510,8 +547,7 @@ export async function submitPropertyListing(
       property,
       privateNote,
       media: {
-        photos: photos.files.length,
-        floor_plans: plans.files.length,
+        cloudinary: media.assets.map((a) => `${a.kind}:${a.publicId}`),
         brochure: brochure.files.length,
       },
     });
@@ -570,39 +606,39 @@ export async function submitPropertyListing(
     return failed;
   }
 
-  const uploadedMedia: string[] = [];
   const uploadedDocs: string[] = [];
+  // Assets are moved out of the draft folder below; on failure these are the
+  // ids to clean up, wherever they ended up.
+  let filed = media.assets;
   try {
+    // Everything for this listing now lives under one folder named for the
+    // property, with an images / videos / floor-plans sub-folder in it.
+    filed = await fileUnderProperty(media.assets, title, ref);
+
     const rows: {
       property_id: string;
       cloudinary_public_id: string;
-      type: "image" | "floor_plan" | "brochure";
+      type: "image" | "floor_plan" | "brochure" | "video";
       alt: string;
       sort_order: number;
     }[] = [];
 
-    for (const [i, file] of photos.files.entries()) {
-      const path = await upload(supabase, MEDIA_BUCKET, inserted.id, file);
-      uploadedMedia.push(path);
+    const ORDER_BASE: Record<string, number> = { image: 0, video: 50, floor_plan: 100 };
+    const seen: Record<string, number> = {};
+
+    for (const asset of filed) {
+      const n = (seen[asset.kind] = (seen[asset.kind] ?? 0) + 1);
+      const noun =
+        asset.kind === "image" ? "photo" : asset.kind === "video" ? "video" : "floor plan";
       rows.push({
         property_id: inserted.id,
-        cloudinary_public_id: publicUrl(supabase, path),
-        type: "image",
-        alt: `${title} — photo ${i + 1}`,
-        sort_order: i,
+        cloudinary_public_id: asset.publicId,
+        type: asset.kind,
+        alt: `${title} — ${noun} ${n}`,
+        sort_order: ORDER_BASE[asset.kind] + n - 1,
       });
     }
-    for (const [i, file] of plans.files.entries()) {
-      const path = await upload(supabase, MEDIA_BUCKET, inserted.id, file);
-      uploadedMedia.push(path);
-      rows.push({
-        property_id: inserted.id,
-        cloudinary_public_id: publicUrl(supabase, path),
-        type: "floor_plan",
-        alt: `${title} — floor plan ${i + 1}`,
-        sort_order: 100 + i,
-      });
-    }
+
     for (const file of brochure.files) {
       // Private bucket: the desk releases brochures on a qualified enquiry.
       const path = await upload(supabase, DOCUMENT_BUCKET, inserted.id, file);
@@ -619,16 +655,20 @@ export async function submitPropertyListing(
     const { error: mediaError } = await supabase.from("property_media").insert(rows);
     if (mediaError) throw mediaError;
   } catch (error) {
-    console.error("[listing] media upload failed", error);
+    console.error("[listing] media filing failed", error);
     // Roll back so a half-submitted listing does not sit in the review queue.
-    if (uploadedMedia.length) await supabase.storage.from(MEDIA_BUCKET).remove(uploadedMedia);
+    await destroyAssets(filed);
     if (uploadedDocs.length) await supabase.storage.from(DOCUMENT_BUCKET).remove(uploadedDocs);
     await supabase.from("properties").delete().eq("id", inserted.id);
     return {
       ok: false,
-      message: "We couldn't upload your files. Please check your connection and try again.",
+      message: "We couldn't save your files. Please check your connection and try again.",
     };
   }
+
+  // The draft folder is empty now that its files are filed under the property.
+  const draftRef = text(data, "draft_ref");
+  if (draftRef) await deleteDraftFolder(draftRef);
 
   const { error: noteError } = await supabase.from("owner_notes").insert({
     owner_id: ownerId,
