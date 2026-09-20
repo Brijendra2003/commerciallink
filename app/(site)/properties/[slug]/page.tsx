@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Gallery } from "@/components/property/gallery";
+import { Photo } from "@/components/ui/photo";
 import { PropertyCard } from "@/components/property/property-card";
 import { EnquiryForm } from "@/components/forms/enquiry-form";
 import { Container, Kicker } from "@/components/ui/section";
@@ -15,13 +16,11 @@ import {
   ShieldIcon,
   WhatsAppIcon,
 } from "@/components/ui/icons";
-import { getPublishedProperties as mockPublished } from "@/lib/data/properties";
 import {
   getPropertyBySlug,
-  getPublishedProperties,
+  getPublishedSlugs,
   getSimilarProperties,
 } from "@/lib/data/queries";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { formatArea, formatDate, formatPrice, imageUrl } from "@/lib/format";
 import {
   FURNISHING_LABEL,
@@ -31,16 +30,15 @@ import {
 } from "@/lib/data/taxonomy";
 import { site } from "@/lib/data/site";
 
+// Admin edits revalidate immediately; this catches changes made elsewhere.
+export const revalidate = 300;
+
 export async function generateStaticParams() {
   // Prerender whatever is published at build time; anything added later still
   // renders on demand. Falls back to the seeded catalogue in demo mode.
-  if (!isSupabaseConfigured) {
-    return mockPublished().map((p) => ({ slug: p.slug }));
-  }
-
   try {
-    const published = await getPublishedProperties();
-    return published.map((p) => ({ slug: p.slug }));
+    const slugs = await getPublishedSlugs();
+    return slugs.map((slug) => ({ slug }));
   } catch (error) {
     // A build should not fail because the database blinked — the pages just
     // render on demand instead.
@@ -62,8 +60,8 @@ export async function generateMetadata({
   const cover = property.media.find((m) => m.type === "image");
 
   return {
-    title: `${property.title}, Mumbai`,
-    description: property.summary,
+    title: property.meta_title || `${property.title}, Mumbai`,
+    description: property.meta_description || property.summary,
     alternates: { canonical: `/properties/${property.slug}` },
     openGraph: {
       title: `${property.title} — ${PURPOSE_LABEL[property.purpose]}`,
@@ -89,16 +87,64 @@ export default async function PropertyPage({
   const similar = await getSimilarProperties(property, 3);
   const cover = property.media.find((m) => m.type === "image");
 
+  const inr = (n: number) => n.toLocaleString("en-IN");
+  const floorLabel =
+    property.floor && property.floor !== "—"
+      ? property.total_floors
+        ? `${property.floor} of ${property.total_floors}`
+        : property.floor
+      : null;
+
+  // Optional specs render only when the listing has them.
   const specs = [
     { label: "Built-up area", value: formatArea(property.area_sqft) },
     { label: "Carpet area", value: formatArea(property.carpet_area_sqft) },
-    { label: "Floor", value: property.floor },
+    { label: "Floor", value: floorLabel },
     { label: "Possession", value: POSSESSION_LABEL[property.possession] },
     { label: "Handover condition", value: FURNISHING_LABEL[property.furnishing] },
-    { label: "Zoning", value: property.zoning },
+    { label: "Zoning", value: property.zoning || null },
     { label: "Asset class", value: PROPERTY_TYPE_LABEL[property.type] },
+    {
+      label: "Maintenance",
+      value: property.maintenance_psf != null ? `₹${inr(property.maintenance_psf)} / sq.ft. / mo` : null,
+    },
+    {
+      label: "Security deposit",
+      value: property.security_deposit_months != null ? `${property.security_deposit_months} months` : null,
+    },
+    {
+      label: "Lock-in",
+      value: property.lock_in_months != null ? `${property.lock_in_months} months` : null,
+    },
+    {
+      label: "Parking",
+      value: property.parking_slots != null ? `${inr(property.parking_slots)} slots` : null,
+    },
+    {
+      label: "Power load",
+      value: property.power_load_kva != null ? `${inr(property.power_load_kva)} kVA` : null,
+    },
+    {
+      label: "Ceiling height",
+      value: property.ceiling_height_ft != null ? `${property.ceiling_height_ft} ft` : null,
+    },
+    {
+      label: "Building age",
+      value:
+        property.property_age_years != null
+          ? property.property_age_years === 0
+            ? "New construction"
+            : `${property.property_age_years} years`
+          : null,
+    },
+    {
+      label: "Available from",
+      value: property.available_from ? formatDate(property.available_from) : null,
+    },
     { label: "Listed", value: formatDate(property.created_at) },
-  ];
+  ].filter((s): s is { label: string; value: string } => Boolean(s.value));
+
+  const floorPlans = property.media.filter((m) => m.type === "floor_plan");
 
   // RealEstateListing structured data — Section 8 of the brief.
   const listingSchema = {
@@ -233,22 +279,46 @@ export default async function PropertyPage({
               </dl>
             </section>
 
-            <section className="mt-10">
-              <Kicker className="mb-4">Amenities &amp; provisions</Kicker>
-              <ul className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
-                {property.amenities.map((a) => (
-                  <li
-                    key={a}
-                    className="flex items-center gap-2.5 text-[0.875rem] text-ink-500"
-                  >
-                    <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand-100 text-brand-700">
-                      <CheckIcon className="h-3 w-3" />
-                    </span>
-                    {a}
-                  </li>
-                ))}
-              </ul>
-            </section>
+            {floorPlans.length > 0 ? (
+              <section className="mt-10">
+                <Kicker className="mb-4">Floor plans</Kicker>
+                <ul className="grid gap-3 sm:grid-cols-2">
+                  {floorPlans.map((m) => (
+                    <li
+                      key={m.id}
+                      className="relative aspect-[4/3] overflow-hidden rounded-3xl border border-brand-900/8 bg-white"
+                    >
+                      <Photo
+                        publicId={m.cloudinary_public_id}
+                        alt={m.alt}
+                        sizes="(max-width: 640px) 100vw, 380px"
+                        width={900}
+                        className="object-contain!"
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
+
+            {property.amenities.length > 0 ? (
+              <section className="mt-10">
+                <Kicker className="mb-4">Amenities &amp; provisions</Kicker>
+                <ul className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+                  {property.amenities.map((a) => (
+                    <li
+                      key={a}
+                      className="flex items-center gap-2.5 text-[0.875rem] text-ink-500"
+                    >
+                      <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-brand-100 text-brand-700">
+                        <CheckIcon className="h-3 w-3" />
+                      </span>
+                      {a}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
 
             <section className="mt-10 rounded-3xl border border-brand-900/8 bg-sand-100 p-6 sm:p-7">
               <div className="flex items-start gap-3">

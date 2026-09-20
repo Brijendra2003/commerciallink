@@ -24,19 +24,39 @@ const securityHeaders = [
   },
 ];
 
+// Uploaded listing photos are served from the project's public Storage bucket.
+const supabaseHost = (() => {
+  try {
+    const url = new URL(process.env.NEXT_PUBLIC_SUPABASE_URL ?? "");
+    return { protocol: url.protocol.replace(":", "") as "http" | "https", hostname: url.hostname, port: url.port };
+  } catch {
+    return null;
+  }
+})();
+
 const nextConfig: NextConfig = {
   images: {
-    // Property media stands in for the Cloudinary delivery domain that will
-    // serve it in production — add `res.cloudinary.com` alongside this when the
-    // media pipeline is wired up.
     remotePatterns: [
+      // The seeded demo catalogue.
       {
         protocol: "https",
         hostname: "images.unsplash.com",
         pathname: "/**",
       },
+      ...(supabaseHost
+        ? [{ ...supabaseHost, pathname: "/storage/v1/object/public/**" }]
+        : []),
     ],
     formats: ["image/avif", "image/webp"],
+  },
+
+  experimental: {
+    // Listing submissions carry photos. The browser downsizes each image
+    // before sending (see lib/image-compress.ts) and caps the total at 20 MB,
+    // so this leaves headroom for multipart overhead.
+    serverActions: { bodySizeLimit: "24mb" },
+    // /admin routes pass through proxy.ts, which buffers bodies up to this.
+    proxyClientMaxBodySize: "24mb",
   },
 
   // Don't advertise the framework version.

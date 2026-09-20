@@ -1,11 +1,37 @@
 "use server";
 
+import { randomInt } from "node:crypto";
 import { headers } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getPortalSession } from "@/lib/portal";
+import {
+  FURNISHING_LABEL,
+  POSSESSION_LABEL,
+  PROPERTY_TYPE_LABEL,
+  zoneForMarket,
+} from "@/lib/data/taxonomy";
+import {
+  DOCUMENT_BUCKET,
+  MAX_FLOOR_PLANS,
+  MAX_IMAGE_BYTES,
+  MAX_PDF_BYTES,
+  MAX_PHOTOS,
+  MEDIA_BUCKET,
+  files,
+  publicUrl,
+  upload,
+  validateFiles,
+} from "@/lib/storage";
 import type { LeadSubmission } from "@/lib/types";
-import type { LeadSourceDb, PropertyTypeDb, PurposeDb } from "@/lib/supabase/types";
+import type {
+  FurnishingDb,
+  LeadSourceDb,
+  PossessionDb,
+  PropertyTypeDb,
+  PurposeDb,
+} from "@/lib/supabase/types";
 
 /**
  * Lead capture. Every public form on the site funnels through here, which is
@@ -25,15 +51,17 @@ function text(data: FormData, key: string): string {
   return String(data.get(key) ?? "").trim();
 }
 
+/** e.g. PRP-2026-483920. Six random digits — refs are UNIQUE columns, and the
+ *  old four-digit suffix gave ~9,000 possibilities a year before inserts
+ *  started colliding. */
 function reference(prefix: string): string {
-  const n = Math.floor(Math.random() * 9000) + 1000;
-  return `${prefix}-${new Date().getFullYear()}${n}`;
+  return `${prefix}-${new Date().getFullYear()}-${randomInt(100000, 1000000)}`;
 }
 
 function validateContact(data: FormData) {
   const errors: Record<string, string> = {};
   const name = text(data, "name");
-  const email = text(data, "email");
+  const email = text(data, "email").toLowerCase();
   const phone = text(data, "phone");
 
   if (name.length < 2) errors.name = "Please enter your full name.";
@@ -245,103 +273,378 @@ export async function submitRequirement(
   };
 }
 
+/**
+ * Parses an optional number typed the way people type money and area in India
+ * ("2,50,00,000", "18 400", "₹285"). Returns `undefined` for blank, and an
+ * error string when the value is present but unusable.
+ */
+function numberField(
+  data: FormData,
+  key: string,
+  { integer = true, min = 0, max = Number.MAX_SAFE_INTEGER, label }: {
+    integer?: boolean;
+    min?: number;
+    max?: number;
+    label: string;
+  },
+  errors: Record<string, string>,
+): number | null {
+  const raw = text(data, key).replace(/[₹,\s]/g, "");
+  if (!raw) return null;
+  const value = Number(raw);
+  if (!Number.isFinite(value) || (integer && !Number.isInteger(value))) {
+    errors[key] = `Enter ${label} as a ${integer ? "whole " : ""}number.`;
+    return null;
+  }
+  if (value < min || value > max) {
+    errors[key] = `${label[0].toUpperCase()}${label.slice(1)} looks out of range.`;
+    return null;
+  }
+  return value;
+}
+
+const PROPERTY_TYPE_VALUES = Object.keys(PROPERTY_TYPE_LABEL);
+const POSSESSION_VALUES = Object.keys(POSSESSION_LABEL);
+const FURNISHING_VALUES = Object.keys(FURNISHING_LABEL);
+
+function slugify(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
+}
+
 export async function submitPropertyListing(
   _prev: LeadSubmission | null,
   data: FormData,
 ): Promise<LeadSubmission> {
-  const { errors, name, email, phone } = validateContact(data);
+  // A signed-in owner submits against their own profile; everyone else
+  // identifies themselves in the form.
+  const session = isSupabaseConfigured ? await getPortalSession() : null;
+  const ownerSession = session?.role === "owner" ? session : null;
 
-  if (!text(data, "property_type")) {
-    errors.property_type = "Select the property type.";
+  const contact = ownerSession
+    ? {
+        errors: {} as Record<string, string>,
+        name: ownerSession.name,
+        email: ownerSession.email,
+        phone: ownerSession.phone,
+      }
+    : validateContact(data);
+  const { errors, name, email, phone } = contact;
+  if (ownerSession && data.get("consent") !== "on") {
+    errors.consent = "Please confirm you agree to be contacted.";
   }
-  if (!text(data, "market")) errors.market = "Select the micro-market.";
-  if (!text(data, "area_sqft")) errors.area_sqft = "Enter the built-up area.";
-  if (!text(data, "purpose")) {
+
+  /* ---- The property ---- */
+  const title = text(data, "title");
+  const type = text(data, "property_type");
+  const purposeRaw = text(data, "purpose");
+  const possession = text(data, "possession") || "ready";
+  const furnishing = text(data, "furnishing") || "bare_shell";
+
+  if (title.length < 5) {
+    errors.title = "Give the listing a descriptive name, e.g. building and floor.";
+  }
+  if (!PROPERTY_TYPE_VALUES.includes(type)) errors.property_type = "Select the property type.";
+  if (!["buy", "lease", "either"].includes(purposeRaw)) {
     errors.purpose = "Tell us whether you want to sell or lease.";
   }
+  if (!POSSESSION_VALUES.includes(possession)) errors.possession = "Select the possession status.";
+  if (!FURNISHING_VALUES.includes(furnishing)) errors.furnishing = "Select the handover condition.";
+
+  /* ---- Location ---- */
+  const market = text(data, "market");
+  const zone = zoneForMarket(market);
+  const address = text(data, "address");
+  const pincode = text(data, "pincode");
+  if (!zone) errors.market = "Select the micro-market.";
+  if (address.length < 5) errors.address = "Enter the street address or building location.";
+  if (pincode && !/^[1-9]\d{5}$/.test(pincode)) errors.pincode = "Enter a 6-digit PIN code.";
+
+  /* ---- Size & commercials ---- */
+  const area = numberField(data, "area_sqft", { min: 50, max: 50_000_000, label: "built-up area" }, errors);
+  if (area === null && !errors.area_sqft) errors.area_sqft = "Enter the built-up area.";
+  const carpet = numberField(data, "carpet_area_sqft", { min: 1, max: 50_000_000, label: "carpet area" }, errors);
+  if (area && carpet && carpet > area) {
+    errors.carpet_area_sqft = "Carpet area cannot exceed built-up area.";
+  }
+
+  const wantsSale = purposeRaw === "buy" || purposeRaw === "either";
+  const wantsLease = purposeRaw === "lease" || purposeRaw === "either";
+  const price = wantsSale
+    ? numberField(data, "price", { min: 10_000, max: 1e13, label: "sale price" }, errors)
+    : null;
+  const rentPsf = wantsLease
+    ? numberField(data, "rent_psf", { integer: false, min: 1, max: 100_000, label: "rent per sq.ft." }, errors)
+    : null;
+  const maintenance = numberField(data, "maintenance_psf", { integer: false, max: 10_000, label: "maintenance" }, errors);
+  const deposit = wantsLease
+    ? numberField(data, "security_deposit_months", { max: 120, label: "security deposit" }, errors)
+    : null;
+  const lockIn = wantsLease
+    ? numberField(data, "lock_in_months", { max: 240, label: "lock-in period" }, errors)
+    : null;
+
+  const floor = text(data, "floor");
+  const totalFloors = numberField(data, "total_floors", { min: 1, max: 200, label: "total floors" }, errors);
+  const age = numberField(data, "property_age_years", { max: 200, label: "age of the property" }, errors);
+  const availableFrom = text(data, "available_from");
+  if (availableFrom && !/^\d{4}-\d{2}-\d{2}$/.test(availableFrom)) {
+    errors.available_from = "Pick a valid date.";
+  }
+
+  /* ---- Specifications ---- */
+  const parking = numberField(data, "parking_slots", { max: 10_000, label: "parking slots" }, errors);
+  const power = numberField(data, "power_load_kva", { max: 1_000_000, label: "power load" }, errors);
+  const ceiling = numberField(data, "ceiling_height_ft", { integer: false, min: 1, max: 200, label: "ceiling height" }, errors);
+  const zoning = text(data, "zoning");
+
+  const amenities = [
+    ...data.getAll("amenities").map(String),
+    ...text(data, "amenities_other").split(",").map((a) => a.trim()),
+  ]
+    .filter(Boolean)
+    .filter((a, i, all) => all.indexOf(a) === i)
+    .slice(0, 40);
+
+  /* ---- Description & private notes ---- */
+  const description = text(data, "description");
+  if (description.length < 40) {
+    errors.description = "Describe the property in a few sentences (at least 40 characters).";
+  }
+  const tenancy = text(data, "tenancy_status");
+  const documents = data.getAll("documents").map(String);
+  const deskNotes = text(data, "notes");
+  const company = text(data, "company");
+
+  /* ---- Media ---- */
+  const photos = await validateFiles(files(data, "photos"), {
+    accept: "image",
+    maxBytes: MAX_IMAGE_BYTES,
+    maxCount: MAX_PHOTOS,
+    label: "photos",
+  });
+  if (photos.error) errors.photos = photos.error;
+  else if (photos.files.length === 0) errors.photos = "Add at least one photo of the property.";
+
+  const plans = await validateFiles(files(data, "floor_plans"), {
+    accept: "image",
+    maxBytes: MAX_IMAGE_BYTES,
+    maxCount: MAX_FLOOR_PLANS,
+    label: "floor plans",
+  });
+  if (plans.error) errors.floor_plans = plans.error;
+
+  const brochure = await validateFiles(files(data, "brochure"), {
+    accept: "pdf",
+    maxBytes: MAX_PDF_BYTES,
+    maxCount: 1,
+    label: "brochure",
+  });
+  if (brochure.error) errors.brochure = brochure.error;
 
   if (Object.keys(errors).length > 0) return invalid(errors);
   if (await rateLimited()) return THROTTLED;
 
   const ref = reference("PRP");
-  const submission = {
-    owner_name: name,
-    owner_email: email,
-    owner_phone: phone,
-    title: text(data, "title"),
-    type: text(data, "property_type"),
-    purpose: text(data, "purpose"),
+  const purpose: PurposeDb =
+    purposeRaw === "buy" ? "buy" : purposeRaw === "lease" ? "lease" : rentPsf !== null ? "lease" : "buy";
+
+  const paragraphs = description
+    .split(/\n\s*\n/)
+    .map((p) => p.replace(/\s+/g, " ").trim())
+    .filter(Boolean);
+
+  const property = {
+    ref,
+    slug: `${slugify(title) || "listing"}-${ref.slice(-6)}`,
+    title,
+    type: type as PropertyTypeDb,
+    purpose,
     city: "Mumbai",
-    market: text(data, "market"),
-    locality: text(data, "locality"),
-    area_sqft: text(data, "area_sqft"),
-    expectation: text(data, "expectation"),
-    notes: text(data, "notes"),
+    zone: zone!,
+    locality: market,
+    address: [address, market, "Mumbai", pincode].filter(Boolean).join(", "),
+    building_name: text(data, "building_name") || null,
+    pincode: pincode || null,
+    price,
+    rent_psf: rentPsf,
+    area_sqft: area!,
+    carpet_area_sqft: carpet,
+    floor: floor || null,
+    total_floors: totalFloors,
+    property_age_years: age,
+    available_from: availableFrom || null,
+    maintenance_psf: maintenance,
+    security_deposit_months: deposit,
+    lock_in_months: lockIn,
+    parking_slots: parking,
+    power_load_kva: power,
+    ceiling_height_ft: ceiling,
+    possession: possession as PossessionDb,
+    furnishing: furnishing as FurnishingDb,
+    zoning: zoning || null,
+    amenities,
+    summary: paragraphs[0]?.slice(0, 280) ?? null,
+    description: paragraphs,
+    status: "pending_review" as const,
   };
 
-  if (isSupabaseConfigured) {
-    const supabase = createAdminClient();
+  // Owner-private context. Kept out of `properties` (publicly readable once
+  // published) and filed as an admin-only owner note instead.
+  const privateNote = [
+    purposeRaw === "either" ? "Open to both sale and lease." : null,
+    tenancy ? `Tenancy: ${tenancy}.` : null,
+    documents.length ? `Documents ready: ${documents.join(", ")}.` : "No documents marked ready.",
+    deskNotes ? `Owner notes: ${deskNotes}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
 
-    // Upsert the owner first — properties.owner_id is NOT NULL, which is what
-    // makes registration a structural prerequisite rather than a UI gate.
-    const { data: owner, error: ownerError } = await supabase
-      .from("owners")
-      .upsert(
-        {
-          name,
-          email,
-          phone,
-          city: "Mumbai",
-          kyc_status: "pending" as const,
-        },
-        { onConflict: "email" },
-      )
-      .select("id")
-      .single();
-
-    if (ownerError || !owner) {
-      console.error("[listing] owner upsert failed", ownerError);
-      return {
-        ok: false,
-        message: "Something went wrong saving your submission. Please call the desk.",
-      };
-    }
-
-    const { error } = await supabase.from("properties").insert({
-      ref,
-      slug: `${ref.toLowerCase()}-${submission.market.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`,
-      title: submission.title || `${submission.market} — owner submission`,
-      type: submission.type as PropertyTypeDb,
-      purpose: (submission.purpose === "buy" ? "buy" : "lease") as PurposeDb,
-      city: "Mumbai",
-      // Zone is assigned by the desk during review; default to the largest.
-      zone: "western",
-      locality: submission.market,
-      address: [submission.locality, submission.market, "Mumbai"]
-        .filter(Boolean)
-        .join(", "),
-      area_sqft: Number(submission.area_sqft.replace(/[^\d]/g, "")) || 1,
-      summary: submission.expectation || null,
-      description: submission.notes ? [submission.notes] : [],
-      status: "pending_review",
-      owner_id: owner.id,
+  if (!isSupabaseConfigured) {
+    console.info("[listing] owner submission captured (demo mode)", {
+      owner: { name, email, phone, company },
+      property,
+      privateNote,
+      media: {
+        photos: photos.files.length,
+        floor_plans: plans.files.length,
+        brochure: brochure.files.length,
+      },
     });
-
-    if (error) {
-      console.error("[listing] property insert failed", error);
-      return {
-        ok: false,
-        message: "Something went wrong saving your submission. Please call the desk.",
-      };
-    }
-  } else {
-    console.info("[listing] owner submission captured (demo mode)", submission);
+    return {
+      ok: true,
+      message:
+        "Submission received. Our onboarding team will call to verify documents before anything goes live.",
+      reference: ref,
+    };
   }
+
+  const supabase = createAdminClient();
+  const failed: LeadSubmission = {
+    ok: false,
+    message: "Something went wrong saving your submission. Please try again or call the desk.",
+  };
+
+  // Resolve the owner. properties.owner_id is NOT NULL, which is what makes
+  // registration a structural prerequisite rather than a UI gate.
+  //
+  // An anonymous submission never overwrites an existing owner record: if the
+  // email is already known we attach to it as-is, so nobody can change a
+  // registered owner's name or phone by typing their email into this form.
+  let ownerId = ownerSession?.profileId ?? null;
+  if (!ownerId) {
+    const { data: existing } = await supabase
+      .from("owners")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (existing) {
+      ownerId = existing.id;
+    } else {
+      const { data: created, error } = await supabase
+        .from("owners")
+        .insert({ name, email, phone, company: company || null, city: "Mumbai", kyc_status: "pending" })
+        .select("id")
+        .single();
+      if (error || !created) {
+        console.error("[listing] owner insert failed", error);
+        return failed;
+      }
+      ownerId = created.id;
+    }
+  }
+
+  const { data: inserted, error: insertError } = await supabase
+    .from("properties")
+    .insert({ ...property, owner_id: ownerId })
+    .select("id")
+    .single();
+
+  if (insertError || !inserted) {
+    console.error("[listing] property insert failed", insertError);
+    return failed;
+  }
+
+  const uploadedMedia: string[] = [];
+  const uploadedDocs: string[] = [];
+  try {
+    const rows: {
+      property_id: string;
+      cloudinary_public_id: string;
+      type: "image" | "floor_plan" | "brochure";
+      alt: string;
+      sort_order: number;
+    }[] = [];
+
+    for (const [i, file] of photos.files.entries()) {
+      const path = await upload(supabase, MEDIA_BUCKET, inserted.id, file);
+      uploadedMedia.push(path);
+      rows.push({
+        property_id: inserted.id,
+        cloudinary_public_id: publicUrl(supabase, path),
+        type: "image",
+        alt: `${title} — photo ${i + 1}`,
+        sort_order: i,
+      });
+    }
+    for (const [i, file] of plans.files.entries()) {
+      const path = await upload(supabase, MEDIA_BUCKET, inserted.id, file);
+      uploadedMedia.push(path);
+      rows.push({
+        property_id: inserted.id,
+        cloudinary_public_id: publicUrl(supabase, path),
+        type: "floor_plan",
+        alt: `${title} — floor plan ${i + 1}`,
+        sort_order: 100 + i,
+      });
+    }
+    for (const file of brochure.files) {
+      // Private bucket: the desk releases brochures on a qualified enquiry.
+      const path = await upload(supabase, DOCUMENT_BUCKET, inserted.id, file);
+      uploadedDocs.push(path);
+      rows.push({
+        property_id: inserted.id,
+        cloudinary_public_id: `${DOCUMENT_BUCKET}/${path}`,
+        type: "brochure",
+        alt: `${title} — brochure`,
+        sort_order: 200,
+      });
+    }
+
+    const { error: mediaError } = await supabase.from("property_media").insert(rows);
+    if (mediaError) throw mediaError;
+  } catch (error) {
+    console.error("[listing] media upload failed", error);
+    // Roll back so a half-submitted listing does not sit in the review queue.
+    if (uploadedMedia.length) await supabase.storage.from(MEDIA_BUCKET).remove(uploadedMedia);
+    if (uploadedDocs.length) await supabase.storage.from(DOCUMENT_BUCKET).remove(uploadedDocs);
+    await supabase.from("properties").delete().eq("id", inserted.id);
+    return {
+      ok: false,
+      message: "We couldn't upload your files. Please check your connection and try again.",
+    };
+  }
+
+  const { error: noteError } = await supabase.from("owner_notes").insert({
+    owner_id: ownerId,
+    author: `Listing submission ${ref}`,
+    text: privateNote,
+  });
+  if (noteError) console.error("[listing] owner note insert failed", noteError);
+
+  revalidatePath("/dashboard");
+  revalidatePath("/admin/properties");
 
   return {
     ok: true,
-    message:
-      "Submission received. Our onboarding team will call to verify documents and schedule photography.",
+    message: ownerSession
+      ? "Submission received — it's now in your dashboard as Pending review. Our onboarding team will call to verify documents."
+      : "Submission received. Our onboarding team will call to verify documents before anything goes live.",
     reference: ref,
   };
 }

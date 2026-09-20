@@ -5,6 +5,7 @@ import { Container, Kicker, Section, SectionHeading } from "@/components/ui/sect
 import { WaveTop, WaveBottom } from "@/components/ui/wave";
 import { CheckIcon } from "@/components/ui/icons";
 import { ownerBenefits } from "@/lib/data/site";
+import { getPortalSession } from "@/lib/portal";
 
 export const metadata: Metadata = {
   title: "List Your Commercial Property",
@@ -17,7 +18,7 @@ const onboarding = [
   {
     number: "01",
     title: "Submit the property",
-    body: "Fill the form below with the basics. It takes about three minutes and creates a pending listing on our side.",
+    body: "Fill the form below with the specifications, commercials and a few photos. It creates a pending listing on our side.",
   },
   {
     number: "02",
@@ -36,7 +37,13 @@ const onboarding = [
   },
 ];
 
-export default function ListYourPropertyPage() {
+export default async function ListYourPropertyPage() {
+  const session = await getPortalSession();
+  const owner =
+    session?.role === "owner"
+      ? { name: session.name, email: session.email, phone: session.phone }
+      : null;
+
   return (
     <>
       <section className="relative overflow-hidden py-12 sm:py-16">
@@ -132,14 +139,14 @@ export default function ListYourPropertyPage() {
           <div className="mx-auto max-w-2xl">
             <SectionHeading
               kicker="Submit a property"
-              title="Start with the basics."
+              title="Tell us about the space."
               accent="We'll take it from there."
               lead="Nothing publishes until we have spoken to you and verified the
                 documents. This form creates a pending listing, not a live one."
               align="center"
             />
             <div className="mt-10 rounded-4xl border border-brand-900/8 bg-white p-6 shadow-lift sm:p-9">
-              <ListPropertyForm />
+              <ListPropertyForm owner={owner} />
             </div>
           </div>
         </Container>

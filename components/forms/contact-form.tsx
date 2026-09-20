@@ -18,21 +18,21 @@ export function ContactForm() {
     submitContact,
     null,
   );
-  const [key, setKey] = useState(0);
+  const [dismissed, setDismissed] = useState<LeadSubmission | null>(null);
   const errors = state?.fieldErrors ?? {};
 
-  if (state?.ok) {
+  if (state?.ok && state !== dismissed) {
     return (
       <SubmissionSuccess
         message={state.message}
         reference={state.reference}
-        onReset={() => setKey((k) => k + 1)}
+        onReset={() => setDismissed(state)}
       />
     );
   }
 
   return (
-    <form key={key} action={action} className="space-y-3.5">
+    <form key={dismissed?.reference ?? "form"} action={action} className="space-y-3.5">
       <Field label="I'm getting in touch as" name="subject">
         <Select name="subject" defaultValue="occupier">
           <option value="occupier">An occupier looking for space</option>

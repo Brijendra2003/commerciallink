@@ -73,6 +73,20 @@ export interface Property {
   summary: string;
   description: string[];
   media: PropertyMedia[];
+  /** Optional specifications (0003_listing_details.sql). Unset renders nothing. */
+  building_name?: string | null;
+  pincode?: string | null;
+  total_floors?: number | null;
+  property_age_years?: number | null;
+  available_from?: string | null;
+  maintenance_psf?: number | null;
+  security_deposit_months?: number | null;
+  lock_in_months?: number | null;
+  parking_slots?: number | null;
+  power_load_kva?: number | null;
+  ceiling_height_ft?: number | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
   /** Supply-side owner reference. Contact fields are never exposed publicly. */
   owner_id: string;
   created_at: string;

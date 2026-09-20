@@ -54,6 +54,18 @@ export type PropertyRow = {
   description: string[];
   meta_title: string | null;
   meta_description: string | null;
+  /** Added in 0003_listing_details.sql. */
+  building_name: string | null;
+  pincode: string | null;
+  total_floors: number | null;
+  property_age_years: number | null;
+  available_from: string | null;
+  maintenance_psf: number | null;
+  security_deposit_months: number | null;
+  lock_in_months: number | null;
+  parking_slots: number | null;
+  power_load_kva: number | null;
+  ceiling_height_ft: number | null;
   owner_id: string;
   created_by: string | null;
   view_count: number;

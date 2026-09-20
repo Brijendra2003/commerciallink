@@ -42,7 +42,8 @@ export async function signUpPortalUser(
 
   const role = text(data, "role") === "owner" ? "owner" : "buyer";
   const name = text(data, "name");
-  const email = text(data, "email");
+  // Lower-cased: profiles are unique on email (0003_listing_details.sql).
+  const email = text(data, "email").toLowerCase();
   const phone = text(data, "phone");
   const password = String(data.get("password") ?? "");
   const company = text(data, "company");

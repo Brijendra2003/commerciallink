@@ -24,21 +24,21 @@ export function RequirementForm() {
     submitRequirement,
     null,
   );
-  const [key, setKey] = useState(0);
+  const [dismissed, setDismissed] = useState<LeadSubmission | null>(null);
   const errors = state?.fieldErrors ?? {};
 
-  if (state?.ok) {
+  if (state?.ok && state !== dismissed) {
     return (
       <SubmissionSuccess
         message={state.message}
         reference={state.reference}
-        onReset={() => setKey((k) => k + 1)}
+        onReset={() => setDismissed(state)}
       />
     );
   }
 
   return (
-    <form key={key} action={action} className="space-y-5">
+    <form key={dismissed?.reference ?? "form"} action={action} className="space-y-5">
       <fieldset className="space-y-3.5">
         <legend className="kicker mb-3 text-clay-600">1 · What you need</legend>
 

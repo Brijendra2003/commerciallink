@@ -36,21 +36,21 @@ export function EnquiryForm({
     submitEnquiry,
     null,
   );
-  const [key, setKey] = useState(0);
+  const [dismissed, setDismissed] = useState<LeadSubmission | null>(null);
   const errors = state?.fieldErrors ?? {};
 
-  if (state?.ok) {
+  if (state?.ok && state !== dismissed) {
     return (
       <SubmissionSuccess
         message={state.message}
         reference={state.reference}
-        onReset={() => setKey((k) => k + 1)}
+        onReset={() => setDismissed(state)}
       />
     );
   }
 
   return (
-    <form key={key} action={action} className="space-y-3.5">
+    <form key={dismissed?.reference ?? "form"} action={action} className="space-y-3.5">
       <input type="hidden" name="property_id" value={propertyId} />
       <input type="hidden" name="source" value="listing_enquiry" />
 

@@ -152,6 +152,47 @@ export const FURNISHING_LABEL: Record<FurnishingStatus, string> = {
   fully_fitted: "Fully fitted",
 };
 
+export function zoneForMarket(market: string): Zone | null {
+  return MICRO_MARKETS.find((m) => m.name === market)?.zone ?? null;
+}
+
+/** The provisions owners tick most often. Free text covers the rest. */
+export const AMENITY_OPTIONS = [
+  "24x7 security & CCTV",
+  "Power backup (DG)",
+  "Central air-conditioning",
+  "Passenger lifts",
+  "Service / goods lift",
+  "Covered car parking",
+  "Fire NOC & sprinklers",
+  "Cafeteria / food court",
+  "Conference rooms",
+  "Pantry",
+  "Washrooms within premises",
+  "Loading docks",
+  "Truck turning radius",
+  "Road-facing frontage",
+  "Near metro / railway",
+  "High-speed fibre ready",
+];
+
+/** Documents the onboarding call asks for. Captured as a readiness checklist. */
+export const OWNER_DOCUMENTS = [
+  "Title deed / share certificate",
+  "Occupancy certificate (OC)",
+  "Latest property tax receipt",
+  "Approved building plan",
+  "Fire NOC",
+  "Society / developer NOC",
+];
+
+export const TENANCY_STATUSES = [
+  "Vacant",
+  "Currently tenanted",
+  "Owner occupied",
+  "Under construction",
+];
+
 /** Budget bands, in INR. `max: null` means "and above". */
 export const BUDGET_BANDS = [
   { value: "0-5000000", label: "Under ₹50 L", min: 0, max: 5_000_000 },

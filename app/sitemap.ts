@@ -3,6 +3,8 @@ import { getPublishedProperties } from "@/lib/data/queries";
 import { MICRO_MARKET_NAMES, PROPERTY_TYPES } from "@/lib/data/taxonomy";
 import { site } from "@/lib/data/site";
 
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
 
@@ -15,7 +17,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${site.url}/contact`, changeFrequency: "monthly", priority: 0.6, lastModified: now },
   ];
 
-  const listings: MetadataRoute.Sitemap = (await getPublishedProperties()).map((p) => ({
+  // Static routes still ship if the database is unreachable when this renders.
+  const published = await getPublishedProperties().catch((error) => {
+    console.error("[sitemap] listings unavailable", error);
+    return [];
+  });
+
+  const listings: MetadataRoute.Sitemap = published.map((p) => ({
     url: `${site.url}/properties/${p.slug}`,
     lastModified: new Date(p.created_at),
     changeFrequency: "weekly",

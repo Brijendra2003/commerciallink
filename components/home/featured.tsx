@@ -3,9 +3,19 @@ import { ButtonLink } from "@/components/ui/button";
 import { Container, SectionHeading } from "@/components/ui/section";
 import { WaveTop, WaveBottom } from "@/components/ui/wave";
 import { getFeaturedProperties } from "@/lib/data/queries";
+import { describeError } from "@/lib/log";
 
 export async function Featured() {
-  const featured = await getFeaturedProperties(6);
+  // The homepage is statically generated; a database outage at build or
+  // revalidation time should drop this section, not take the page down.
+  let featured: Awaited<ReturnType<typeof getFeaturedProperties>> = [];
+  try {
+    featured = await getFeaturedProperties(6);
+  } catch (error) {
+    console.error("[home] featured listings unavailable:", describeError(error));
+  }
+
+  if (featured.length === 0) return null;
 
   return (
     <>

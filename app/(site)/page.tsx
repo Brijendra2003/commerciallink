@@ -38,6 +38,9 @@ const organizationSchema = {
   },
 };
 
+// Featured listings: admin edits revalidate immediately; this catches the rest.
+export const revalidate = 300;
+
 export default function HomePage() {
   return (
     <>

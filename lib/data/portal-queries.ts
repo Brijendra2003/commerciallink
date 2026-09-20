@@ -4,62 +4,17 @@ import { createClient } from "@/lib/supabase/server";
 import type { PortalSession } from "@/lib/portal";
 import type { Property } from "@/lib/types";
 import type { Requirement } from "@/lib/admin-types";
-import type {
-  PropertyMediaRow,
-  PropertyRow,
-  RequirementRow,
-} from "@/lib/supabase/types";
+import type { RequirementRow } from "@/lib/supabase/types";
+import {
+  PROPERTY_SELECT,
+  toProperty,
+  type PropertyWithMedia,
+} from "@/lib/data/mappers";
 
 /**
  * Reads for the buyer/owner portal. Everything here runs under the caller's
  * own session, so RLS — not application code — is what scopes a row to them.
  */
-
-type PropertyWithMedia = PropertyRow & {
-  property_media: PropertyMediaRow[] | null;
-};
-
-function toProperty(row: PropertyWithMedia): Property {
-  return {
-    id: row.ref,
-    slug: row.slug,
-    title: row.title,
-    type: row.type,
-    purpose: row.purpose,
-    city: row.city,
-    zone: row.zone,
-    locality: row.locality,
-    address: row.address,
-    price: row.price,
-    rent_psf: row.rent_psf,
-    area_sqft: row.area_sqft,
-    carpet_area_sqft: row.carpet_area_sqft ?? row.area_sqft,
-    floor: row.floor ?? "—",
-    possession: row.possession,
-    furnishing: row.furnishing,
-    zoning: row.zoning ?? "",
-    status: row.status,
-    featured: row.featured,
-    verified: row.verified,
-    amenities: row.amenities,
-    summary: row.summary ?? "",
-    description: row.description,
-    media: (row.property_media ?? [])
-      .slice()
-      .sort((a, b) => a.sort_order - b.sort_order)
-      .map((m) => ({
-        id: m.id,
-        cloudinary_public_id: m.cloudinary_public_id,
-        type: m.type,
-        alt: m.alt ?? "",
-        sort_order: m.sort_order,
-      })),
-    owner_id: row.owner_id,
-    created_at: row.created_at.slice(0, 10),
-    view_count: row.view_count,
-    enquiry_count: row.enquiry_count,
-  };
-}
 
 /** An owner's listings, in every state. Includes the database uuid so the
  *  withdraw action can target it. */
@@ -69,7 +24,7 @@ export async function getOwnerListings(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("properties")
-    .select("*, property_media(*)")
+    .select(PROPERTY_SELECT)
     .eq("owner_id", session.profileId)
     .order("created_at", { ascending: false });
 

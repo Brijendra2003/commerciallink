@@ -4,9 +4,14 @@ import { Container, Section, SectionHeading } from "@/components/ui/section";
 import { PROPERTY_TYPE_ICON } from "@/components/ui/icons";
 import { PROPERTY_TYPES } from "@/lib/data/taxonomy";
 import { getPublishedProperties } from "@/lib/data/queries";
+import { describeError } from "@/lib/log";
 
 export async function AssetClasses() {
-  const all = await getPublishedProperties();
+  // Counts are decoration; an unreachable database shows zeros, not an error.
+  const all = await getPublishedProperties().catch((error) => {
+    console.error("[home] listing counts unavailable:", describeError(error));
+    return [];
+  });
 
   return (
     <Section className="pt-6 sm:pt-8 lg:pt-10">

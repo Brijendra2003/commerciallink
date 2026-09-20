@@ -56,6 +56,10 @@ flag, [`isSupabaseConfigured`](lib/supabase/env.ts).
      indexes, triggers, RLS.
    - [`0002_portal.sql`](supabase/migrations/0002_portal.sql) — buyer/owner
      self-service policies and the `leads.buyer_id` link.
+   - [`0003_listing_details.sql`](supabase/migrations/0003_listing_details.sql) —
+     unique profile emails (required by the upserts), extra listing
+     specification columns, and the `property-media` (public) /
+     `property-documents` (private) Storage buckets for uploads.
 
 3. **Fill in `.env.local`** — copy [`.env.example`](.env.example):
 

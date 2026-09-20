@@ -1,19 +1,28 @@
 import "server-only";
 
+import { createClient as createAnonClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { isSupabaseConfigured } from "@/lib/supabase/env";
+import {
+  SUPABASE_ANON_KEY,
+  SUPABASE_URL,
+  isSupabaseConfigured,
+} from "@/lib/supabase/env";
 import type {
+  Database,
   AdminUserRow,
   DealRow,
   LeadActivityRow,
   LeadRow,
   OwnerNoteRow,
   OwnerRow,
-  PropertyMediaRow,
-  PropertyRow,
   RequirementRow,
 } from "@/lib/supabase/types";
-import type { Property, PropertyMedia } from "@/lib/types";
+import type { Property } from "@/lib/types";
+import {
+  PROPERTY_SELECT,
+  toProperty,
+  type PropertyWithMedia,
+} from "@/lib/data/mappers";
 import type {
   AdminUser,
   Deal,
@@ -39,67 +48,23 @@ import {
  */
 
 /* ------------------------------------------------------------------ *
- * Row → domain mappers
- * ------------------------------------------------------------------ */
-
-type PropertyWithMedia = PropertyRow & { property_media: PropertyMediaRow[] | null };
-
-function toMedia(rows: PropertyMediaRow[] | null): PropertyMedia[] {
-  return (rows ?? [])
-    .slice()
-    .sort((a, b) => a.sort_order - b.sort_order)
-    .map((m) => ({
-      id: m.id,
-      cloudinary_public_id: m.cloudinary_public_id,
-      type: m.type,
-      alt: m.alt ?? "",
-      sort_order: m.sort_order,
-    }));
-}
-
-function toProperty(row: PropertyWithMedia): Property {
-  return {
-    id: row.ref,
-    slug: row.slug,
-    title: row.title,
-    type: row.type,
-    purpose: row.purpose,
-    city: row.city,
-    zone: row.zone,
-    locality: row.locality,
-    address: row.address,
-    price: row.price,
-    rent_psf: row.rent_psf,
-    area_sqft: row.area_sqft,
-    carpet_area_sqft: row.carpet_area_sqft ?? row.area_sqft,
-    floor: row.floor ?? "—",
-    possession: row.possession,
-    furnishing: row.furnishing,
-    zoning: row.zoning ?? "",
-    status: row.status,
-    featured: row.featured,
-    verified: row.verified,
-    amenities: row.amenities,
-    summary: row.summary ?? "",
-    description: row.description,
-    media: toMedia(row.property_media),
-    owner_id: row.owner_id,
-    created_at: row.created_at.slice(0, 10),
-    view_count: row.view_count,
-    enquiry_count: row.enquiry_count,
-  };
-}
-
-const PROPERTY_SELECT = "*, property_media(*)";
-
-/* ------------------------------------------------------------------ *
  * Public property reads
+ *
+ * Published listings are anon-readable under RLS, so these use a cookie-less
+ * client. That keeps public pages cacheable and lets generateStaticParams
+ * (which runs with no request) prerender listing pages.
  * ------------------------------------------------------------------ */
+
+function publicClient() {
+  return createAnonClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+}
 
 export async function getPublishedProperties(): Promise<Property[]> {
   if (!isSupabaseConfigured) return mockProperties.getPublishedProperties();
 
-  const supabase = await createClient();
+  const supabase = publicClient();
   const { data, error } = await supabase
     .from("properties")
     .select(PROPERTY_SELECT)
@@ -110,10 +75,27 @@ export async function getPublishedProperties(): Promise<Property[]> {
   return (data as unknown as PropertyWithMedia[]).map(toProperty);
 }
 
+/** Slugs for build-time prerendering. */
+
+export async function getPublishedSlugs(): Promise<string[]> {
+  if (!isSupabaseConfigured) {
+    return mockProperties.getPublishedProperties().map((p) => p.slug);
+  }
+
+  const supabase = publicClient();
+  const { data, error } = await supabase
+    .from("properties")
+    .select("slug")
+    .eq("status", "published");
+
+  if (error) throw error;
+  return (data ?? []).map((p) => p.slug);
+}
+
 export async function getFeaturedProperties(limit = 6): Promise<Property[]> {
   if (!isSupabaseConfigured) return mockProperties.getFeaturedProperties(limit);
 
-  const supabase = await createClient();
+  const supabase = publicClient();
   const { data, error } = await supabase
     .from("properties")
     .select(PROPERTY_SELECT)
@@ -131,7 +113,7 @@ export async function getPropertyBySlug(
 ): Promise<Property | undefined> {
   if (!isSupabaseConfigured) return mockProperties.getPropertyBySlug(slug);
 
-  const supabase = await createClient();
+  const supabase = publicClient();
   const { data, error } = await supabase
     .from("properties")
     .select(PROPERTY_SELECT)
@@ -151,7 +133,7 @@ export async function getSimilarProperties(
     return mockProperties.getSimilarProperties(property, limit);
   }
 
-  const supabase = await createClient();
+  const supabase = publicClient();
   const { data, error } = await supabase
     .from("properties")
     .select(PROPERTY_SELECT)

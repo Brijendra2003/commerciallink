@@ -49,7 +49,11 @@ export function formatDate(iso: string): string {
   });
 }
 
-/** Cloudinary in production; a signed Unsplash transform in this build. */
+/**
+ * Media references are either an absolute URL (uploads served from Supabase
+ * Storage) or a bare Unsplash photo id (the seeded catalogue).
+ */
 export function imageUrl(publicId: string, width = 1200): string {
+  if (/^https?:\/\//.test(publicId)) return publicId;
   return `https://images.unsplash.com/${publicId}?auto=format&fit=crop&w=${width}&q=75`;
 }
