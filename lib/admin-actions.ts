@@ -8,8 +8,11 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 import {
   FURNISHING_LABEL,
   POSSESSION_LABEL,
+  PROJECT_CATEGORY_LABEL,
   PROPERTY_TYPE_LABEL,
   ZONE_LABEL,
+  reraRequired,
+  segmentForType,
 } from "@/lib/data/taxonomy";
 import {
   DOCUMENT_BUCKET,
@@ -35,10 +38,12 @@ import { LIMIT, type UploadedAsset } from "@/lib/media";
 import type {
   FurnishingDb,
   PossessionDb,
+  ProjectCategoryDb,
   PropertyRow,
   PropertyStatusDb,
   PropertyTypeDb,
   PurposeDb,
+  ReviewOutcomeDb,
   ZoneDb,
 } from "@/lib/supabase/types";
 
@@ -131,7 +136,23 @@ export async function updateProperty(
   const purpose = text(data, "purpose");
   if (purpose !== "buy" && purpose !== "lease") errors.purpose = "Pick a purpose.";
   const zone = text(data, "zone");
-  if (!(zone in ZONE_LABEL)) errors.zone = "Pick a zone.";
+  if (!(zone in ZONE_LABEL)) errors.zone = "Pick a belt.";
+
+  // Segment follows the type rather than being independently editable — an
+  // "apartment" is residential by definition, and letting the two disagree
+  // would break every segment filter on the public side.
+  const segment = segmentForType(type);
+
+  const category = text(data, "category");
+  if (!(category in PROJECT_CATEGORY_LABEL)) errors.category = "Pick a category.";
+
+  // The same conditional rule the public form enforces, and the same rule the
+  // CHECK constraint on `properties` enforces underneath.
+  const reraNumber = text(data, "rera_number").toUpperCase();
+  if (reraRequired(category) && !reraNumber) {
+    errors.rera_number =
+      "A new project under construction cannot be saved without its RERA number.";
+  }
   const possession = text(data, "possession");
   if (!(possession in POSSESSION_LABEL)) errors.possession = "Pick a possession status.";
   const furnishing = text(data, "furnishing");
@@ -157,10 +178,18 @@ export async function updateProperty(
   if (pincode && !/^[1-9]\d{5}$/.test(pincode)) errors.pincode = "Enter a 6-digit PIN code.";
 
   const availableFrom = text(data, "available_from");
+  const possessionBy = text(data, "possession_by");
 
   const update: Partial<PropertyRow> = {
     title,
+    segment,
     type: type as PropertyTypeDb,
+    category: category as ProjectCategoryDb,
+    rera_number: reraNumber || null,
+    bedrooms: optionalNumber(data, "bedrooms", errors),
+    bathrooms: optionalNumber(data, "bathrooms", errors),
+    balconies: optionalNumber(data, "balconies", errors),
+    possession_by: /^\d{4}-\d{2}-\d{2}$/.test(possessionBy) ? possessionBy : null,
     purpose: purpose as PurposeDb,
     zone: zone as ZoneDb,
     locality,
@@ -238,6 +267,116 @@ export async function updateProperty(
   if (before?.slug && before.slug !== slug) revalidatePath(`/properties/${before.slug}`);
 
   return { ok: true, message: "Changes saved." };
+}
+
+/* ------------------------------------------------------------------ *
+ * Verification
+ * ------------------------------------------------------------------ */
+
+/**
+ * The admin verification pass on a submitted project.
+ *
+ * Approving is the only route to `published`: the RLS policy in
+ * 0006_projects_and_leads.sql refuses a lister's own write when the status is
+ * `published`, so nothing reaches the public site without a staff decision
+ * going through here.
+ *
+ * The note is written to `review_note`, which the lister sees on their own
+ * dashboard row — a rejection with no reason just generates a phone call.
+ */
+export async function reviewProperty(
+  ref: string,
+  outcome: Exclude<ReviewOutcomeDb, "pending">,
+  note?: string,
+): Promise<AdminActionState> {
+  if (!isSupabaseConfigured) return DEMO;
+  const session = await requireEditor();
+
+  const supabase = await createClient();
+  const { data: property } = await supabase
+    .from("properties")
+    .select("id, slug, title, status, category, rera_number")
+    .eq("ref", ref)
+    .maybeSingle();
+
+  if (!property) return { ok: false, message: "Listing not found." };
+
+  // Refuse to publish a new project that is missing the one document the law
+  // requires. The CHECK constraint would also stop this, but failing here
+  // gives the reviewer a sentence instead of a Postgres error.
+  if (
+    outcome === "approved" &&
+    reraRequired(property.category) &&
+    !property.rera_number
+  ) {
+    return {
+      ok: false,
+      message:
+        "This is a new project under construction with no RERA number. Add the number before approving.",
+    };
+  }
+
+  const trimmed = note?.trim().slice(0, 1000) || null;
+  if (outcome !== "approved" && !trimmed) {
+    return {
+      ok: false,
+      message: "Tell the lister what needs fixing — they see this note.",
+      fieldErrors: { review_note: "Add a reason." },
+    };
+  }
+
+  // `approved` publishes. The others keep it out of the public set but differ
+  // in what the lister is being asked to do, so they are not the same state.
+  const status: PropertyStatusDb =
+    outcome === "approved"
+      ? "published"
+      : outcome === "rejected"
+        ? "archived"
+        : "pending_review";
+
+  const { data: saved, error } = await supabase
+    .from("properties")
+    .update({
+      status,
+      review_status: outcome,
+      review_note: trimmed,
+      reviewed_at: new Date().toISOString(),
+      reviewed_by: session.id,
+      verified: outcome === "approved",
+    })
+    .eq("ref", ref)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    console.error("[admin] review update failed", error);
+    return { ok: false, message: "Could not save that decision." };
+  }
+  // RLS filters the row out rather than erroring when the role lacks rights.
+  if (!saved) {
+    return { ok: false, message: "Listing not found, or your role cannot review it." };
+  }
+
+  const verb =
+    outcome === "approved"
+      ? "Approved and published listing"
+      : outcome === "rejected"
+        ? "Rejected listing"
+        : "Requested changes on listing";
+
+  await audit(session, verb, ref);
+  refresh(ref, property.slug);
+  revalidatePath("/dashboard");
+
+  return {
+    ok: true,
+    message:
+      outcome === "approved"
+        ? `${property.title} is live.`
+        : outcome === "rejected"
+          ? "Rejected. The lister can see your note."
+          : "Sent back to the lister with your note.",
+  };
 }
 
 /* ------------------------------------------------------------------ *

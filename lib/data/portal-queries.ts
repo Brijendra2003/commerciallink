@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { PortalSession } from "@/lib/portal";
 import type { Property } from "@/lib/types";
 import type { Requirement } from "@/lib/admin-types";
-import type { RequirementRow } from "@/lib/supabase/types";
+import type { LeadStatusDb, RequirementRow } from "@/lib/supabase/types";
 import {
   PROPERTY_SELECT,
   toProperty,
@@ -33,6 +33,87 @@ export async function getOwnerListings(
   return (data as unknown as PropertyWithMedia[]).map((row) => ({
     uuid: row.id,
     property: toProperty(row),
+  }));
+}
+
+/**
+ * A lead raised on one of the signed-in lister's own projects, with the
+ * buyer's contact details.
+ *
+ * This is readable because of the `leads_owner_read` policy added in
+ * 0006_projects_and_leads.sql, which scopes the row to listings the caller
+ * owns. It reverses the desk-in-the-middle guarantee that 0002_portal.sql
+ * described — see the note at the top of 0006 for why.
+ */
+export interface OwnerLead {
+  id: string;
+  ref: string;
+  status: LeadStatusDb;
+  created_at: string;
+  buyerName: string;
+  buyerCompany: string | null;
+  buyerPhone: string;
+  buyerEmail: string;
+  message: string | null;
+  preferredTime: string | null;
+  source: string;
+  /** The listing the enquiry came in on. */
+  propertyRef: string | null;
+  propertyTitle: string | null;
+  propertySlug: string | null;
+}
+
+/**
+ * Takes no session argument, unlike its neighbours here.
+ *
+ * `leads` has no owner column to filter on, so there is nothing an application
+ * filter could narrow: the scoping is entirely the `leads_owner_read` policy,
+ * which resolves `auth.uid()` from the request's own cookies. Passing a
+ * profile id in would read as though it were doing the work, and it would not
+ * be.
+ */
+export async function getOwnerLeads(): Promise<OwnerLead[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("leads")
+    .select(
+      "id, ref, status, created_at, buyer_name, buyer_company, buyer_phone, buyer_email, message, preferred_time, source, properties(ref, title, slug)",
+    )
+    .not("property_id", "is", null)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  type Row = {
+    id: string;
+    ref: string;
+    status: LeadStatusDb;
+    created_at: string;
+    buyer_name: string;
+    buyer_company: string | null;
+    buyer_phone: string;
+    buyer_email: string;
+    message: string | null;
+    preferred_time: string | null;
+    source: string;
+    properties: { ref: string; title: string; slug: string } | null;
+  };
+
+  return (data as unknown as Row[]).map((l) => ({
+    id: l.id,
+    ref: l.ref,
+    status: l.status,
+    created_at: l.created_at.slice(0, 10),
+    buyerName: l.buyer_name,
+    buyerCompany: l.buyer_company,
+    buyerPhone: l.buyer_phone,
+    buyerEmail: l.buyer_email,
+    message: l.message,
+    preferredTime: l.preferred_time,
+    source: l.source,
+    propertyRef: l.properties?.ref ?? null,
+    propertyTitle: l.properties?.title ?? null,
+    propertySlug: l.properties?.slug ?? null,
   }));
 }
 

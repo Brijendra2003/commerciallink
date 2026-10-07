@@ -8,13 +8,29 @@
  */
 
 export type PropertyTypeDb =
-  | "office" | "retail" | "warehouse" | "industrial" | "land" | "coworking";
+  // Commercial (0001_schema.sql)
+  | "office" | "retail" | "warehouse" | "industrial" | "land" | "coworking"
+  // Residential (0005_segment_enums.sql)
+  | "apartment" | "studio" | "penthouse" | "villa" | "row_house" | "bungalow" | "plot";
 export type PropertyStatusDb =
   | "draft" | "pending_review" | "published" | "archived" | "sold" | "leased";
 export type PurposeDb = "buy" | "lease";
 export type PossessionDb = "ready" | "under_construction" | "shell_core";
-export type FurnishingDb = "bare_shell" | "warm_shell" | "fully_fitted";
-export type ZoneDb = "south" | "central" | "western" | "eastern" | "navi" | "thane";
+export type FurnishingDb =
+  | "bare_shell" | "warm_shell" | "fully_fitted"
+  | "unfurnished" | "semi_furnished" | "furnished";
+/**
+ * The enum still carries the six legacy MMR labels; only the three corridor
+ * belts are written from here on. See 0005_segment_enums.sql.
+ */
+export type ZoneDb =
+  | "mira_bhayandar" | "vasai_virar" | "palghar"
+  | "south" | "central" | "western" | "eastern" | "navi" | "thane";
+export type PropertySegmentDb = "commercial" | "residential";
+export type ProjectCategoryDb = "new_project" | "ready_to_move" | "resale";
+export type OwnerAccountTypeDb = "owner" | "broker" | "developer";
+export type ReviewOutcomeDb =
+  | "pending" | "approved" | "rejected" | "changes_requested";
 export type MediaTypeDb = "image" | "floor_plan" | "brochure" | "video";
 export type LeadStatusDb =
   | "new" | "contacted" | "qualified" | "site_visit" | "negotiation" | "won" | "lost";
@@ -66,6 +82,18 @@ export type PropertyRow = {
   parking_slots: number | null;
   power_load_kva: number | null;
   ceiling_height_ft: number | null;
+  /** Added in 0006_projects_and_leads.sql. */
+  segment: PropertySegmentDb;
+  category: ProjectCategoryDb;
+  rera_number: string | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  balconies: number | null;
+  possession_by: string | null;
+  review_status: ReviewOutcomeDb;
+  review_note: string | null;
+  reviewed_at: string | null;
+  reviewed_by: string | null;
   owner_id: string;
   created_by: string | null;
   view_count: number;
@@ -94,6 +122,10 @@ export type OwnerRow = {
   city: string;
   kyc_status: KycStatusDb;
   verified_at: string | null;
+  /** Added in 0006_projects_and_leads.sql. */
+  account_type: OwnerAccountTypeDb;
+  rera_number: string | null;
+  about: string | null;
   created_at: string;
 }
 
@@ -244,10 +276,15 @@ export type Database = {
       is_admin: { Args: Record<never, never>; Returns: boolean };
       admin_role: { Args: Record<never, never>; Returns: AdminRoleDb };
       can_edit_listings: { Args: Record<never, never>; Returns: boolean };
+      owns_property: { Args: { pid: string }; Returns: boolean };
     };
     Enums: {
       property_type: PropertyTypeDb;
       property_status: PropertyStatusDb;
+      property_segment: PropertySegmentDb;
+      project_category: ProjectCategoryDb;
+      owner_account_type: OwnerAccountTypeDb;
+      review_outcome: ReviewOutcomeDb;
       purpose: PurposeDb;
       possession: PossessionDb;
       furnishing: FurnishingDb;

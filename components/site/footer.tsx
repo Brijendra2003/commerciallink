@@ -10,20 +10,22 @@ const columns = [
   {
     title: "Explore",
     links: [
-      { href: "/properties", label: "All properties" },
-      { href: "/properties?purpose=lease", label: "For lease" },
-      { href: "/properties?purpose=buy", label: "For sale" },
+      { href: "/properties", label: "All projects" },
+      { href: "/properties?segment=residential", label: "Residential" },
+      { href: "/properties?segment=commercial", label: "Commercial" },
+      { href: "/properties?category=new_project", label: "New projects" },
+      { href: "/properties?category=resale", label: "Resale & owner property" },
       { href: "/post-requirement", label: "Post a requirement" },
-      { href: "/about", label: "About the desk" },
     ],
   },
   {
     title: "Your Account",
     links: [
       { href: "/dashboard", label: "My dashboard" },
-      { href: "/list-your-property", label: "List your property" },
-      { href: "/signup?role=owner", label: "Create owner account" },
-      { href: "/signup?role=buyer", label: "Create buyer account" },
+      { href: "/list-your-property", label: "List your project" },
+      { href: "/signup?role=owner", label: "Register as an owner" },
+      { href: "/signup?role=broker", label: "Register as a broker" },
+      { href: "/signup?role=developer", label: "Register as a developer" },
       { href: "/login", label: "Log in" },
     ],
   },
@@ -37,8 +39,8 @@ export function Footer() {
           <div>
             <Logo tone="light" />
             <p className="mt-5 max-w-xs text-[0.875rem] leading-relaxed text-sand-200/65">
-              {site.tagline} We hold the relationship on both sides of a
-              transaction so neither party has to work a phone list.
+              {site.tagline} Owners, brokers and developers list their projects
+              here; we verify each one, and buyers reach the lister directly.
             </p>
             <ul className="mt-6 space-y-3 text-[0.8125rem] text-sand-200/70">
               <li className="flex items-start gap-2.5">
@@ -81,8 +83,8 @@ export function Footer() {
           <div>
             <h3 className="kicker text-brand-100">Market Notes</h3>
             <p className="mt-5 text-[0.875rem] leading-relaxed text-sand-200/65">
-              Quarterly rent benchmarks and absorption data for the MMR
-              markets. No listings, no sales pitch.
+              Quarterly price and rent benchmarks for every station area from
+              Mira Road to Dahanu Road. No listings, no sales pitch.
             </p>
             <MarketNotesForm />
 

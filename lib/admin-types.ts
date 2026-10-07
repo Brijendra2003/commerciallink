@@ -4,6 +4,8 @@
  * `admin_users`) so these read like the rows the panel will eventually query.
  */
 
+import type { AccountType } from "@/lib/types";
+
 export type LeadStatus =
   | "new"
   | "contacted"
@@ -107,6 +109,10 @@ export interface OwnerContact {
   phone: string;
   email: string;
   city: string;
+  /** Owner / broker / developer (0006_projects_and_leads.sql). */
+  account_type: AccountType;
+  /** The lister's own MahaRERA agent or promoter registration, if any. */
+  rera_number: string | null;
   kyc_status: KycStatus;
   verified_at: string | null;
   property_ids: string[];

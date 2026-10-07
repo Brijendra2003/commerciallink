@@ -5,9 +5,9 @@ import { Container, Kicker, Section, SectionHeading } from "@/components/ui/sect
 import { faqs, processSteps, stats, trustPoints } from "@/lib/data/site";
 
 export const metadata: Metadata = {
-  title: "About the Desk",
+  title: "About CommercialLink",
   description:
-    "CommercialLink is a controlled commercial real estate marketplace. We hold the relationship on both sides of a transaction so neither party has to work a phone list.",
+    "A residential and commercial property marketplace for the Mira Road to Dahanu Road corridor. Owners, brokers and developers list their own projects; we verify each one; buyers reach the lister directly.",
   alternates: { canonical: "/about" },
 };
 
@@ -34,15 +34,15 @@ export default function AboutPage() {
           <div className="mx-auto max-w-3xl text-center">
             <Kicker className="mb-4">About the firm</Kicker>
             <h1 className="font-display text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em] text-brand-900 sm:text-[2.75rem]">
-              A marketplace works better{" "}
-              <span className="text-brand-600">with someone accountable in the middle.</span>
+              One line, done properly,{" "}
+              <span className="text-brand-600">instead of a whole state done badly.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-[0.9375rem] leading-relaxed text-ink-500 sm:text-base">
-              Most property portals are classifieds: they publish a number and
-              step back. That works for a two-bedroom flat. It fails for a
-              46,000 sq.ft. industrial shed where the buyer needs the MPCB
-              consent checked, the owner needs to know the buyer can fund it, and
-              somebody has to hold the negotiation together for four months.
+              Search for a flat in Nalasopara on a national portal and six
+              brokers have your number before you close the tab — none of whom
+              hold the flat. We do the opposite: we cover one corridor, we check
+              every project before it appears, and your enquiry goes to the one
+              person who can actually show it to you.
             </p>
           </div>
 
@@ -80,28 +80,30 @@ export default function AboutPage() {
           <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <SectionHeading
               kicker="What we actually do"
-              title="We are a brokerage"
-              accent="wearing a portal."
+              title="A verified marketplace,"
+              accent="not a lead broker."
             />
             <div className="space-y-4 text-[0.9375rem] leading-relaxed text-ink-500">
               <p>
-                CommercialLink was set up in 2019 by three advisors who had spent
-                a decade between an IPC and a regional brokerage, and were tired
-                of the same failure: good stock sitting unlet because it was
-                being marketed by people who had never walked the floor.
+                CommercialLink was set up in 2019 by three people who had spent a
+                decade selling property on this line, and were tired of the same
+                failure: a buyer and a seller both on the same corridor, both
+                paying to be introduced to each other.
               </p>
               <p>
-                So the model is deliberately narrow. We take a limited number of
-                mandates in one city, verify every one before it publishes,
-                and route every enquiry through a named advisor who is
-                accountable for it end to end. Owner numbers do not appear on the
-                site. Buyer details do not reach owners without permission.
+                So the model is simple. Owners, brokers and developers register
+                and list their own projects — residential and commercial, from a
+                1 BHK in Nalasopara to a shed in Tarapur. Our team verifies every
+                one before it publishes, and a new project under construction
+                cannot be listed at all without its MahaRERA number. Then the
+                enquiries go to the lister, with their name on the listing and
+                ours on the verification.
               </p>
               <p>
-                That is a slower business than an open listing board. It is also
-                the reason a fifth of our mandates come from owners who
-                previously listed elsewhere, and why our average time from
-                enquiry to first site visit is under nine days.
+                We are not in the middle of the conversation, and we do not sell
+                the same enquiry to six people. What we are accountable for is
+                that what you are looking at is real, and that the person you
+                reach is the person who holds it.
               </p>
             </div>
           </div>
@@ -157,7 +159,7 @@ export default function AboutPage() {
         <Container>
           <SectionHeading
             kicker="The process"
-            title="What working with us"
+            title="What buying or renting here"
             accent="looks like."
             align="center"
           />
@@ -209,10 +211,10 @@ export default function AboutPage() {
 
             <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
               <ButtonLink href="/contact" size="lg" arrow>
-                Talk to the desk
+                Talk to our team
               </ButtonLink>
               <ButtonLink href="/properties" variant="ghost" size="lg">
-                Browse properties
+                Browse all projects
               </ButtonLink>
             </div>
           </div>

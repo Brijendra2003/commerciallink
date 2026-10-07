@@ -134,7 +134,7 @@ export function BuyerDashboard({
                           {r.area_sqft > 0 ? formatArea(r.area_sqft) : "Area flexible"}
                         </h3>
                         <p className="mt-1 text-[0.75rem] text-ink-500">
-                          {r.locality || "Anywhere in MMR"} ·{" "}
+                          {r.locality || "Anywhere on the corridor"} ·{" "}
                           {r.purpose === "lease" ? "Lease" : "Buy"} · {r.budget_label}
                         </p>
                         <p className="mt-1 text-[0.6875rem] tabular-nums text-ink-300">

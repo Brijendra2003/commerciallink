@@ -4,37 +4,67 @@ import Link from "next/link";
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/field";
-import { OfficeIcon, SearchIcon } from "@/components/ui/icons";
+import { OfficeIcon, SearchIcon, ShieldIcon } from "@/components/ui/icons";
 import { signUpPortalUser, type PortalAuthState } from "@/lib/portal-actions";
 
+/**
+ * Four accounts, one radio group.
+ *
+ * "buyer" is the demand side and lands in `buyers`. The other three are all
+ * rows in `owners` told apart by `account_type` — they do exactly the same
+ * things on the platform (list projects, work the leads on them), so giving
+ * them separate tables or separate dashboards would buy nothing.
+ */
 const ROLES = [
   {
     value: "buyer",
-    title: "I'm looking for a property",
-    body: "Track enquiries, shortlist space and post requirements.",
+    title: "I'm looking to buy or rent",
+    body: "Enquire on projects, track your enquiries and post a requirement.",
     Icon: SearchIcon,
   },
   {
     value: "owner",
-    title: "I want to list a property",
-    body: "Submit listings, see views and enquiry counts, manage documents.",
+    title: "I own a property to list",
+    body: "List your flat, shop, godown or plot, and get enquiries directly.",
     Icon: OfficeIcon,
   },
+  {
+    value: "broker",
+    title: "I'm a broker or channel partner",
+    body: "List on behalf of owners and developers, and work your own leads.",
+    Icon: OfficeIcon,
+  },
+  {
+    value: "developer",
+    title: "We're a developer",
+    body: "Market your own projects — new launches, under construction and ready.",
+    Icon: ShieldIcon,
+  },
 ] as const;
+
+type Role = (typeof ROLES)[number]["value"];
+
+/** The three supply-side accounts. Keep in step with ACCOUNT_TYPES. */
+const SUPPLY_SIDE: Role[] = ["owner", "broker", "developer"];
 
 export function PortalSignupForm({
   defaultRole,
   configured,
 }: {
-  defaultRole: "owner" | "buyer";
+  defaultRole: Role;
   configured: boolean;
 }) {
   const [state, action, pending] = useActionState<PortalAuthState | null, FormData>(
     signUpPortalUser,
     null,
   );
-  const [role, setRole] = useState<"owner" | "buyer">(defaultRole);
+  const [role, setRole] = useState<Role>(defaultRole);
   const errors = state?.fieldErrors ?? {};
+
+  const isLister = SUPPLY_SIDE.includes(role);
+  // A broker or developer is asked for their RERA registration up front; it is
+  // what the verification call starts from.
+  const wantsRera = role === "broker" || role === "developer";
 
   // Confirmation-pending is a success state with no redirect, so it gets its
   // own panel rather than a green line under a form the user must not resubmit.
@@ -76,13 +106,13 @@ export function PortalSignupForm({
     <form action={action} className="space-y-4">
       <fieldset>
         <legend className="mb-2.5 text-[0.8125rem] font-semibold text-ink-700">
-          I am here to…
+          I am a…
         </legend>
         <div className="grid gap-2.5">
           {ROLES.map((r) => (
             <label
               key={r.value}
-              className="flex cursor-pointer items-start gap-3 rounded-lg border border-sand-300 bg-white p-4 transition-colors has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"
+              className="flex cursor-pointer items-start gap-3 rounded-lg border border-sand-300 bg-white p-3.5 transition-colors has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"
             >
               <input
                 type="radio"
@@ -117,12 +147,49 @@ export function PortalSignupForm({
       </Field>
 
       <Field
-        label={role === "owner" ? "Company or firm" : "Company"}
+        label={
+          role === "developer"
+            ? "Company name"
+            : role === "broker"
+              ? "Firm name"
+              : "Company"
+        }
         name="company"
-        hint="Optional."
+        required={role === "developer"}
+        error={errors.company}
+        hint={
+          role === "developer"
+            ? "Shown on your projects — this is the name buyers will see."
+            : "Optional."
+        }
       >
-        <Input name="company" autoComplete="organization" placeholder="Optional" />
+        <Input
+          name="company"
+          autoComplete="organization"
+          required={role === "developer"}
+          placeholder={role === "developer" ? "e.g. Shree Siddhi Developers" : "Optional"}
+          error={errors.company}
+        />
       </Field>
+
+      {wantsRera ? (
+        <Field
+          label={
+            role === "developer"
+              ? "MahaRERA promoter registration"
+              : "MahaRERA agent registration"
+          }
+          name="rera_number"
+          hint="Optional here — we confirm it on the verification call. Each under-construction project still needs its own project RERA number."
+        >
+          <Input
+            name="rera_number"
+            maxLength={30}
+            placeholder={role === "developer" ? "P99000051284" : "A51900001234"}
+            className="field-input uppercase"
+          />
+        </Field>
+      ) : null}
 
       <Field label="Phone" name="phone" required error={errors.phone}>
         <Input
@@ -172,8 +239,9 @@ export function PortalSignupForm({
           />
           <span>
             I agree to the terms of use and the DPDP-compliant privacy policy.
-            We verify your email before a listing or requirement can be
-            submitted.
+            {isLister
+              ? " Every project I list is checked by the CommercialLink team before it publishes."
+              : " We verify your email before a requirement can be submitted."}
           </span>
         </label>
         {errors.terms ? (

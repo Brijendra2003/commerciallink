@@ -6,8 +6,29 @@ import { getPortalSession } from "@/lib/portal";
 import {
   getBuyerEnquiries,
   getBuyerRequirements,
+  getOwnerLeads,
   getOwnerListings,
 } from "@/lib/data/portal-queries";
+
+/**
+ * The two lister reads run together — they are independent, and the leads
+ * query is the slower of the pair.
+ *
+ * A leads failure must not take the dashboard down with it: the RLS policy
+ * that makes it readable arrived in 0006_projects_and_leads.sql, so a database
+ * that has not had that migration applied yet should still render the
+ * projects list.
+ */
+async function listerData(session: NonNullable<Awaited<ReturnType<typeof getPortalSession>>>) {
+  const [listings, leads] = await Promise.all([
+    getOwnerListings(session),
+    getOwnerLeads().catch((error) => {
+      console.error("[dashboard] owner leads unavailable", error);
+      return [];
+    }),
+  ]);
+  return { listings, leads };
+}
 
 export default async function DashboardPage() {
   // The layout already guaranteed this; re-reading is free (React `cache`).
@@ -21,7 +42,7 @@ export default async function DashboardPage() {
       {session.role === "owner" ? (
         <OwnerDashboard
           session={session}
-          listings={await getOwnerListings(session)}
+          {...await listerData(session)}
         />
       ) : (
         <BuyerDashboard

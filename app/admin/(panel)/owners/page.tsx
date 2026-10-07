@@ -5,6 +5,7 @@ import { LogOwnerNoteButton, NewOwnerButton } from "@/components/admin/quick-act
 import { KycBadge } from "@/components/admin/status-badge";
 import { StatTile } from "@/components/charts/stat-tile";
 import { getAllProperties, getDeals, getOwners } from "@/lib/data/queries";
+import { ACCOUNT_TYPE_LABEL } from "@/lib/data/taxonomy";
 import { formatArea, formatINR } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Owner Management" };
@@ -117,7 +118,19 @@ export default async function OwnersPage() {
                       {owner.name}
                     </span>
                     <span className="mt-0.5 block truncate text-[0.75rem] text-ink-500">
-                      {owner.company} · {owner.city}
+                      {owner.company || ACCOUNT_TYPE_LABEL[owner.account_type]}
+                    </span>
+                    <span className="mt-1 flex flex-wrap items-center gap-1.5">
+                      {/* Which side of the supply the account is — a developer
+                          and a private owner need very different chasing. */}
+                      <span className="rounded border border-sand-300 bg-sand-50 px-1.5 py-0.5 text-[0.625rem] font-bold uppercase tracking-[0.08em] text-ink-500">
+                        {ACCOUNT_TYPE_LABEL[owner.account_type]}
+                      </span>
+                      {owner.rera_number ? (
+                        <span className="rounded border border-brand-100 bg-brand-50 px-1.5 py-0.5 text-[0.625rem] font-semibold text-brand-700">
+                          RERA {owner.rera_number}
+                        </span>
+                      ) : null}
                     </span>
                   </span>
                 </div>

@@ -14,12 +14,13 @@ export function RequirementBand() {
             <div className="max-w-2xl">
               <Kicker tone="light">Nothing matching your brief?</Kicker>
               <h2 className="mt-3 font-display text-[1.5rem] font-semibold leading-[1.15] tracking-[-0.025em] text-white sm:text-[1.875rem]">
-                Submit the requirement and we will source against it.
+                Tell us what you need and we will go and find it.
               </h2>
               <p className="mt-4 text-[0.9375rem] leading-relaxed text-sand-200/75">
-                We match written briefs against off-market mandates, upcoming
-                completions and owner stock that has not gone live. Your details
-                stay with our desk — owners never receive them.
+                We match written briefs against projects still in verification,
+                upcoming launches along the line, and stock listers have not put
+                up yet. A requirement stays with our team — no lister sees it
+                until there is something worth showing you.
               </p>
             </div>
 
@@ -38,7 +39,7 @@ export function RequirementBand() {
                 size="lg"
                 className="justify-center border border-white/25 bg-transparent text-white hover:bg-white/10"
               >
-                Speak to the desk
+                Speak to our team
               </ButtonLink>
             </div>
           </div>

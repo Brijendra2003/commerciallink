@@ -7,29 +7,35 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { getPortalSession } from "@/lib/portal";
 import {
+  ACCOUNT_TYPE_LABEL,
   FURNISHING_LABEL,
   POSSESSION_LABEL,
+  PROJECT_CATEGORIES,
+  PROJECT_CATEGORY_LABEL,
+  PROPERTY_TYPES,
   PROPERTY_TYPE_LABEL,
+  isLandType,
+  purposeLabel,
+  reraRequired,
+  segmentForType,
   zoneForMarket,
 } from "@/lib/data/taxonomy";
-import {
-  DOCUMENT_BUCKET,
-  MAX_PDF_BYTES,
-  files,
-  upload,
-  validateFiles,
-} from "@/lib/storage";
 import {
   deleteDraftFolder,
   destroyAssets,
   fileUnderProperty,
   verifySubmittedMedia,
 } from "@/lib/cloudinary";
-import type { LeadSubmission } from "@/lib/types";
+import type {
+  LeadSubmission,
+  ProjectCategory,
+  PropertySegment,
+} from "@/lib/types";
 import type {
   FurnishingDb,
   LeadSourceDb,
   PossessionDb,
+  ProjectCategoryDb,
   PropertyTypeDb,
   PurposeDb,
 } from "@/lib/supabase/types";
@@ -228,7 +234,7 @@ export async function submitEnquiry(
   return {
     ok: true,
     message:
-      "Enquiry received. An advisor will call you within four working hours.",
+      "Enquiry sent. It is with the lister of this project and our team — expect a call back, usually the same working day.",
     reference: ref,
   };
 }
@@ -240,9 +246,9 @@ export async function submitRequirement(
   const { errors, name, email, phone } = validateContact(data);
 
   if (!text(data, "property_type")) {
-    errors.property_type = "Select the type of space you need.";
+    errors.property_type = "Select the type of property you need.";
   }
-  if (!text(data, "market")) errors.market = "Select a preferred micro-market.";
+  if (!text(data, "market")) errors.market = "Select a preferred station area.";
   if (!text(data, "purpose")) {
     errors.purpose = "Tell us whether you want to buy or lease.";
   }
@@ -253,6 +259,17 @@ export async function submitRequirement(
   const ref = reference("REQ");
   const market = text(data, "market");
   const extra = text(data, "locality");
+
+  // `requirements` has no segment or BHK column — the brief is free-form by
+  // design, and the desk works it by reading it. Both are folded into the
+  // notes so nothing the buyer told us is dropped on the floor.
+  const bhk = text(data, "bhk");
+  const notes = [
+    bhk ? `Configuration wanted: ${bhk} BHK or more.` : null,
+    text(data, "notes") || null,
+  ]
+    .filter(Boolean)
+    .join("\n");
 
   const requirement = {
     ref,
@@ -266,7 +283,7 @@ export async function submitRequirement(
     area_sqft: Number(text(data, "area_sqft").replace(/[^\d]/g, "")) || null,
     purpose: text(data, "purpose") as PurposeDb,
     timeline: text(data, "timeline") || null,
-    notes: text(data, "notes") || null,
+    notes: notes || null,
     status: "open" as const,
   };
 
@@ -351,6 +368,7 @@ function numberField(
 const PROPERTY_TYPE_VALUES = Object.keys(PROPERTY_TYPE_LABEL);
 const POSSESSION_VALUES = Object.keys(POSSESSION_LABEL);
 const FURNISHING_VALUES = Object.keys(FURNISHING_LABEL);
+const CATEGORY_VALUES = PROJECT_CATEGORIES.map((c) => c.value);
 
 function slugify(value: string): string {
   return value
@@ -361,91 +379,236 @@ function slugify(value: string): string {
     .slice(0, 60);
 }
 
+/**
+ * Builds the listing title from the facts the lister already gave us.
+ *
+ * Asking for a title was the single worst field on the old form: it is the
+ * part a non-technical owner stalls on, and the part the desk rewrote anyway.
+ * "2 BHK Flat in Sunrise Heights, Mira Road East" is what a buyer searches
+ * for, and it falls straight out of type + configuration + building + market.
+ */
+function composeTitle({
+  segment,
+  type,
+  bedrooms,
+  building,
+  market,
+  areaSqft,
+}: {
+  segment: PropertySegment;
+  type: string;
+  bedrooms: number | null;
+  building: string;
+  market: string;
+  areaSqft: number;
+}): string {
+  const short =
+    PROPERTY_TYPES.find((t) => t.value === type)?.short ?? "Property";
+
+  let subject: string;
+  if (isLandType(type)) {
+    subject = `${areaSqft.toLocaleString("en-IN")} sq.ft. ${short}`;
+  } else if (segment === "residential" && bedrooms && bedrooms > 0) {
+    subject = `${bedrooms} BHK ${short}`;
+  } else {
+    subject = short;
+  }
+
+  const place = building ? `${building}, ${market}` : market;
+  return `${subject} in ${place}`.slice(0, 120);
+}
+
+/**
+ * Project submission.
+ *
+ * Registration is a hard gate: there is no anonymous path through this action
+ * any more. A listing has an accountable owner, broker or developer behind it
+ * before it reaches the review queue, which is what makes the verification
+ * step in the admin panel mean anything.
+ *
+ * The form that feeds this is one screen with about a dozen controls. Fields
+ * the old six-tab version demanded — title, carpet area, deposit, lock-in,
+ * ceiling height, amenities, zoning — are either derived here, collected in
+ * the optional "more details" section, or filled in by the desk on review.
+ */
 export async function submitPropertyListing(
   _prev: LeadSubmission | null,
   data: FormData,
 ): Promise<LeadSubmission> {
-  // A signed-in owner submits against their own profile; everyone else
-  // identifies themselves in the form.
-  const session = isSupabaseConfigured ? await getPortalSession() : null;
+  if (!isSupabaseConfigured) {
+    // Demo mode has no accounts, so the gate cannot be enforced; validate and
+    // log so the form stays exercisable without credentials.
+    return submitPropertyListingDemo(data);
+  }
+
+  const session = await getPortalSession();
   const ownerSession = session?.role === "owner" ? session : null;
 
-  const contact = ownerSession
-    ? {
-        errors: {} as Record<string, string>,
-        name: ownerSession.name,
-        email: ownerSession.email,
-        phone: ownerSession.phone,
-      }
-    : validateContact(data);
-  const { errors, name, email, phone } = contact;
-  if (ownerSession && data.get("consent") !== "on") {
+  if (!ownerSession) {
+    return {
+      ok: false,
+      message: session
+        ? "This is a buyer account. Register as an owner, broker or developer to list a project."
+        : "Please create an account or sign in before listing a project.",
+    };
+  }
+
+  // Contact details are not read off the form at all any more: they come from
+  // the signed-in profile, which is the whole point of the registration gate.
+  const errors: Record<string, string> = {};
+
+  if (data.get("consent") !== "on") {
     errors.consent = "Please confirm you agree to be contacted.";
   }
 
-  /* ---- The property ---- */
-  const title = text(data, "title");
+  /* ---- What it is ---- */
+  const segmentRaw = text(data, "segment");
+  const segment: PropertySegment =
+    segmentRaw === "residential" ? "residential" : "commercial";
+  if (segmentRaw !== "residential" && segmentRaw !== "commercial") {
+    errors.segment = "Choose residential or commercial.";
+  }
+
   const type = text(data, "property_type");
+  if (!PROPERTY_TYPE_VALUES.includes(type)) {
+    errors.property_type = "Select the property type.";
+  } else if (segmentForType(type) !== segment) {
+    // Guards against a stale select left over from a segment switch.
+    errors.property_type = "That type does not belong to the selected segment.";
+  }
+
+  const category = text(data, "category");
+  if (!CATEGORY_VALUES.includes(category as ProjectCategory)) {
+    errors.category = "Select the project category.";
+  }
+
+  /* ---- RERA: mandatory for an under-construction new project ----
+     The same predicate guards the form field, this action and a CHECK
+     constraint on the table, so the rule cannot be bypassed by posting the
+     form directly. */
+  const reraNumber = text(data, "rera_number").toUpperCase();
+  if (reraRequired(category)) {
+    if (!reraNumber) {
+      errors.rera_number =
+        "A RERA registration number is required for a new project under construction.";
+    } else if (!/^[A-Z0-9/-]{8,30}$/.test(reraNumber)) {
+      errors.rera_number =
+        "Enter the MahaRERA number as registered, e.g. P99000051284.";
+    }
+  }
+
   const purposeRaw = text(data, "purpose");
-  const possession = text(data, "possession") || "ready";
-  const furnishing = text(data, "furnishing") || "bare_shell";
-
-  if (title.length < 5) {
-    errors.title = "Give the listing a descriptive name, e.g. building and floor.";
+  if (purposeRaw !== "buy" && purposeRaw !== "lease") {
+    errors.purpose =
+      segment === "residential"
+        ? "Tell us whether you want to sell or rent it out."
+        : "Tell us whether you want to sell or lease it.";
   }
-  if (!PROPERTY_TYPE_VALUES.includes(type)) errors.property_type = "Select the property type.";
-  if (!["buy", "lease", "either"].includes(purposeRaw)) {
-    errors.purpose = "Tell us whether you want to sell or lease.";
-  }
-  if (!POSSESSION_VALUES.includes(possession)) errors.possession = "Select the possession status.";
-  if (!FURNISHING_VALUES.includes(furnishing)) errors.furnishing = "Select the handover condition.";
+  const purpose = purposeRaw as PurposeDb;
+  const wantsSale = purposeRaw === "buy";
+  const wantsLease = purposeRaw === "lease";
 
-  /* ---- Location ---- */
+  /* ---- Where it is ---- */
   const market = text(data, "market");
   const zone = zoneForMarket(market);
-  const address = text(data, "address");
-  const pincode = text(data, "pincode");
-  if (!zone) errors.market = "Select the micro-market.";
-  if (address.length < 5) errors.address = "Enter the street address or building location.";
-  if (pincode && !/^[1-9]\d{5}$/.test(pincode)) errors.pincode = "Enter a 6-digit PIN code.";
+  if (!zone) {
+    errors.market = "Select the location. We cover Mira Road to Dahanu Road.";
+  }
 
-  /* ---- Size & commercials ---- */
-  const area = numberField(data, "area_sqft", { min: 50, max: 50_000_000, label: "built-up area" }, errors);
-  if (area === null && !errors.area_sqft) errors.area_sqft = "Enter the built-up area.";
-  const carpet = numberField(data, "carpet_area_sqft", { min: 1, max: 50_000_000, label: "carpet area" }, errors);
+  const building = text(data, "building_name");
+  if (building.length < 2) {
+    errors.building_name = isLandType(type)
+      ? "Give the layout or survey reference."
+      : "Enter the building or project name.";
+  }
+
+  const landmark = text(data, "address");
+  const pincode = text(data, "pincode");
+  if (pincode && !/^[1-9]\d{5}$/.test(pincode)) {
+    errors.pincode = "Enter a 6-digit PIN code.";
+  }
+
+  /* ---- Size, configuration and price ---- */
+  const area = numberField(
+    data,
+    "area_sqft",
+    { min: 50, max: 50_000_000, label: "built-up area" },
+    errors,
+  );
+  if (area === null && !errors.area_sqft) {
+    errors.area_sqft = "Enter the built-up area in sq.ft.";
+  }
+
+  const bedrooms = numberField(
+    data,
+    "bedrooms",
+    { max: 50, label: "bedrooms" },
+    errors,
+  );
+  // A flat without a BHK count is unsearchable; a plot has no bedrooms at all.
+  if (segment === "residential" && !isLandType(type) && bedrooms === null) {
+    if (!errors.bedrooms) errors.bedrooms = "Select the configuration.";
+  }
+
+  const price = wantsSale
+    ? numberField(data, "price", { min: 10_000, max: 1e13, label: "price" }, errors)
+    : null;
+  const rentPsf = wantsLease
+    ? numberField(
+        data,
+        "rent_psf",
+        { integer: false, min: 1, max: 100_000, label: "rent per sq.ft." },
+        errors,
+      )
+    : null;
+
+  /* ---- Optional detail (the collapsed section of the form) ---- */
+  const carpet = numberField(
+    data,
+    "carpet_area_sqft",
+    { min: 1, max: 50_000_000, label: "carpet area" },
+    errors,
+  );
   if (area && carpet && carpet > area) {
     errors.carpet_area_sqft = "Carpet area cannot exceed built-up area.";
   }
 
-  const wantsSale = purposeRaw === "buy" || purposeRaw === "either";
-  const wantsLease = purposeRaw === "lease" || purposeRaw === "either";
-  const price = wantsSale
-    ? numberField(data, "price", { min: 10_000, max: 1e13, label: "sale price" }, errors)
-    : null;
-  const rentPsf = wantsLease
-    ? numberField(data, "rent_psf", { integer: false, min: 1, max: 100_000, label: "rent per sq.ft." }, errors)
-    : null;
+  const bathrooms = numberField(data, "bathrooms", { max: 50, label: "bathrooms" }, errors);
+  const balconies = numberField(data, "balconies", { max: 50, label: "balconies" }, errors);
+  const floor = text(data, "floor");
+  const totalFloors = numberField(data, "total_floors", { min: 1, max: 200, label: "total floors" }, errors);
+  const age = numberField(data, "property_age_years", { max: 200, label: "age of the property" }, errors);
+  const parking = numberField(data, "parking_slots", { max: 10_000, label: "parking slots" }, errors);
   const maintenance = numberField(data, "maintenance_psf", { integer: false, max: 10_000, label: "maintenance" }, errors);
   const deposit = wantsLease
     ? numberField(data, "security_deposit_months", { max: 120, label: "security deposit" }, errors)
     : null;
-  const lockIn = wantsLease
-    ? numberField(data, "lock_in_months", { max: 240, label: "lock-in period" }, errors)
-    : null;
 
-  const floor = text(data, "floor");
-  const totalFloors = numberField(data, "total_floors", { min: 1, max: 200, label: "total floors" }, errors);
-  const age = numberField(data, "property_age_years", { max: 200, label: "age of the property" }, errors);
-  const availableFrom = text(data, "available_from");
-  if (availableFrom && !/^\d{4}-\d{2}-\d{2}$/.test(availableFrom)) {
-    errors.available_from = "Pick a valid date.";
+  const possessionBy = text(data, "possession_by");
+  if (possessionBy && !/^\d{4}-\d{2}-\d{2}$/.test(possessionBy)) {
+    errors.possession_by = "Pick a valid date.";
+  }
+  if (reraRequired(category) && !possessionBy) {
+    // Not fatal — the desk can chase it — but a new project with no date is
+    // the single most-asked question on an enquiry call.
+    errors.possession_by = "Enter the committed possession date.";
   }
 
-  /* ---- Specifications ---- */
-  const parking = numberField(data, "parking_slots", { max: 10_000, label: "parking slots" }, errors);
-  const power = numberField(data, "power_load_kva", { max: 1_000_000, label: "power load" }, errors);
-  const ceiling = numberField(data, "ceiling_height_ft", { integer: false, min: 1, max: 200, label: "ceiling height" }, errors);
-  const zoning = text(data, "zoning");
+  const furnishingRaw = text(data, "furnishing");
+  const furnishing: FurnishingDb = FURNISHING_VALUES.includes(furnishingRaw)
+    ? (furnishingRaw as FurnishingDb)
+    : segment === "residential"
+      ? "unfurnished"
+      : "bare_shell";
+
+  // Possession follows the category: an under-construction project is not
+  // "ready", whatever the form says.
+  const possessionRaw = text(data, "possession");
+  const possession: PossessionDb = reraRequired(category)
+    ? "under_construction"
+    : POSSESSION_VALUES.includes(possessionRaw)
+      ? (possessionRaw as PossessionDb)
+      : "ready";
 
   const amenities = [
     ...data.getAll("amenities").map(String),
@@ -455,149 +618,123 @@ export async function submitPropertyListing(
     .filter((a, i, all) => all.indexOf(a) === i)
     .slice(0, 40);
 
-  /* ---- Description & private notes ---- */
-  const description = text(data, "description");
-  if (description.length < 40) {
-    errors.description = "Describe the property in a few sentences (at least 40 characters).";
-  }
+  const zoning = text(data, "zoning");
   const tenancy = text(data, "tenancy_status");
   const documents = data.getAll("documents").map(String);
   const deskNotes = text(data, "notes");
-  const company = text(data, "company");
 
-  /* ---- Media ----
-     Photos, videos and floor plans were uploaded straight to Cloudinary by the
-     browser; the form carries only their identifiers, which are re-read from
-     Cloudinary here rather than trusted. */
+  /* ---- Description: optional ----
+     A one-line summary is generated from the facts when it is left blank, so
+     an owner who does not want to write copy is not blocked. The desk edits
+     the listing before it publishes either way. */
+  const description = text(data, "description");
+
+  /* ---- Photographs ----
+     Uploaded straight to Cloudinary by the browser; the form carries only
+     their identifiers, which are re-read from Cloudinary rather than trusted. */
   const media = await verifySubmittedMedia(text(data, "media"));
   if (media.error) errors.photos = media.error;
   else if (!media.assets.some((a) => a.kind === "image")) {
-    errors.photos = "Add at least one photograph of the property.";
+    errors.photos = "Add at least one photograph.";
   }
-
-  const brochure = await validateFiles(files(data, "brochure"), {
-    accept: "pdf",
-    maxBytes: MAX_PDF_BYTES,
-    maxCount: 1,
-    label: "brochure",
-  });
-  if (brochure.error) errors.brochure = brochure.error;
 
   if (Object.keys(errors).length > 0) return invalid(errors);
   if (await rateLimited()) return THROTTLED;
 
+  /* ---- Compose the row ---- */
   const ref = reference("PRP");
-  const purpose: PurposeDb =
-    purposeRaw === "buy" ? "buy" : purposeRaw === "lease" ? "lease" : rentPsf !== null ? "lease" : "buy";
+  const title = composeTitle({
+    segment,
+    type,
+    bedrooms,
+    building,
+    market,
+    areaSqft: area!,
+  });
 
   const paragraphs = description
     .split(/\n\s*\n/)
     .map((p) => p.replace(/\s+/g, " ").trim())
     .filter(Boolean);
 
+  const generatedSummary = [
+    title,
+    `${area!.toLocaleString("en-IN")} sq.ft.`,
+    PROJECT_CATEGORY_LABEL[category as ProjectCategory],
+    purposeLabel(purpose, segment).toLowerCase(),
+  ].join(" · ");
+
   const property = {
     ref,
     slug: `${slugify(title) || "listing"}-${ref.slice(-6)}`,
     title,
+    segment,
     type: type as PropertyTypeDb,
+    category: category as ProjectCategoryDb,
+    rera_number: reraNumber || null,
     purpose,
     city: "Mumbai",
     zone: zone!,
     locality: market,
-    address: [address, market, "Mumbai", pincode].filter(Boolean).join(", "),
-    building_name: text(data, "building_name") || null,
+    address: [building, landmark, market, "Maharashtra", pincode]
+      .filter(Boolean)
+      .join(", "),
+    building_name: building,
     pincode: pincode || null,
     price,
     rent_psf: rentPsf,
     area_sqft: area!,
     carpet_area_sqft: carpet,
+    bedrooms,
+    bathrooms,
+    balconies,
     floor: floor || null,
     total_floors: totalFloors,
     property_age_years: age,
-    available_from: availableFrom || null,
+    possession_by: possessionBy || null,
+    available_from: null,
     maintenance_psf: maintenance,
     security_deposit_months: deposit,
-    lock_in_months: lockIn,
+    lock_in_months: null,
     parking_slots: parking,
-    power_load_kva: power,
-    ceiling_height_ft: ceiling,
-    possession: possession as PossessionDb,
-    furnishing: furnishing as FurnishingDb,
+    power_load_kva: null,
+    ceiling_height_ft: null,
+    possession,
+    furnishing,
     zoning: zoning || null,
     amenities,
-    summary: paragraphs[0]?.slice(0, 280) ?? null,
+    summary: paragraphs[0]?.slice(0, 280) ?? generatedSummary,
     description: paragraphs,
+    // Every submission enters the queue. Only the admin review action can
+    // move it to `published`.
     status: "pending_review" as const,
+    review_status: "pending" as const,
+    verified: false,
   };
 
-  // Owner-private context. Kept out of `properties` (publicly readable once
+  // Lister-private context. Kept off `properties` (publicly readable once
   // published) and filed as an admin-only owner note instead.
   const privateNote = [
-    purposeRaw === "either" ? "Open to both sale and lease." : null,
-    tenancy ? `Tenancy: ${tenancy}.` : null,
-    documents.length ? `Documents ready: ${documents.join(", ")}.` : "No documents marked ready.",
-    deskNotes ? `Owner notes: ${deskNotes}` : null,
+    `Submitted from the ${ACCOUNT_TYPE_LABEL[ownerSession.accountType ?? "owner"]} dashboard.`,
+    tenancy ? `Occupancy: ${tenancy}.` : null,
+    documents.length
+      ? `Documents ready: ${documents.join(", ")}.`
+      : "No documents marked ready.",
+    deskNotes ? `Lister notes: ${deskNotes}` : null,
   ]
     .filter(Boolean)
     .join("\n");
 
-  if (!isSupabaseConfigured) {
-    console.info("[listing] owner submission captured (demo mode)", {
-      owner: { name, email, phone, company },
-      property,
-      privateNote,
-      media: {
-        cloudinary: media.assets.map((a) => `${a.kind}:${a.publicId}`),
-        brochure: brochure.files.length,
-      },
-    });
-    return {
-      ok: true,
-      message:
-        "Submission received. Our onboarding team will call to verify documents before anything goes live.",
-      reference: ref,
-    };
-  }
-
   const supabase = createAdminClient();
   const failed: LeadSubmission = {
     ok: false,
-    message: "Something went wrong saving your submission. Please try again or call the desk.",
+    message:
+      "Something went wrong saving your submission. Please try again or call the desk.",
   };
-
-  // Resolve the owner. properties.owner_id is NOT NULL, which is what makes
-  // registration a structural prerequisite rather than a UI gate.
-  //
-  // An anonymous submission never overwrites an existing owner record: if the
-  // email is already known we attach to it as-is, so nobody can change a
-  // registered owner's name or phone by typing their email into this form.
-  let ownerId = ownerSession?.profileId ?? null;
-  if (!ownerId) {
-    const { data: existing } = await supabase
-      .from("owners")
-      .select("id")
-      .eq("email", email)
-      .maybeSingle();
-
-    if (existing) {
-      ownerId = existing.id;
-    } else {
-      const { data: created, error } = await supabase
-        .from("owners")
-        .insert({ name, email, phone, company: company || null, city: "Mumbai", kyc_status: "pending" })
-        .select("id")
-        .single();
-      if (error || !created) {
-        console.error("[listing] owner insert failed", error);
-        return failed;
-      }
-      ownerId = created.id;
-    }
-  }
 
   const { data: inserted, error: insertError } = await supabase
     .from("properties")
-    .insert({ ...property, owner_id: ownerId })
+    .insert({ ...property, owner_id: ownerSession.profileId })
     .select("id")
     .single();
 
@@ -606,7 +743,6 @@ export async function submitPropertyListing(
     return failed;
   }
 
-  const uploadedDocs: string[] = [];
   // Assets are moved out of the draft folder below; on failure these are the
   // ids to clean up, wherever they ended up.
   let filed = media.assets;
@@ -615,42 +751,20 @@ export async function submitPropertyListing(
     // property, with an images / videos / floor-plans sub-folder in it.
     filed = await fileUnderProperty(media.assets, title, ref);
 
-    const rows: {
-      property_id: string;
-      cloudinary_public_id: string;
-      type: "image" | "floor_plan" | "brochure" | "video";
-      alt: string;
-      sort_order: number;
-    }[] = [];
-
     const ORDER_BASE: Record<string, number> = { image: 0, video: 50, floor_plan: 100 };
     const seen: Record<string, number> = {};
-
-    for (const asset of filed) {
+    const rows = filed.map((asset) => {
       const n = (seen[asset.kind] = (seen[asset.kind] ?? 0) + 1);
       const noun =
         asset.kind === "image" ? "photo" : asset.kind === "video" ? "video" : "floor plan";
-      rows.push({
+      return {
         property_id: inserted.id,
         cloudinary_public_id: asset.publicId,
         type: asset.kind,
         alt: `${title} — ${noun} ${n}`,
         sort_order: ORDER_BASE[asset.kind] + n - 1,
-      });
-    }
-
-    for (const file of brochure.files) {
-      // Private bucket: the desk releases brochures on a qualified enquiry.
-      const path = await upload(supabase, DOCUMENT_BUCKET, inserted.id, file);
-      uploadedDocs.push(path);
-      rows.push({
-        property_id: inserted.id,
-        cloudinary_public_id: `${DOCUMENT_BUCKET}/${path}`,
-        type: "brochure",
-        alt: `${title} — brochure`,
-        sort_order: 200,
-      });
-    }
+      };
+    });
 
     const { error: mediaError } = await supabase.from("property_media").insert(rows);
     if (mediaError) throw mediaError;
@@ -658,11 +772,11 @@ export async function submitPropertyListing(
     console.error("[listing] media filing failed", error);
     // Roll back so a half-submitted listing does not sit in the review queue.
     await destroyAssets(filed);
-    if (uploadedDocs.length) await supabase.storage.from(DOCUMENT_BUCKET).remove(uploadedDocs);
     await supabase.from("properties").delete().eq("id", inserted.id);
     return {
       ok: false,
-      message: "We couldn't save your files. Please check your connection and try again.",
+      message:
+        "We couldn't save your photographs. Please check your connection and try again.",
     };
   }
 
@@ -671,8 +785,8 @@ export async function submitPropertyListing(
   if (draftRef) await deleteDraftFolder(draftRef);
 
   const { error: noteError } = await supabase.from("owner_notes").insert({
-    owner_id: ownerId,
-    author: `Listing submission ${ref}`,
+    owner_id: ownerSession.profileId,
+    author: `Project submission ${ref}`,
     text: privateNote,
   });
   if (noteError) console.error("[listing] owner note insert failed", noteError);
@@ -682,12 +796,61 @@ export async function submitPropertyListing(
 
   return {
     ok: true,
-    message: ownerSession
-      ? "Submission received — it's now in your dashboard as Pending review. Our onboarding team will call to verify documents."
-      : "Submission received. Our onboarding team will call to verify documents before anything goes live.",
+    message:
+      "Submitted. It is in your dashboard as Pending verification — our team checks the details and it goes live once approved. Enquiries will appear under Leads.",
     reference: ref,
   };
 }
+
+/**
+ * The no-credentials path. Keeps the form usable in demo mode by validating
+ * the essentials and logging the payload instead of writing a row.
+ */
+async function submitPropertyListingDemo(
+  data: FormData,
+): Promise<LeadSubmission> {
+  const errors: Record<string, string> = {};
+  const category = text(data, "category");
+  const market = text(data, "market");
+
+  if (!PROPERTY_TYPE_VALUES.includes(text(data, "property_type"))) {
+    errors.property_type = "Select the property type.";
+  }
+  if (!CATEGORY_VALUES.includes(category as ProjectCategory)) {
+    errors.category = "Select the project category.";
+  }
+  if (reraRequired(category) && !text(data, "rera_number")) {
+    errors.rera_number =
+      "A RERA registration number is required for a new project under construction.";
+  }
+  if (!zoneForMarket(market)) errors.market = "Select the location.";
+  if (!text(data, "area_sqft")) errors.area_sqft = "Enter the built-up area in sq.ft.";
+  if (data.get("consent") !== "on") {
+    errors.consent = "Please confirm you agree to be contacted.";
+  }
+
+  if (Object.keys(errors).length > 0) return invalid(errors);
+
+  const ref = reference("PRP");
+  console.info("[listing] submission captured (demo mode)", {
+    ref,
+    segment: text(data, "segment"),
+    type: text(data, "property_type"),
+    category,
+    rera: text(data, "rera_number"),
+    market,
+    building: text(data, "building_name"),
+    area: text(data, "area_sqft"),
+  });
+
+  return {
+    ok: true,
+    message:
+      "Submitted (demo mode — nothing was saved). Connect Supabase in .env.local to file real submissions.",
+    reference: ref,
+  };
+}
+
 
 export async function submitContact(
   _prev: LeadSubmission | null,

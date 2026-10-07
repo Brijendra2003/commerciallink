@@ -3,9 +3,15 @@ import Link from "next/link";
 import { PageHeader, Panel } from "@/components/admin/page-header";
 import { NewListingButton } from "@/components/admin/quick-actions";
 import { PropertyStatusBadge } from "@/components/admin/status-badge";
+import { ReviewActions } from "@/components/admin/review-actions";
 import { StatTile } from "@/components/charts/stat-tile";
 import { Photo } from "@/components/ui/photo";
-import { PROPERTY_TYPE_LABEL, PURPOSE_LABEL } from "@/lib/data/taxonomy";
+import {
+  PROJECT_CATEGORY_LABEL,
+  PROPERTY_TYPE_LABEL,
+  SEGMENT_LABEL,
+  purposeLabel,
+} from "@/lib/data/taxonomy";
 import { makeOwnerLookup } from "@/lib/data/crm";
 import { getAllProperties, getLeads, getOwners } from "@/lib/data/queries";
 import { formatArea, formatINR, formatPrice, formatRate } from "@/lib/format";
@@ -77,8 +83,8 @@ export default async function AdminPropertiesPage({
   return (
     <>
       <PageHeader
-        title="Property management"
-        lead="Listings, the owner-submission approval queue, and media. Nothing publishes until documents are verified."
+        title="Project management"
+        lead="Residential and commercial listings, the verification queue, and media. Nothing publishes until a reviewer approves it."
         action={
           <NewListingButton
             owners={owners.map((o) => ({
@@ -103,37 +109,62 @@ export default async function AdminPropertiesPage({
       {pending.length > 0 ? (
         <div className="mt-4">
           <Panel
-            title={`Approval queue · ${pending.length} awaiting review`}
+            title={`Verification queue · ${pending.length} awaiting review`}
             padded={false}
           >
             <ul className="divide-y divide-sand-200">
-              {pending.map((p) => (
-                <li key={p.id} className="flex flex-wrap items-center gap-4 px-5 py-4">
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-[0.8125rem] font-bold text-brand-900">
-                      {p.title}
-                    </span>
-                    <span className="mt-0.5 block text-[0.75rem] text-ink-500">
-                      Submitted by {ownerById(p.owner_id)?.name ?? p.owner_id} ·{" "}
-                      {formatArea(p.area_sqft)}
-                    </span>
-                  </span>
-                  <span className="flex shrink-0 gap-2">
-                    <Link
-                      href={`/admin/properties/${p.id}`}
-                      className="rounded-lg bg-brand-700 px-4 py-2 text-[0.75rem] font-semibold text-white transition-colors hover:bg-brand-800"
-                    >
-                      Review &amp; publish
-                    </Link>
-                    <a
-                      href={requestDocsHref(p.title, ownerById(p.owner_id)?.email)}
-                      className="rounded-lg border border-sand-300 px-4 py-2 text-[0.75rem] font-semibold text-ink-500 transition-colors hover:bg-sand-100"
-                    >
-                      Request docs
-                    </a>
-                  </span>
-                </li>
-              ))}
+              {pending.map((p) => {
+                // A new project with no RERA number cannot be approved, so the
+                // reviewer is told before they click rather than after.
+                const missingRera =
+                  p.category === "new_project" && !p.rera_number;
+
+                return (
+                  <li key={p.id} className="px-5 py-4">
+                    <div className="flex flex-wrap items-start gap-4">
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-[0.8125rem] font-bold text-brand-900">
+                          {p.title}
+                        </span>
+                        <span className="mt-0.5 block text-[0.75rem] text-ink-500">
+                          {SEGMENT_LABEL[p.segment]} ·{" "}
+                          {PROJECT_CATEGORY_LABEL[p.category]} ·{" "}
+                          {formatArea(p.area_sqft)} · submitted by{" "}
+                          {ownerById(p.owner_id)?.name ?? p.owner_id}
+                        </span>
+                        {p.rera_number ? (
+                          <span className="mt-1 block text-[0.6875rem] text-ink-300">
+                            RERA {p.rera_number}
+                          </span>
+                        ) : null}
+                        {missingRera ? (
+                          <span className="mt-1.5 inline-block rounded border border-clay-100 bg-clay-50 px-2 py-1 text-[0.6875rem] font-semibold text-clay-700">
+                            New project with no RERA number — add it before
+                            approving
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="flex shrink-0 flex-wrap gap-2">
+                        <Link
+                          href={`/admin/properties/${p.id}`}
+                          className="rounded-lg border border-sand-300 px-4 py-2 text-[0.75rem] font-semibold text-brand-900 transition-colors hover:bg-sand-100"
+                        >
+                          Open
+                        </Link>
+                        <a
+                          href={requestDocsHref(p.title, ownerById(p.owner_id)?.email)}
+                          className="rounded-lg border border-sand-300 px-4 py-2 text-[0.75rem] font-semibold text-ink-500 transition-colors hover:bg-sand-100"
+                        >
+                          Request docs
+                        </a>
+                      </span>
+                    </div>
+                    <div className="mt-3">
+                      <ReviewActions propertyRef={p.id} compact />
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </Panel>
         </div>
@@ -224,7 +255,8 @@ export default async function AdminPropertiesPage({
                       {PROPERTY_TYPE_LABEL[p.type]}
                     </span>
                     <span className="mt-0.5 block text-[0.6875rem] text-ink-300">
-                      {PURPOSE_LABEL[p.purpose]}
+                      {purposeLabel(p.purpose, p.segment)} ·{" "}
+                      {PROJECT_CATEGORY_LABEL[p.category]}
                     </span>
                   </td>
                   <td className="px-4 py-3">

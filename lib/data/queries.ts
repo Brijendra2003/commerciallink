@@ -344,6 +344,9 @@ export async function getOwners(): Promise<OwnerContact[]> {
     phone: o.phone,
     email: o.email,
     city: o.city,
+    // Rows written before 0006_projects_and_leads.sql have no account type.
+    account_type: o.account_type ?? "owner",
+    rera_number: o.rera_number ?? null,
     kyc_status: o.kyc_status,
     verified_at: o.verified_at ? o.verified_at.slice(0, 10) : null,
     property_ids: (o.properties ?? []).map((p) => p.ref),

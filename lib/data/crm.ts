@@ -574,6 +574,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-114", name: "Sanjay Kothari", company: "Kothari Realty LLP",
     phone: "+91 98200 11400", email: "sanjay@kotharirealty.in", city: "Mumbai",
+    account_type: "broker", rera_number: "A51900001234",
     kyc_status: "verified", verified_at: "2026-03-11", property_ids: ["p-001"],
     notes: [
       { date: "2026-09-04", author: "Priya Nair", text: "Countered Arclight at ₹285 with 4 months rent-free. Will hold at that." },
@@ -583,6 +584,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-207", name: "Deepak Bhandari", company: "Bhandari Logistics Parks",
     phone: "+91 98200 20700", email: "deepak@bhandariparks.com", city: "Mumbai",
+    account_type: "developer", rera_number: "P99000031122",
     kyc_status: "verified", verified_at: "2026-01-19", property_ids: ["p-002"],
     notes: [
       { date: "2026-08-14", author: "Imran Shaikh", text: "Rao Warehousing lease signed. Brokerage invoice raised and settled." },
@@ -591,6 +593,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-331", name: "Anita Phadke", company: "Phadke Estates",
     phone: "+91 98200 33100", email: "anita@phadkeestates.in", city: "Mumbai",
+    account_type: "owner", rera_number: null,
     kyc_status: "verified", verified_at: "2026-02-04", property_ids: ["p-003"],
     notes: [
       { date: "2026-09-02", author: "Ananya Bose", text: "Confirmed a stepped rent is acceptable for an established F&B covenant." },
@@ -599,6 +602,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-402", name: "Sunita Desai", company: "Desai Estates",
     phone: "+91 98200 40200", email: "sunita@desaiestates.in", city: "Mumbai",
+    account_type: "owner", rera_number: null,
     kyc_status: "verified", verified_at: "2025-11-27", property_ids: ["p-005"],
     notes: [
       { date: "2026-08-30", author: "Imran Shaikh", text: "Agreement signed with Shetty Precision at ₹28.5 Cr. Payout pending." },
@@ -608,6 +612,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-509", name: "Harpreet Sandhu", company: "Sandhu Land Holdings",
     phone: "+91 98200 50900", email: "harpreet@sandhuholdings.in", city: "Mumbai",
+    account_type: "owner", rera_number: null,
     kyc_status: "pending", verified_at: null, property_ids: ["p-007"],
     notes: [
       { date: "2026-09-01", author: "Priya Nair", text: "Chasing the mutation record — last item before KYC clears." },
@@ -616,6 +621,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-611", name: "Bhavesh Patel", company: "Patel Cold Chain",
     phone: "+91 98200 61100", email: "bhavesh@patelcoldchain.com", city: "Mumbai",
+    account_type: "owner", rera_number: null,
     kyc_status: "verified", verified_at: "2026-04-08", property_ids: ["p-009"],
     notes: [
       { date: "2026-09-05", author: "Imran Shaikh", text: "Open to a facility handover with chambers pulled down and validated." },
@@ -624,6 +630,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-724", name: "Girish Hegde", company: "Hegde Properties",
     phone: "+91 98200 72400", email: "girish@hegdeproperties.in", city: "Mumbai",
+    account_type: "broker", rera_number: "A51900004455",
     kyc_status: "verified", verified_at: "2026-05-16", property_ids: ["p-010"],
     notes: [
       { date: "2026-09-04", author: "Ananya Bose", text: "Will contribute to shopfront and escalator capex on a 9-year term." },
@@ -632,6 +639,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-288", name: "Lakshmi Sridhar", company: "Sridhar Holdings",
     phone: "+91 98200 28800", email: "lakshmi@sridharholdings.in", city: "Mumbai",
+    account_type: "owner", rera_number: null,
     kyc_status: "pending", verified_at: null, property_ids: ["p-008"],
     notes: [
       { date: "2026-09-03", author: "Priya Nair", text: "Requested the in-situ tenant lease copy and rent roll for Chandra Exports." },
@@ -640,6 +648,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-118", name: "Rajiv Menon", company: "Menon Estates",
     phone: "+91 98200 11800", email: "rajiv@menonestates.in", city: "Mumbai",
+    account_type: "owner", rera_number: null,
     kyc_status: "verified", verified_at: "2026-02-21", property_ids: ["p-004"],
     notes: [
       { date: "2026-09-01", author: "Priya Nair", text: "Happy to leave the workstations in situ for a tenant taking a 5-year term." },
@@ -648,6 +657,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-133", name: "Ashwin Gokhale", company: "Gokhale Developers",
     phone: "+91 98200 13300", email: "ashwin@gokhaledev.in", city: "Mumbai",
+    account_type: "developer", rera_number: "P99000077880",
     kyc_status: "verified", verified_at: "2026-06-02", property_ids: ["p-011"],
     notes: [
       { date: "2026-08-30", author: "Priya Nair", text: "Confirmed the interconnecting stair approval covers floors 18–20." },
@@ -656,6 +666,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-155", name: "Zoya Merchant", company: "Merchant Workspace Co.",
     phone: "+91 98200 15500", email: "zoya@merchantworkspace.in", city: "Mumbai",
+    account_type: "broker", rera_number: "A51900009901",
     kyc_status: "verified", verified_at: "2026-07-14", property_ids: ["p-006"],
     notes: [
       { date: "2026-09-02", author: "Ananya Bose", text: "Will hold the all-in seat rate for a 3-year commitment on the full floor." },
@@ -664,6 +675,7 @@ export const owners: OwnerContact[] = [
   {
     id: "o-318", name: "Prakash Salvi", company: "Salvi Industrial Estates",
     phone: "+91 98200 31800", email: "prakash@salviestates.in", city: "Mumbai",
+    account_type: "owner", rera_number: null,
     kyc_status: "pending", verified_at: null, property_ids: ["p-012"],
     notes: [
       { date: "2026-09-04", author: "Imran Shaikh", text: "Onboarded last week. Chasing the MIDC transfer letter before we publish." },

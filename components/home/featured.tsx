@@ -20,11 +20,11 @@ export async function Featured() {
     <section className="border-y border-brand-800 bg-brand-900 py-14 sm:py-16 lg:py-20">
       <Container>
         <SectionHeading
-          kicker="Current mandates"
-          title="Space we are actively"
-          accent="taking to market."
-          lead="Live instructions under exclusive or co-exclusive mandate, with
-            ownership documents verified before publication."
+          kicker="Featured"
+          title="Projects worth a look"
+          accent="this week."
+          lead="Picked by our team from the live book — new launches, ready
+            possession and resale, all verified before publication."
           align="center"
           tone="light"
         />
@@ -36,18 +36,18 @@ export async function Featured() {
         </div>
 
         <div className="mt-10 flex flex-col items-center gap-4 border-t border-white/10 pt-8">
-          <ButtonLink href="/properties" variant="light" size="lg" arrow>
-            See all live listings
+          <ButtonLink href="#projects" variant="light" size="lg" arrow>
+            See every live project
           </ButtonLink>
           <p className="text-center text-[0.8125rem] text-sand-200/60">
-            Roughly a third of what we transact is never listed publicly.{" "}
+            Own a property on this line?{" "}
             <a
-              href="/post-requirement"
+              href="/list-your-property"
               className="font-semibold text-white underline underline-offset-4 hover:text-brand-100"
             >
-              Submit a requirement
+              List it in two minutes
             </a>{" "}
-            to access off-market stock.
+            and take the enquiries yourself.
           </p>
         </div>
       </Container>

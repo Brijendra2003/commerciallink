@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Arrow } from "@/components/ui/button";
 import { Container, Section, SectionHeading } from "@/components/ui/section";
 import { PROPERTY_TYPE_ICON } from "@/components/ui/icons";
-import { PROPERTY_TYPES } from "@/lib/data/taxonomy";
+import { PROPERTY_TYPES, SEGMENT_LABEL } from "@/lib/data/taxonomy";
 import { getPublishedProperties } from "@/lib/data/queries";
 import { describeError } from "@/lib/log";
 
@@ -13,28 +13,35 @@ export async function AssetClasses() {
     return [];
   });
 
+  // Types with live stock first, then the rest. Thirteen tiles is a lot to
+  // scan, and an empty asset class is the least useful of them.
+  const ordered = [...PROPERTY_TYPES].sort((a, b) => {
+    const count = (v: string) => all.filter((p) => p.type === v).length;
+    return count(b.value) - count(a.value);
+  });
+
   return (
     <Section className="pt-16 sm:pt-20">
       <Container>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <SectionHeading
             kicker="Coverage"
-            title="Six asset classes,"
-            accent="one advisory desk."
-            lead="Each class is run by advisors who transact in it weekly — not a
-              generalist working from a listing feed."
+            title="Residential and commercial,"
+            accent="on one corridor."
+            lead="From a 1 BHK in Nalasopara to a Tarapur shed — every asset class
+              on the Mira Road to Dahanu Road line, in one place."
           />
           <Link
             href="/properties"
             className="group/btn inline-flex shrink-0 items-center gap-2 text-[0.8125rem] font-semibold text-brand-700 transition-colors hover:text-brand-800"
           >
-            View all properties
+            View all projects
             <Arrow />
           </Link>
         </div>
 
         <ul className="mt-10 grid gap-px overflow-hidden rounded-lg border border-sand-200 bg-sand-200 sm:grid-cols-2 lg:grid-cols-3">
-          {PROPERTY_TYPES.map((type) => {
+          {ordered.map((type) => {
             const Icon = PROPERTY_TYPE_ICON[type.value];
             const count = all.filter((p) => p.type === type.value).length;
 
@@ -53,7 +60,10 @@ export async function AssetClasses() {
                     </span>
                   </div>
 
-                  <h3 className="mt-5 font-display text-[1.0625rem] font-semibold tracking-[-0.01em] text-brand-900">
+                  <p className="mt-5 text-[0.625rem] font-bold uppercase tracking-[0.12em] text-ink-300">
+                    {SEGMENT_LABEL[type.segment]}
+                  </p>
+                  <h3 className="mt-1 font-display text-[1.0625rem] font-semibold tracking-[-0.01em] text-brand-900">
                     {type.label}
                   </h3>
                   <p className="mt-2 flex-1 text-[0.8125rem] leading-relaxed text-ink-500">
@@ -61,7 +71,7 @@ export async function AssetClasses() {
                   </p>
 
                   <span className="mt-5 inline-flex items-center gap-1.5 text-[0.75rem] font-semibold text-brand-700">
-                    View listings
+                    View projects
                     <svg
                       viewBox="0 0 16 16"
                       className="h-3 w-3 transition-transform duration-150 group-hover/tile:translate-x-0.5"

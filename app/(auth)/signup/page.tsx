@@ -8,9 +8,12 @@ import { isSupabaseConfigured } from "@/lib/supabase/env";
 export const metadata: Metadata = {
   title: "Create an Account",
   description:
-    "Create a CommercialLink account as a buyer to track enquiries and post requirements, or as an owner to list commercial property in Mumbai.",
+    "Create a CommercialLink account as a buyer to track enquiries, or as an owner, broker or developer to list residential and commercial projects.",
   robots: { index: false, follow: true },
 };
+
+const SIGNUP_ROLES = ["buyer", "owner", "broker", "developer"] as const;
+type SignupRole = (typeof SIGNUP_ROLES)[number];
 
 export default async function SignupPage({
   searchParams,
@@ -30,13 +33,17 @@ export default async function SignupPage({
         Create your account
       </h1>
       <p className="mt-3 text-[0.875rem] leading-relaxed text-ink-500">
-        Registration is what ties a listing to a verified owner and a
-        requirement to a real buyer — which is why nothing here is anonymous.
+        Registration is what ties a project to an accountable lister and an
+        enquiry to a real buyer — which is why nothing here is anonymous.
       </p>
 
       <div className="mt-8">
         <PortalSignupForm
-          defaultRole={requested === "owner" ? "owner" : "buyer"}
+          defaultRole={
+            SIGNUP_ROLES.includes(requested as SignupRole)
+              ? (requested as SignupRole)
+              : "buyer"
+          }
           configured={isSupabaseConfigured}
         />
       </div>

@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
 import { requirePortalSession } from "@/lib/portal";
+import type { OwnerAccountTypeDb } from "@/lib/supabase/types";
 
 export interface PortalAuthState {
   ok: boolean;
@@ -40,18 +41,33 @@ export async function signUpPortalUser(
 ): Promise<PortalAuthState> {
   if (!isSupabaseConfigured) return NOT_CONFIGURED;
 
-  const role = text(data, "role") === "owner" ? "owner" : "buyer";
+  // One radio group drives both the table the profile lands in and, on the
+  // supply side, which kind of account it is. "buyer" is the only demand-side
+  // value; everything else is an `owners` row with an account_type.
+  const choice = text(data, "role");
+  const accountType: OwnerAccountTypeDb | null =
+    choice === "owner" || choice === "broker" || choice === "developer"
+      ? choice
+      : null;
+  const role: "owner" | "buyer" = accountType ? "owner" : "buyer";
+
   const name = text(data, "name");
   // Lower-cased: profiles are unique on email (0003_listing_details.sql).
   const email = text(data, "email").toLowerCase();
   const phone = text(data, "phone");
   const password = String(data.get("password") ?? "");
   const company = text(data, "company");
+  const reraNumber = text(data, "rera_number");
 
   const fieldErrors: Record<string, string> = {};
   if (name.length < 2) fieldErrors.name = "Please enter your full name.";
   if (!EMAIL.test(email)) fieldErrors.email = "Please enter a valid email address.";
   if (!PHONE.test(phone)) fieldErrors.phone = "Please enter a valid phone number.";
+  // A developer is a company, not a person — the firm name is the identity
+  // buyers see on the project, so it is required here rather than optional.
+  if (accountType === "developer" && company.length < 2) {
+    fieldErrors.company = "Enter your company name.";
+  }
   if (password.length < 8) {
     fieldErrors.password = "Use at least 8 characters.";
   } else if (!/\d/.test(password)) {
@@ -70,7 +86,7 @@ export async function signUpPortalUser(
     email,
     password,
     options: {
-      data: { name, role },
+      data: { name, role, account_type: accountType },
       emailRedirectTo: `${siteUrl()}/dashboard`,
     },
   });
@@ -108,12 +124,16 @@ export async function signUpPortalUser(
   // and stops typechecking either shape properly.
   const { error: profileError } =
     role === "owner"
-      ? await admin
-          .from("owners")
-          .upsert(
-            { ...base, city: "Mumbai", kyc_status: "pending" as const },
-            { onConflict: "email" },
-          )
+      ? await admin.from("owners").upsert(
+          {
+            ...base,
+            city: "Mumbai",
+            kyc_status: "pending" as const,
+            account_type: accountType ?? "owner",
+            rera_number: reraNumber || null,
+          },
+          { onConflict: "email" },
+        )
       : await admin.from("buyers").upsert(base, { onConflict: "email" });
 
   if (profileError) {
@@ -307,20 +327,120 @@ export async function closeRequirement(requirementId: string) {
   revalidatePath("/dashboard");
 }
 
+/**
+ * Takes a project off the market. A lister can pull their own listing in any
+ * state — a sold flat has to come down the moment it sells, and waiting on the
+ * desk to do it is what makes a portal's stock go stale.
+ */
 export async function withdrawListing(propertyId: string) {
   if (!isSupabaseConfigured) return;
 
   const session = await requirePortalSession("owner");
   const supabase = await createClient();
 
-  // Only pending submissions can be pulled — a published listing is under
-  // mandate and comes down by talking to the desk.
   await supabase
     .from("properties")
     .update({ status: "archived" })
     .eq("id", propertyId)
     .eq("owner_id", session.profileId)
-    .eq("status", "pending_review");
+    .in("status", ["draft", "pending_review", "published"]);
 
   revalidatePath("/dashboard");
+  revalidatePath("/properties");
+  revalidatePath("/");
+}
+
+/** Puts a withdrawn project back into the review queue. */
+export async function relistListing(propertyId: string) {
+  if (!isSupabaseConfigured) return;
+
+  const session = await requirePortalSession("owner");
+  const supabase = await createClient();
+
+  await supabase
+    .from("properties")
+    .update({ status: "pending_review", review_status: "pending", verified: false })
+    .eq("id", propertyId)
+    .eq("owner_id", session.profileId)
+    .eq("status", "archived");
+
+  revalidatePath("/dashboard");
+}
+
+/* ------------------------------------------------------------------ *
+ * Leads on my own projects
+ * ------------------------------------------------------------------ */
+
+const LEAD_STATUSES = [
+  "new",
+  "contacted",
+  "qualified",
+  "site_visit",
+  "negotiation",
+  "won",
+  "lost",
+] as const;
+
+export type OwnerLeadStatus = (typeof LEAD_STATUSES)[number];
+
+/**
+ * Moves one of the lister's own leads along their pipeline.
+ *
+ * Deliberately a service-role write rather than an RLS-backed UPDATE policy:
+ * RLS is row-level, so granting a lister UPDATE on `leads` would also let them
+ * rewrite buyer_name or buyer_phone on any row they can read. Here, ownership
+ * is verified first and only `status` is written.
+ */
+export async function updateOwnerLeadStatus(
+  leadId: string,
+  status: OwnerLeadStatus,
+): Promise<{ ok: boolean; message: string }> {
+  if (!isSupabaseConfigured) {
+    return { ok: false, message: "Connect Supabase to work your leads." };
+  }
+  if (!LEAD_STATUSES.includes(status)) {
+    return { ok: false, message: "Unknown status." };
+  }
+
+  const session = await requirePortalSession("owner");
+  const admin = createAdminClient();
+
+  // Which listing is this lead on, and is it one of theirs?
+  const { data: lead } = await admin
+    .from("leads")
+    .select("id, property_id, properties(owner_id)")
+    .eq("id", leadId)
+    .maybeSingle();
+
+  const ownerId = (lead as { properties?: { owner_id: string } | null } | null)
+    ?.properties?.owner_id;
+
+  if (!lead || !ownerId || ownerId !== session.profileId) {
+    // Same answer for "no such lead" and "not yours": distinguishing them
+    // would confirm that a given lead id exists.
+    return { ok: false, message: "That enquiry is not on one of your projects." };
+  }
+
+  const { error } = await admin
+    .from("leads")
+    .update({ status, last_activity_at: new Date().toISOString() })
+    .eq("id", leadId);
+
+  if (error) {
+    console.error("[portal] lead status update failed", error);
+    return { ok: false, message: "Could not update that enquiry." };
+  }
+
+  // Leave a trail the desk can see too, so both sides share one history.
+  const { error: activityError } = await admin.from("lead_activities").insert({
+    lead_id: leadId,
+    type: "status_change",
+    note: `${session.name} (lister) moved this enquiry to ${status.replace("_", " ")}.`,
+  });
+  if (activityError) {
+    console.error("[portal] lead activity insert failed", activityError);
+  }
+
+  revalidatePath("/dashboard");
+  return { ok: true, message: "Enquiry updated." };
 }

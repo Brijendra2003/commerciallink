@@ -3,7 +3,13 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { isSupabaseConfigured } from "@/lib/supabase/env";
+import type { AccountType } from "@/lib/types";
 
+/**
+ * Which table the profile lives in. "owner" covers the whole supply side —
+ * an owner, a broker and a developer are all rows in `owners`, told apart by
+ * `accountType`, because they do exactly the same things on the platform.
+ */
 export type PortalRole = "owner" | "buyer";
 
 export interface PortalSession {
@@ -15,8 +21,11 @@ export interface PortalSession {
   email: string;
   phone: string;
   company: string | null;
-  /** Owners only. */
+  /** Supply side only: owner / broker / developer. */
+  accountType?: AccountType;
+  /** Supply side only. */
   kycStatus?: "verified" | "pending" | "rejected";
+  reraNumber?: string | null;
   emailVerified: boolean;
 }
 
@@ -49,7 +58,7 @@ export const getPortalSession = cache(
     const [{ data: owner }, { data: buyer }] = await Promise.all([
       supabase
         .from("owners")
-        .select("id, name, email, phone, company, kyc_status")
+        .select("id, name, email, phone, company, kyc_status, account_type, rera_number")
         .eq("auth_user_id", user.id)
         .maybeSingle(),
       supabase
@@ -70,7 +79,10 @@ export const getPortalSession = cache(
         email: owner.email,
         phone: owner.phone,
         company: owner.company,
+        // Older rows predate 0006_projects_and_leads.sql; treat them as owners.
+        accountType: owner.account_type ?? "owner",
         kycStatus: owner.kyc_status,
+        reraNumber: owner.rera_number ?? null,
         emailVerified,
       };
     }

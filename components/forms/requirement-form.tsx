@@ -11,14 +11,16 @@ import {
   Textarea,
 } from "@/components/ui/field";
 import {
+  BHK_OPTIONS,
   BUDGET_BANDS,
   MICRO_MARKETS,
-  PROPERTY_TYPES,
+  SEGMENTS,
   TIMELINES,
   ZONES,
+  typesInSegment,
 } from "@/lib/data/taxonomy";
 import { submitRequirement } from "@/lib/actions";
-import type { LeadSubmission } from "@/lib/types";
+import type { LeadSubmission, PropertySegment } from "@/lib/types";
 
 export function RequirementForm() {
   const [state, action, pending] = useActionState<LeadSubmission | null, FormData>(
@@ -26,6 +28,10 @@ export function RequirementForm() {
     null,
   );
   const [dismissed, setDismissed] = useState<LeadSubmission | null>(null);
+  // Which half of the book the brief is for. It narrows the type list and
+  // decides whether a BHK question makes any sense.
+  const [segment, setSegment] = useState<PropertySegment>("residential");
+  const residential = segment === "residential";
   const errors = state?.fieldErrors ?? {};
 
   if (state?.ok && state !== dismissed) {
@@ -48,6 +54,25 @@ export function RequirementForm() {
           Requirement
         </legend>
 
+        <div className="grid gap-2.5 sm:grid-cols-2">
+          {SEGMENTS.map((s) => (
+            <label
+              key={s.value}
+              className="flex cursor-pointer items-center gap-2.5 rounded-lg border border-sand-300 bg-white p-3.5 text-[0.875rem] font-semibold tracking-tight text-brand-900 transition-colors has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50"
+            >
+              <input
+                type="radio"
+                name="segment"
+                value={s.value}
+                checked={segment === s.value}
+                onChange={() => setSegment(s.value)}
+                className="control-box rounded-full"
+              />
+              {s.label}
+            </label>
+          ))}
+        </div>
+
         <div className="grid gap-3.5 sm:grid-cols-2">
           <Field
             label="Property type"
@@ -55,11 +80,19 @@ export function RequirementForm() {
             required
             error={errors.property_type}
           >
-            <Select name="property_type" defaultValue="" required error={errors.property_type}>
+            <Select
+              name="property_type"
+              defaultValue=""
+              // Remount on segment change so the stale selection cannot
+              // survive into a list that no longer contains it.
+              key={segment}
+              required
+              error={errors.property_type}
+            >
               <option value="" disabled>
                 Select a type
               </option>
-              {PROPERTY_TYPES.map((t) => (
+              {typesInSegment(segment).map((t) => (
                 <option key={t.value} value={t.value}>
                   {t.label}
                 </option>
@@ -67,27 +100,34 @@ export function RequirementForm() {
             </Select>
           </Field>
 
-          <Field label="Buy or lease" name="purpose" required error={errors.purpose}>
+          <Field
+            label={residential ? "Buy or rent" : "Buy or lease"}
+            name="purpose"
+            required
+            error={errors.purpose}
+          >
             <Select name="purpose" defaultValue="" required error={errors.purpose}>
               <option value="" disabled>
                 Select
               </option>
-              <option value="lease">Lease / rent</option>
+              <option value="lease">{residential ? "Rent" : "Lease / rent"}</option>
               <option value="buy">Buy outright</option>
             </Select>
           </Field>
 
           <Field
-            label="Preferred micro-market"
+            label="Preferred station area"
             name="market"
             required
             error={errors.market}
           >
             <Select name="market" defaultValue="" required error={errors.market}>
               <option value="" disabled>
-                Select a micro-market
+                Select a station area
               </option>
-              <option value="flexible">Flexible across MMR</option>
+              <option value="flexible">
+                Flexible — anywhere Mira Road to Dahanu Road
+              </option>
               {ZONES.map((zone) => (
                 <optgroup key={zone.value} label={zone.label}>
                   {MICRO_MARKETS.filter((m) => m.zone === zone.value).map((m) => (
@@ -103,9 +143,9 @@ export function RequirementForm() {
           <Field
             label="Other areas you'd consider"
             name="locality"
-            hint="Optional — list two or three more micro-markets."
+            hint="Optional — list two or three more station areas."
           >
-            <Input name="locality" placeholder="e.g. Lower Parel, Worli, Prabhadevi" />
+            <Input name="locality" placeholder="e.g. Nalasopara West, Virar East" />
           </Field>
 
           <Field label="Budget" name="budget">
@@ -119,8 +159,25 @@ export function RequirementForm() {
             </Select>
           </Field>
 
+          {residential ? (
+            <Field label="Configuration" name="bhk">
+              <Select name="bhk" defaultValue="">
+                <option value="">Any</option>
+                {BHK_OPTIONS.map((b) => (
+                  <option key={b.value} value={b.value}>
+                    {b.label}
+                  </option>
+                ))}
+              </Select>
+            </Field>
+          ) : null}
+
           <Field label="Area required" name="area_sqft" hint="Carpet or built-up, in sq.ft.">
-            <Input name="area_sqft" inputMode="numeric" placeholder="e.g. 12,000" />
+            <Input
+              name="area_sqft"
+              inputMode="numeric"
+              placeholder={residential ? "e.g. 750" : "e.g. 12,000"}
+            />
           </Field>
         </div>
 
@@ -138,12 +195,16 @@ export function RequirementForm() {
         <Field
           label="Anything else we should know?"
           name="notes"
-          hint="Headcount, power load, dock requirement, expansion plans, board approvals — the more context, the better the match."
+          hint="Floor preference, vastu, loan status, distance from the station, power load — the more context, the better the match."
         >
           <Textarea
             name="notes"
             rows={4}
-            placeholder="We're a 180-person engineering team moving out of a serviced office; need warm shell with 1:800 parking and a metro within 1 km…"
+            placeholder={
+              residential
+                ? "Family of four, need a 2 BHK within ten minutes' walk of the station, loan pre-approved, east-facing if possible…"
+                : "Need a godown of about 8,000 sq.ft. with truck access off the highway and a current fire NOC…"
+            }
           />
         </Field>
       </fieldset>

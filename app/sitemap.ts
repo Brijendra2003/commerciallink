@@ -1,6 +1,11 @@
 import type { MetadataRoute } from "next";
 import { getPublishedProperties } from "@/lib/data/queries";
-import { MICRO_MARKET_NAMES, PROPERTY_TYPES } from "@/lib/data/taxonomy";
+import {
+  MICRO_MARKET_NAMES,
+  PROJECT_CATEGORIES,
+  PROPERTY_TYPES,
+  SEGMENTS,
+} from "@/lib/data/taxonomy";
 import { site } from "@/lib/data/site";
 
 export const revalidate = 3600;
@@ -32,8 +37,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // Long-tail "type in micro-market" combinations — the organic lead engine described
-  // in Section 8. Filters live in the URL specifically so these are indexable.
+  // Long-tail "type in station area" combinations — the organic lead engine.
+  // Filters live in the URL specifically so these are indexable.
   const landingPages: MetadataRoute.Sitemap = PROPERTY_TYPES.flatMap((type) =>
     MICRO_MARKET_NAMES.map((market) => ({
       url: `${site.url}/properties?type=${type.value}&market=${encodeURIComponent(market)}`,
@@ -43,5 +48,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     })),
   );
 
-  return [...staticRoutes, ...listings, ...landingPages];
+  // "New project in Virar West" and "resale in Nalasopara East" are the two
+  // highest-intent searches on this corridor, so the category × area pairs get
+  // their own URLs rather than being reachable only through a type filter.
+  const categoryPages: MetadataRoute.Sitemap = PROJECT_CATEGORIES.flatMap((c) =>
+    MICRO_MARKET_NAMES.map((market) => ({
+      url: `${site.url}/properties?category=${c.value}&market=${encodeURIComponent(market)}`,
+      lastModified: now,
+      changeFrequency: "weekly" as const,
+      priority: 0.5,
+    })),
+  );
+
+  const segmentPages: MetadataRoute.Sitemap = SEGMENTS.map((s) => ({
+    url: `${site.url}/properties?segment=${s.value}`,
+    lastModified: now,
+    changeFrequency: "daily" as const,
+    priority: 0.85,
+  }));
+
+  return [
+    ...staticRoutes,
+    ...segmentPages,
+    ...listings,
+    ...landingPages,
+    ...categoryPages,
+  ];
 }

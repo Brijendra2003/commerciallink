@@ -2,138 +2,144 @@ import type { Testimonial } from "@/lib/types";
 
 export const site = {
   name: "CommercialLink",
-  tagline: "Mumbai commercial real estate, brokered properly.",
+  tagline: "Property on the Western line, listed properly.",
   description:
-    "A Mumbai commercial real estate portal connecting owners, developers and occupiers through a single advisory desk. Every enquiry is qualified by our team — no cold contact lists, no unfiltered noise.",
+    "A residential and commercial property portal for the Mira Road to Dahanu Road corridor. Owners, brokers and developers list their projects, our team verifies each one, and buyer enquiries reach the lister directly.",
   url: "https://commerciallink.in",
   email: "desk@commerciallink.in",
   phone: "+91 22 4890 1200",
   whatsapp: "+91 98200 41200",
-  address: "Unit 704, Trade Centre, Bandra Kurla Complex, Mumbai 400051",
+  address: "Unit 12, Shanti Shopping Centre, Mira Road East 401107",
   hours: "Mon – Sat, 9:30 am – 7:00 pm IST",
   /** The single market the portal serves. */
-  region: "Mumbai Metropolitan Region",
+  region: "Mira Road to Dahanu Road",
 };
 
 export const navLinks = [
-  { href: "/properties", label: "Properties" },
-  { href: "/list-your-property", label: "List Your Property" },
+  { href: "/properties", label: "Projects" },
+  { href: "/list-your-property", label: "List Your Project" },
   { href: "/post-requirement", label: "Post Requirement" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
 
+// Rendered at display size with tabular figures, so each value stays short and
+// numeric — a word here would set loose and overflow the tile on mobile.
 export const stats = [
-  { value: "1,240+", label: "Properties under mandate" },
-  { value: "38 mn", label: "Sq.ft. transacted" },
-  { value: "26", label: "MMR micro-markets covered" },
-  { value: "412", label: "Deals closed since 2019" },
+  { value: "40", label: "Station areas, Mira Road to Dahanu Road" },
+  { value: "13", label: "Asset classes, residential and commercial" },
+  { value: "2 min", label: "To list a project" },
+  { value: "100%", label: "Verified before they publish" },
 ];
 
 export const trustPoints = [
   {
-    title: "Every listing is verified",
-    body: "Ownership documents, title chain and approvals are checked by our desk before a listing goes live. Nothing reaches the site on the owner's word alone.",
+    title: "Every project is verified",
+    body: "Our team checks the details and the ownership documents before a project appears on the site. A new project under construction cannot list without its MahaRERA number.",
   },
   {
-    title: "One advisory desk, not a phone tree",
-    body: "Your enquiry is answered by a named advisor who owns it end to end — through shortlisting, site visits, negotiation and closure.",
+    title: "You reach the actual lister",
+    body: "Send an enquiry and it goes to the owner, broker or developer who listed the project — not into a call-centre queue. You talk to whoever can answer.",
   },
   {
-    title: "Owners are shielded from noise",
-    body: "We qualify budget, timeline and intent before any introduction, so owners meet buyers who are actually ready to transact.",
+    title: "Listers work their own leads",
+    body: "Every enquiry on a project lands in that lister's dashboard with your name and number, so nothing sits waiting on a middleman to pass it along.",
   },
   {
-    title: "Mumbai is all we do",
-    body: "One city, twenty-six micro-markets, and advisors who have walked the floors. We know what a BKC floor plate really rents for, not what a portal says it does.",
+    title: "One corridor is all we do",
+    body: "Mira Road to Dahanu Road, forty station areas, residential and commercial. Depth on one line beats a thin presence across the state.",
   },
 ];
 
 export const processSteps = [
   {
     number: "01",
-    title: "Tell us the brief",
-    body: "Send an enquiry on a listing, or post a requirement if nothing on site fits. Either way it lands with a named advisor.",
+    title: "Browse the corridor",
+    body: "Every live project is on this site — residential and commercial, from Mira Road to Dahanu Road. Filter by category, station area, budget and configuration.",
   },
   {
     number: "02",
-    title: "We shortlist and verify",
-    body: "We match your brief against live mandates and off-market stock across the MMR, and confirm title, approvals and commercial terms before you see it.",
+    title: "Enquire on what fits",
+    body: "One short form. Your enquiry reaches the owner, broker or developer who listed the project, with a copy to our team.",
   },
   {
     number: "03",
-    title: "Inspect on site",
-    body: "We coordinate the visit schedule with owners directly, so you see three or four qualified options in a single day.",
+    title: "They call you back",
+    body: "You get the price, the papers and a site-visit slot from the person who actually holds the property. Usually the same working day.",
   },
   {
     number: "04",
-    title: "Negotiate and close",
-    body: "We run the commercial negotiation, coordinate legal diligence and stay on the file through fit-out handover.",
+    title: "Nothing fits? Post a brief",
+    body: "Tell us what you need and we will match it against projects that have not gone live yet, and against stock listers have not published.",
   },
 ];
 
 export const ownerBenefits = [
   {
-    title: "Qualified buyers only",
-    body: "We screen budget, timeline and decision authority before an introduction is made. You never field a speculative call.",
+    title: "Leads come straight to you",
+    body: "Every buyer who enquires on your project appears in your dashboard with their name, phone number and message. You call them, not us.",
   },
   {
-    title: "Your contact stays private",
-    body: "Your phone number and email never appear on the public site. Enquiries route to our desk and reach you only once they are worth your time.",
+    title: "One short form, not six tabs",
+    body: "Category, type, location, size, price, a few photographs. Our team fills in the rest before the project goes live.",
   },
   {
-    title: "Professional presentation",
-    body: "We commission photography, floor plans and a brochure for every mandate — at our cost, not yours.",
+    title: "The verified badge",
+    body: "Our team checks each project before it publishes, so buyers can see the listing has been through a real check rather than taking your word for it.",
   },
   {
-    title: "Transparent reporting",
-    body: "Your dashboard shows views, enquiry volume and where each live negotiation stands, updated as we work the file.",
+    title: "Your own dashboard",
+    body: "Add, edit and withdraw projects yourself, see views on each one, and move each enquiry along your own pipeline.",
   },
 ];
 
 export const testimonials: Testimonial[] = [
   {
     quote:
-      "We had been shown the same four buildings by three different brokers. CommercialLink came back with two off-market floors in BKC within a week, and one of them is now our head office.",
+      "We were looking for a 2 BHK between Nalasopara and Virar and every portal gave us the same six brokers calling at once. Here we enquired on four flats and the actual owners rang back. We bought the second one.",
     name: "Rohan Mehta",
-    role: "COO, Arclight Technologies",
+    role: "Bought in Virar West",
     initials: "RM",
   },
   {
     quote:
-      "I own two industrial sheds in Taloja and I do not want my number on a listing site. Their desk filters everything and only calls me when there is a real buyer on the other side.",
+      "I list five or six flats around Mira Road at any time. The form takes two minutes and every enquiry shows up in my dashboard with the buyer's number. I am not waiting on anyone to forward it.",
     name: "Sunita Desai",
-    role: "Owner, Desai Estates",
+    role: "Channel partner, Mira Road",
     initials: "SD",
   },
   {
     quote:
-      "The warehouse search covered Bhiwandi, Panvel and Taloja across eleven parks. Having one advisor hold the whole process — including the fire NOC diligence — saved our expansion timeline.",
+      "Our Palghar launch needed to reach buyers on the line, not across the state. The RERA number sits on the listing, the leads come to our sales team directly, and we closed eleven units in the first phase.",
     name: "Farhan Qureshi",
-    role: "Head of Supply Chain, Nordwell Retail",
+    role: "Sales head, Shree Siddhi Developers",
     initials: "FQ",
   },
 ];
 
 export const faqs = [
   {
-    q: "Why can't I see the owner's phone number on a listing?",
-    a: "Because our desk sits between both sides on purpose. Owners list with us specifically so they are not called by every browsing visitor, and buyers get a single advisor who knows the whole market rather than one building. Submit an enquiry and a named advisor responds — usually within four working hours.",
+    q: "Who sees my enquiry when I send one?",
+    a: "The owner, broker or developer who listed that project, and our team. They get your name, phone number and message so they can call you back — usually the same working day. We do not sell your details or pass them to anyone else.",
   },
   {
     q: "Is there a fee for buyers or tenants?",
-    a: "There is no fee to search, enquire or post a requirement. On a completed transaction we are paid a brokerage fee, and the structure is disclosed in writing before you commit to anything.",
+    a: "There is no fee to search, enquire or post a requirement. If a brokerage fee applies on a completed transaction, the lister discloses it in writing before you commit to anything.",
   },
   {
-    q: "What if nothing on the site matches what I need?",
-    a: "Post a requirement. Roughly a third of what we transact never appears as a public listing, so a written brief lets us match you against off-market mandates and owner stock that is not yet live.",
+    q: "Can anyone list a property here?",
+    a: "You need an account — as an owner, a broker or a developer — and every project you add is checked by our team before it appears on the site. A new project under construction cannot be listed at all without its MahaRERA registration number.",
   },
   {
-    q: "How long does it take to get a listing published?",
-    a: "Once you submit a property we review the details and ownership documents, then arrange photography. Most listings go live within five to seven working days of a complete submission.",
+    q: "How long does it take to get a project published?",
+    a: "The form itself takes about two minutes. Verification is usually done within one to two working days; if something is missing we send it back with a note telling you exactly what to add.",
   },
   {
-    q: "Do you work outside Mumbai?",
-    a: "No — and that is deliberate. We cover the Mumbai Metropolitan Region only, from Nariman Point through the suburbs to Navi Mumbai, Thane, Bhiwandi and Panvel. Depth in one market beats a thin presence in seven. If your requirement is in another city we will say so upfront rather than take the brief and sit on it.",
+    q: "Which areas do you cover?",
+    a: "The Western line from Mira Road to Dahanu Road, and nothing else. That is Mira Road and Bhayandar, then Naigaon, Vasai, Nalasopara and Virar, then Saphale, Kelve Road, Palghar, Boisar, Tarapur, Vangaon and Dahanu Road. Depth on one corridor beats a thin presence everywhere. If your requirement is outside it we will say so upfront rather than take the brief and sit on it.",
+  },
+  {
+    q: "Do you list residential as well as commercial?",
+    a: "Both. Flats, studios, penthouses, villas, row houses, bungalows and residential plots on the residential side; shops, offices, godowns, industrial units, co-working and commercial land on the other. The filter at the top of the projects page switches between them.",
   },
 ];

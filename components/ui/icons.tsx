@@ -77,10 +77,79 @@ export function CoworkingIcon(p: IconProps) {
   );
 }
 
+/* ---- Residential ---------------------------------------------------- */
+
+export function ApartmentIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M3 21h18M5.5 21V4.5A1.5 1.5 0 0 1 7 3h7a1.5 1.5 0 0 1 1.5 1.5V21" />
+      <path d="M8.5 6.5h1.5M12 6.5h1.5M8.5 10h1.5M12 10h1.5M8.5 13.5h1.5M12 13.5h1.5M9.75 21v-3.5h1.5V21" />
+      <path d="M15.5 11h3A1.5 1.5 0 0 1 20 12.5V21M17.5 14.5h1M17.5 17.5h1" />
+    </Svg>
+  );
+}
+
+export function StudioIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <rect x="3.5" y="5.5" width="17" height="13" rx="1.5" />
+      <path d="M3.5 12.5h10M13.5 5.5v13M16 9h2M16 15h2" />
+    </Svg>
+  );
+}
+
+export function PenthouseIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M3 21h18M6 21V9.5h12V21" />
+      <path d="M6 9.5V6h8.5v3.5M9 13h2.5M14 13h2.5M9 17h2.5M14 17h2.5" />
+      <path d="M18 6.5h3v3" />
+    </Svg>
+  );
+}
+
+export function VillaIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M2.5 11 12 4l9.5 7" />
+      <path d="M5 9.5V21h14V9.5M9.5 21v-6h5v6M8 12.5h2M14 12.5h2" />
+    </Svg>
+  );
+}
+
+export function RowHouseIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M2 21h20M3 21v-9l4-3 4 3v9M13 21v-9l4-3 4 3v9" />
+      <path d="M5.5 21v-4h3v4M15.5 21v-4h3v4" />
+    </Svg>
+  );
+}
+
+export function PlotIcon(p: IconProps) {
+  return (
+    <Svg {...p}>
+      <path d="M3.5 7.5 12 4.5l8.5 3v9L12 19.5l-8.5-3z" />
+      <path d="M12 4.5v15M3.5 7.5 12 10.5l8.5-3" />
+    </Svg>
+  );
+}
+
 export const PROPERTY_TYPE_ICON: Record<
   PropertyType,
   (p: IconProps) => React.JSX.Element
 > = {
+  // Residential
+  apartment: ApartmentIcon,
+  studio: StudioIcon,
+  penthouse: PenthouseIcon,
+  villa: VillaIcon,
+  row_house: RowHouseIcon,
+  // A bungalow reads the same as a villa at 20 px; a separate glyph would be
+  // distinction without difference.
+  bungalow: VillaIcon,
+  plot: PlotIcon,
+  // Commercial
   office: OfficeIcon,
   retail: RetailIcon,
   warehouse: WarehouseIcon,

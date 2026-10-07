@@ -25,8 +25,11 @@ import { formatArea, formatDate, formatPrice, imageUrl } from "@/lib/format";
 import {
   FURNISHING_LABEL,
   POSSESSION_LABEL,
+  PROJECT_CATEGORY_LABEL,
   PROPERTY_TYPE_LABEL,
-  PURPOSE_LABEL,
+  ZONE_LABEL,
+  isLandType,
+  purposeLabel,
 } from "@/lib/data/taxonomy";
 import { site } from "@/lib/data/site";
 
@@ -60,11 +63,11 @@ export async function generateMetadata({
   const cover = property.media.find((m) => m.type === "image");
 
   return {
-    title: property.meta_title || `${property.title}, Mumbai`,
+    title: property.meta_title || `${property.title} — ${property.locality}`,
     description: property.meta_description || property.summary,
     alternates: { canonical: `/properties/${property.slug}` },
     openGraph: {
-      title: `${property.title} — ${PURPOSE_LABEL[property.purpose]}`,
+      title: `${property.title} — ${purposeLabel(property.purpose, property.segment)}`,
       description: property.summary,
       images: cover
         ? [{ url: imageUrl(cover.cloudinary_public_id, 1200), alt: cover.alt }]
@@ -95,15 +98,46 @@ export default async function PropertyPage({
         : property.floor
       : null;
 
+  const residential = property.segment === "residential";
+
   // Optional specs render only when the listing has them.
   const specs = [
+    { label: "Category", value: PROJECT_CATEGORY_LABEL[property.category] },
+    // RERA sits high in the list on purpose: on a new project it is the first
+    // thing a careful buyer checks, and the number is publicly verifiable.
+    { label: "MahaRERA number", value: property.rera_number || null },
     { label: "Built-up area", value: formatArea(property.area_sqft) },
     { label: "Carpet area", value: formatArea(property.carpet_area_sqft) },
+    {
+      label: "Configuration",
+      value:
+        residential && !isLandType(property.type) && property.bedrooms
+          ? `${property.bedrooms} BHK`
+          : null,
+    },
+    {
+      label: "Bathrooms",
+      value: property.bathrooms != null ? String(property.bathrooms) : null,
+    },
+    {
+      label: "Balconies",
+      value: property.balconies != null ? String(property.balconies) : null,
+    },
     { label: "Floor", value: floorLabel },
     { label: "Possession", value: POSSESSION_LABEL[property.possession] },
-    { label: "Handover condition", value: FURNISHING_LABEL[property.furnishing] },
+    {
+      label: "Possession by",
+      value: property.possession_by ? formatDate(property.possession_by) : null,
+    },
+    {
+      label: residential ? "Furnishing" : "Handover condition",
+      value: FURNISHING_LABEL[property.furnishing],
+    },
     { label: "Zoning", value: property.zoning || null },
-    { label: "Asset class", value: PROPERTY_TYPE_LABEL[property.type] },
+    {
+      label: residential ? "Property type" : "Asset class",
+      value: PROPERTY_TYPE_LABEL[property.type],
+    },
     {
       label: "Maintenance",
       value: property.maintenance_psf != null ? `₹${inr(property.maintenance_psf)} / sq.ft. / mo` : null,
@@ -210,7 +244,7 @@ export default async function PropertyPage({
                 href={`/properties?zone=${property.zone}`}
                 className="transition-colors hover:text-brand-700"
               >
-                {property.city}
+                {ZONE_LABEL[property.zone]}
               </Link>
             </li>
             <li aria-hidden="true">/</li>
@@ -223,15 +257,25 @@ export default async function PropertyPage({
           <div>
             <div className="mb-6 flex flex-wrap items-center gap-2">
               <span className="rounded bg-brand-900 px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-white">
-                {PURPOSE_LABEL[property.purpose]}
+                {purposeLabel(property.purpose, property.segment)}
               </span>
               <span className="rounded border border-brand-100 bg-brand-50 px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-brand-700">
                 {PROPERTY_TYPE_LABEL[property.type]}
               </span>
+              <span className="rounded border border-sand-300 bg-sand-50 px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-ink-700">
+                {PROJECT_CATEGORY_LABEL[property.category]}
+              </span>
               {property.verified ? (
                 <span className="flex items-center gap-1.5 rounded border border-gold-500/35 bg-gold-100 px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-gold-600">
                   <ShieldIcon className="h-3 w-3" />
-                  Documents verified
+                  Verified by our team
+                </span>
+              ) : null}
+              {/* The RERA number is the listing's own legal reference, so it
+                  is shown in full rather than behind an enquiry. */}
+              {property.rera_number ? (
+                <span className="rounded border border-brand-200 bg-white px-2.5 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-brand-800">
+                  RERA {property.rera_number}
                 </span>
               ) : null}
             </div>

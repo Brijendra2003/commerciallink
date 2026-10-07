@@ -13,32 +13,32 @@ export function Trust() {
             <div className="relative aspect-[4/3] overflow-hidden rounded-lg border border-sand-200 bg-sand-100">
               <Photo
                 publicId="photo-1556761175-b413da4baf72"
-                alt="Advisory team reviewing a floor plan in a meeting room"
+                alt="Buyer and owner reviewing a floor plan together"
                 sizes="(max-width: 1024px) 100vw, 480px"
                 width={900}
               />
             </div>
 
             <div className="mt-3 rounded-lg border border-sand-200 bg-white p-5">
-              <p className="kicker text-brand-600">Median response time</p>
-              <p className="mt-2 font-display text-[1.5rem] font-semibold leading-none text-brand-900 tnum">
-                3.9 hours
+              <p className="kicker text-brand-600">Where your enquiry goes</p>
+              <p className="mt-2 font-display text-[1.5rem] font-semibold leading-none text-brand-900">
+                The lister
               </p>
               <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-500">
-                To first advisor callback on a new enquiry, measured across the
-                last four quarters.
+                Straight to the verified owner, broker or developer who holds
+                the project — with our team copied in.
               </p>
             </div>
           </div>
 
           <div>
             <SectionHeading
-              kicker="The advisory model"
-              title="A listing board sells attention."
-              accent="We are accountable for outcomes."
-              lead="Occupiers get one advisor who knows the whole market. Owners get a
-                filter between them and every speculative caller. That is the
-                trade, and it is why our mandates convert."
+              kicker="How this works"
+              title="Most portals sell your number to six brokers."
+              accent="We send it to one — the right one."
+              lead="Enquire on a project and it reaches the person who actually
+                listed it. They have the price, the papers and the keys, so the
+                first call you get is the useful one."
             />
 
             <ul className="mt-9 grid gap-x-8 gap-y-6 sm:grid-cols-2">

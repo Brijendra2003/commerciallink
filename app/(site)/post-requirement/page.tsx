@@ -6,14 +6,14 @@ import { CheckIcon, ShieldIcon } from "@/components/ui/icons";
 export const metadata: Metadata = {
   title: "Post Your Requirement",
   description:
-    "Can't find the right commercial space? Send us the brief and our desk matches it against off-market mandates, upcoming completions and unlisted owner stock.",
+    "Can't find the right home or commercial space between Mira Road and Dahanu Road? Send us the brief and our team matches it against projects still in verification and stock that has not gone live.",
   alternates: { canonical: "/post-requirement" },
 };
 
 const promises = [
-  "Matched against off-market mandates, not just what is on this site",
-  "A named advisor calls you back within two working days",
-  "Your contact details are never shared with property owners",
+  "Matched against upcoming launches and stock that is not live yet",
+  "Our team calls you back within two working days",
+  "A requirement stays with us — no lister sees your number",
   "No fee to post, and no obligation to transact",
 ];
 
@@ -29,10 +29,10 @@ export default function PostRequirementPage() {
               <span className="text-brand-600">We will source against it.</span>
             </h1>
             <p className="mt-5 max-w-md text-[0.9375rem] leading-relaxed text-ink-500">
-              Roughly a third of what we transact never appears as a public
-              listing — owners hand it to us quietly, and it moves before it
-              would ever reach a search page. A written brief is how you get
-              access to that.
+              Plenty on this corridor never reaches a search page — a launch
+              still in verification, a resale an owner has mentioned but not
+              listed, a tower about to open bookings. A written brief is how you
+              get in front of that.
             </p>
 
             <ul className="mt-8 space-y-3.5">
@@ -52,11 +52,12 @@ export default function PostRequirementPage() {
               <ShieldIcon className="h-5 w-5 text-brand-600" />
               <p className="mt-3 text-[0.8125rem] leading-relaxed text-ink-500">
                 <span className="font-semibold text-brand-900">
-                  Requirements are confidential.
+                  A requirement is not an enquiry.
                 </span>{" "}
-                When we take your brief to an owner we describe the requirement,
-                not the company — useful if you are moving before you have told
-                the market, or a landlord.
+                An enquiry on a project goes to that lister. A requirement stays
+                with our team: when we take it to an owner we describe what is
+                wanted, not who is asking, and your number is not passed on
+                until you have seen something you like.
               </p>
             </div>
           </div>

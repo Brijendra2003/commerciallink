@@ -1,7 +1,32 @@
+import { zoneForMarket } from "@/lib/data/taxonomy";
 import type { PropertyMediaRow, PropertyRow } from "@/lib/supabase/types";
-import type { Property, PropertyMedia } from "@/lib/types";
+import type { Property, PropertyMedia, Zone } from "@/lib/types";
 
 /** Row → domain mappers shared by the admin, public and portal reads. */
+
+/**
+ * The three belts the app knows about. The `mmr_zone` enum still carries the
+ * six legacy MMR labels — Postgres cannot drop an enum label that historical
+ * rows may hold — so a row read from a pre-corridor database can arrive with
+ * `zone: "thane"`, which `Zone` no longer admits.
+ */
+const CORRIDOR_ZONES: Zone[] = ["mira_bhayandar", "vasai_virar", "palghar"];
+
+/**
+ * Resolves a row's belt.
+ *
+ * The locality is consulted first and the stored zone second, because the
+ * locality names an actual station area and therefore pins the belt exactly,
+ * while a legacy "western" could mean anywhere from Bandra to Boisar. A row
+ * that matches neither is out of the service area; it falls back to the
+ * nearest belt rather than crashing the page, and the desk re-tags it.
+ */
+function toZone(row: Pick<PropertyRow, "zone" | "locality">): Zone {
+  const fromMarket = zoneForMarket(row.locality);
+  if (fromMarket) return fromMarket;
+  if (CORRIDOR_ZONES.includes(row.zone as Zone)) return row.zone as Zone;
+  return "mira_bhayandar";
+}
 
 export type PropertyWithMedia = PropertyRow & {
   property_media: PropertyMediaRow[] | null;
@@ -27,10 +52,16 @@ export function toProperty(row: PropertyWithMedia): Property {
     id: row.ref,
     slug: row.slug,
     title: row.title,
+    // `segment` and `category` are NOT NULL with defaults in the database, but
+    // a row read back from an older generated client can still arrive without
+    // them — fall back rather than render `undefined` into a label lookup.
+    segment: row.segment ?? "commercial",
     type: row.type,
+    category: row.category ?? "ready_to_move",
+    rera_number: row.rera_number ?? null,
     purpose: row.purpose,
     city: row.city,
-    zone: row.zone,
+    zone: toZone(row),
     locality: row.locality,
     address: row.address,
     price: row.price,
@@ -48,6 +79,13 @@ export function toProperty(row: PropertyWithMedia): Property {
     summary: row.summary ?? "",
     description: row.description,
     media: toMedia(row.property_media),
+    bedrooms: row.bedrooms ?? null,
+    bathrooms: row.bathrooms ?? null,
+    balconies: row.balconies ?? null,
+    possession_by: row.possession_by ?? null,
+    review_status: row.review_status ?? "pending",
+    review_note: row.review_note ?? null,
+    reviewed_at: row.reviewed_at ?? null,
     building_name: row.building_name ?? null,
     pincode: row.pincode ?? null,
     total_floors: row.total_floors ?? null,

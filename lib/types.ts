@@ -1,19 +1,33 @@
 /**
- * Field names here mirror the Supabase schema in the project documentation
- * (Section 6, "Core Data Model"), so swapping the mock reads in lib/data for
- * real `supabase.from(...)` queries is a drop-in change.
+ * Field names here mirror the Supabase schema in supabase/migrations, so
+ * swapping the mock reads in lib/data for real `supabase.from(...)` queries is
+ * a drop-in change.
  */
 
-/** MMR zone groupings. The portal covers Mumbai only. */
-export type Zone =
-  | "south"
-  | "central"
-  | "western"
-  | "eastern"
-  | "navi"
-  | "thane";
+/**
+ * Service-area belts along the Western line.
+ *
+ * The portal covers Mira Road to Dahanu Road only. The six legacy MMR values
+ * remain in the database enum (Postgres cannot drop a label historical rows
+ * may carry) but are not offered anywhere in the UI.
+ */
+export type Zone = "mira_bhayandar" | "vasai_virar" | "palghar";
+
+export type PropertySegment = "commercial" | "residential";
+
+/** The buyer-facing category. `new_project` requires a RERA number. */
+export type ProjectCategory = "new_project" | "ready_to_move" | "resale";
 
 export type PropertyType =
+  // Residential
+  | "apartment"
+  | "studio"
+  | "penthouse"
+  | "villa"
+  | "row_house"
+  | "bungalow"
+  | "plot"
+  // Commercial
   | "office"
   | "retail"
   | "warehouse"
@@ -29,11 +43,27 @@ export type PropertyStatus =
   | "sold"
   | "leased";
 
+/** The outcome of the admin verification pass. */
+export type ReviewStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "changes_requested";
+
 export type Purpose = "buy" | "lease";
 
 export type PossessionStatus = "ready" | "under_construction" | "shell_core";
 
-export type FurnishingStatus = "bare_shell" | "warm_shell" | "fully_fitted";
+export type FurnishingStatus =
+  | "bare_shell"
+  | "warm_shell"
+  | "fully_fitted"
+  | "unfurnished"
+  | "semi_furnished"
+  | "furnished";
+
+/** Which side of the desk a signed-in supply-side account sits on. */
+export type AccountType = "owner" | "broker" | "developer";
 
 export interface PropertyMedia {
   id: string;
@@ -48,17 +78,22 @@ export interface Property {
   id: string;
   slug: string;
   title: string;
+  segment: PropertySegment;
   type: PropertyType;
+  /** New project / ready to move / resale. Drives the RERA requirement. */
+  category: ProjectCategory;
+  /** MahaRERA registration. Mandatory when `category` is `new_project`. */
+  rera_number: string | null;
   purpose: Purpose;
   /** Always "Mumbai" — kept as a column for schema fidelity. */
   city: string;
   zone: Zone;
-  /** The micro-market buyers actually filter on, e.g. "Bandra Kurla Complex". */
+  /** The station micro-market buyers actually filter on, e.g. "Virar West". */
   locality: string;
   address: string;
   /** Total ask in INR. `null` renders as "Price on request" — a deliberate soft gate. */
   price: number | null;
-  /** Monthly rent per sq.ft. for lease listings. */
+  /** Monthly rent per sq.ft. for lease and rental listings. */
   rent_psf: number | null;
   area_sqft: number;
   carpet_area_sqft: number;
@@ -73,6 +108,16 @@ export interface Property {
   summary: string;
   description: string[];
   media: PropertyMedia[];
+  /** Residential configuration (0006_projects_and_leads.sql). */
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  balconies?: number | null;
+  /** Expected possession date on an under-construction project. */
+  possession_by?: string | null;
+  /** Admin verification trail. */
+  review_status?: ReviewStatus;
+  review_note?: string | null;
+  reviewed_at?: string | null;
   /** Optional specifications (0003_listing_details.sql). Unset renders nothing. */
   building_name?: string | null;
   pincode?: string | null;
@@ -87,10 +132,10 @@ export interface Property {
   ceiling_height_ft?: number | null;
   meta_title?: string | null;
   meta_description?: string | null;
-  /** Supply-side owner reference. Contact fields are never exposed publicly. */
+  /** Supply-side reference — the owner, broker or developer who listed it. */
   owner_id: string;
   created_at: string;
-  /** Surfaced to the owner dashboard only, never to buyers. */
+  /** Surfaced to the lister's dashboard only, never to buyers. */
   view_count: number;
   enquiry_count: number;
 }

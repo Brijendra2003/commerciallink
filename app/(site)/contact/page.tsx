@@ -13,7 +13,7 @@ import { site } from "@/lib/data/site";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Speak to the CommercialLink advisory desk about commercial space, listing a property, or a market question. Mon–Sat, 9:30 am – 7:00 pm IST.",
+    "Speak to the CommercialLink team about a property between Mira Road and Dahanu Road, listing your own project, or a market question. Mon–Sat, 9:30 am – 7:00 pm IST.",
   alternates: { canonical: "/contact" },
 };
 
@@ -27,19 +27,20 @@ export default function ContactPage() {
           <div>
             <Kicker className="mb-4">Contact</Kicker>
             <h1 className="font-display text-[2rem] font-semibold leading-[1.1] tracking-[-0.03em] text-brand-900 sm:text-[2.5rem]">
-              One desk.{" "}
+              One number.{" "}
               <span className="text-brand-600">One person who answers.</span>
             </h1>
             <p className="mt-5 max-w-md text-[0.9375rem] leading-relaxed text-ink-500">
-              No call centre, no ticket queue. Send a message and an advisor
-              picks it up the same working day — with a straight answer about
-              whether we are the right firm for your brief.
+              No call centre, no ticket queue. Send a message and someone on our
+              team picks it up the same working day. If you want to list a
+              project and would rather not fill in a form, call us and we will
+              add it for you over the phone.
             </p>
 
             <ul className="mt-9 space-y-3">
               <ContactRow
                 icon={<PhoneIcon className="h-4 w-4" />}
-                label="Call the desk"
+                label="Call us"
                 value={site.phone}
                 href={`tel:${site.phone.replace(/\s/g, "")}`}
                 note={site.hours}

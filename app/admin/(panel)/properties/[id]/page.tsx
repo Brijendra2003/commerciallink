@@ -9,12 +9,16 @@ import { StatTile } from "@/components/charts/stat-tile";
 import { Field, Input, Select, Textarea } from "@/components/ui/field";
 import { makeOwnerLookup } from "@/lib/data/crm";
 import { getLeads, getOwners, getPropertyByRef } from "@/lib/data/queries";
+import { ReviewActions } from "@/components/admin/review-actions";
 import {
   FURNISHING_LABEL,
   MICRO_MARKETS,
   POSSESSION_LABEL,
-  PROPERTY_TYPES,
+  PROJECT_CATEGORIES,
+  SEGMENTS,
   ZONES,
+  isLandType,
+  typesInSegment,
 } from "@/lib/data/taxonomy";
 import { site } from "@/lib/data/site";
 import { formatINR } from "@/lib/format";
@@ -96,6 +100,29 @@ export default async function EditPropertyPage({
         <StatTile label="Open pipeline on this listing" value={openValue > 0 ? formatINR(openValue) : "—"} />
       </div>
 
+      {/* The verification decision. Kept outside the edit form below: it is a
+          decision about the listing rather than an edit to it, and nested
+          forms are invalid HTML. */}
+      {property.status !== "published" ? (
+        <div className="mb-4">
+          <Panel title="Verification">
+            <p className="mb-3.5 text-[0.8125rem] leading-relaxed text-ink-500">
+              {property.review_status === "rejected"
+                ? "This project was rejected."
+                : property.review_status === "changes_requested"
+                  ? "Changes were requested from the lister."
+                  : "Check the details and the ownership documents, then decide. Approving publishes the project immediately."}
+              {property.review_note ? (
+                <span className="mt-2 block rounded border border-sand-200 bg-sand-50 px-3 py-2 text-[0.75rem] text-ink-700">
+                  Last note: {property.review_note}
+                </span>
+              ) : null}
+            </p>
+            <ReviewActions propertyRef={property.id} />
+          </Panel>
+        </div>
+      ) : null}
+
       <PropertyEditForm propertyRef={property.id}>
         <div className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
           <div className="space-y-4">
@@ -104,27 +131,93 @@ export default async function EditPropertyPage({
                 <Field label="Title" name="title" className="sm:col-span-2">
                   <Input name="title" defaultValue={property.title} />
                 </Field>
-                <Field label="Property type" name="type">
+                {/* `segment` is derived from `type` on save, so the type
+                    select is grouped by segment rather than paired with a
+                    separate segment control that could disagree with it. */}
+                <Field
+                  label="Property type"
+                  name="type"
+                  hint={`Currently ${SEGMENTS.find((s) => s.value === property.segment)?.label ?? "commercial"}. Changing the type moves the segment with it.`}
+                >
                   <Select name="type" defaultValue={property.type}>
-                    {PROPERTY_TYPES.map((t) => (
-                      <option key={t.value} value={t.value}>{t.label}</option>
+                    {SEGMENTS.map((s) => (
+                      <optgroup key={s.value} label={s.label}>
+                        {typesInSegment(s.value).map((t) => (
+                          <option key={t.value} value={t.value}>{t.label}</option>
+                        ))}
+                      </optgroup>
                     ))}
                   </Select>
                 </Field>
+                <Field label="Category" name="category">
+                  <Select name="category" defaultValue={property.category}>
+                    {PROJECT_CATEGORIES.map((c) => (
+                      <option key={c.value} value={c.value}>{c.label}</option>
+                    ))}
+                  </Select>
+                </Field>
+                <Field
+                  label="RERA number"
+                  name="rera_number"
+                  hint="Required for a new project under construction."
+                >
+                  <Input
+                    name="rera_number"
+                    defaultValue={property.rera_number ?? ""}
+                    maxLength={30}
+                    placeholder="P99000051284"
+                  />
+                </Field>
+                <Field
+                  label="Committed possession"
+                  name="possession_by"
+                  hint="Under-construction projects only."
+                >
+                  <Input
+                    name="possession_by"
+                    type="date"
+                    defaultValue={property.possession_by ?? ""}
+                  />
+                </Field>
+                {property.segment === "residential" && !isLandType(property.type) ? (
+                  <div className="grid grid-cols-3 gap-3.5 sm:col-span-2">
+                    <Field label="Bedrooms" name="bedrooms">
+                      <Input
+                        name="bedrooms"
+                        defaultValue={property.bedrooms ?? ""}
+                        inputMode="numeric"
+                      />
+                    </Field>
+                    <Field label="Bathrooms" name="bathrooms">
+                      <Input
+                        name="bathrooms"
+                        defaultValue={property.bathrooms ?? ""}
+                        inputMode="numeric"
+                      />
+                    </Field>
+                    <Field label="Balconies" name="balconies">
+                      <Input
+                        name="balconies"
+                        defaultValue={property.balconies ?? ""}
+                        inputMode="numeric"
+                      />
+                    </Field>
+                  </div>
+                ) : null}
                 <Field label="Purpose" name="purpose">
                   <Select name="purpose" defaultValue={property.purpose}>
                     <option value="lease">For lease</option>
                     <option value="buy">For sale</option>
                   </Select>
                 </Field>
-                <Field label="Zone" name="zone">
+                <Field label="Belt" name="zone">
                   <Select name="zone" defaultValue={property.zone}>
                     {ZONES.map((z) => (
                       <option key={z.value} value={z.value}>{z.label}</option>
                     ))}
                   </Select>
                 </Field>
-                <Field label="Micro-market" name="locality">
+                <Field label="Station area" name="locality">
                   <Select name="locality" defaultValue={property.locality}>
                     {markets.map((m) => (
                       <option key={m.name} value={m.name}>{m.name}</option>

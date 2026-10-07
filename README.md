@@ -1,14 +1,15 @@
 # CommercialLink
 
-A commercial real estate lead-generation portal for the **Mumbai Metropolitan
-Region**, built to the brief in
-[`public/CommercialLink_Project_Documentation.docx`](public/CommercialLink_Project_Documentation.docx).
+A **residential and commercial** property marketplace for the Western line
+corridor from **Mira Road to Dahanu Road**.
 
-The platform is a **controlled marketplace**: owner contact details are never
-published, and every buyer interaction funnels through an enquiry that becomes a
-lead the admin desk works. That principle drives the UI throughout — every
-listing CTA is enquiry-based, and there is a second capture path ("Post Your
-Requirement") for visitors who find no match.
+Registered **owners, brokers and developers** list their own projects. Our team
+**verifies** each one before it publishes — and a new project under
+construction cannot list at all without a MahaRERA number. Buyer enquiries on a
+project go **to the lister who owns it**, in their own dashboard, with the
+buyer's name and number. There is a second capture path ("Post Your
+Requirement") for visitors who find no match; unlike an enquiry, a requirement
+stays with the internal desk.
 
 ## Quick start
 
@@ -19,25 +20,54 @@ npm run dev          # http://localhost:3000
 
 It runs immediately with no configuration. See [Demo mode](#demo-mode) below.
 
-## Coverage: Mumbai only
+## Coverage: one corridor
 
-The portal serves the MMR and nothing else. `properties.city` is always
-`Mumbai`; the facet buyers actually search on is the **micro-market**
-(`locality`), grouped into six **zones** (`zone`):
+The portal serves the Western line from Mira Road to Dahanu Road and nothing
+else. `properties.city` stays on the schema but is no longer a useful facet; the
+one buyers search on is the **station area** (`locality`), grouped into three
+**belts** (`zone`):
 
-| Zone | Micro-markets |
+| Belt (`zone`) | Station areas |
 | --- | --- |
-| South Mumbai | Nariman Point, Fort & Ballard Estate, Colaba |
-| Central Mumbai | Worli, Lower Parel, Prabhadevi, Dadar |
-| Western Suburbs | BKC, Bandra West, Andheri East/West, Goregaon, Malad |
-| Eastern Suburbs | Powai, Vikhroli, Ghatkopar, Chembur |
-| Navi Mumbai | Vashi, Turbhe, Airoli, Belapur, Taloja MIDC |
-| Thane & Beyond | Thane West, Wagle Estate, Bhiwandi, Panvel |
+| `mira_bhayandar` | Mira Road E/W, Kashimira, Shanti Park, Beverly Park, Bhayandar E/W, Navghar, Uttan, Dongri |
+| `vasai_virar` | Naigaon E/W, Juchandra, Vasai Road E/W, Papdy, Nalasopara E/W, Achole, Virar E/W, Bolinj, Agashi, Arnala |
+| `palghar` | Vaitarna, Saphale, Kelve Road, Palghar E/W, Umroli, Boisar E/W, Tarapur MIDC, Vangaon, Chinchani, Dahanu Road |
 
-Twenty-six micro-markets, defined once in
+Forty station areas, defined once in
 [`lib/data/taxonomy.ts`](lib/data/taxonomy.ts). Search URLs use `?zone=` and
-`?market=`, and the sitemap emits a long-tail landing URL for every
-`type × micro-market` pair.
+`?market=`, and the sitemap emits long-tail landing URLs for every
+`type × station area` and `category × station area` pair.
+
+> The six legacy MMR `mmr_zone` labels (`south`, `central`, `western`,
+> `eastern`, `navi`, `thane`) remain in the database enum — Postgres cannot drop
+> a label historical rows may hold — but nothing new is written with them and
+> the UI does not offer them. `toProperty()` in
+> [`lib/data/mappers.ts`](lib/data/mappers.ts) resolves a legacy row's belt from
+> its locality.
+
+## Segments, types and categories
+
+One `properties` table serves both sides of the book, split by `segment`:
+
+| | Types |
+| --- | --- |
+| `residential` | Flat/apartment, studio, penthouse, villa, row house, bungalow, residential plot |
+| `commercial` | Office, shop & retail, warehouse/godown, industrial, commercial land, co-working |
+
+Every listing also carries a `category`, which is the first facet buyers filter
+on:
+
+| `category` | Meaning | RERA |
+| --- | --- | --- |
+| `new_project` | Launched or under construction | **Required** |
+| `ready_to_move` | Completed, OC received | Optional |
+| `resale` | Resale or owner property | Optional |
+
+The conditional RERA rule is enforced in three places from one predicate
+(`reraRequired()` in `lib/data/taxonomy.ts`): the form reveals and requires the
+field, `submitPropertyListing` re-validates it server-side, and a `CHECK`
+constraint on `properties` refuses the row. `reviewProperty` additionally
+refuses to approve a `new_project` with no number.
 
 ## Demo mode
 
@@ -60,6 +90,19 @@ flag, [`isSupabaseConfigured`](lib/supabase/env.ts).
      unique profile emails (required by the upserts), extra listing
      specification columns, and the `property-media` (public) /
      `property-documents` (private) Storage buckets for uploads.
+   - [`0004_market_notes.sql`](supabase/migrations/0004_market_notes.sql) —
+     the Market Notes subscriber list.
+   - [`0005_segment_enums.sql`](supabase/migrations/0005_segment_enums.sql) —
+     residential property types, the three corridor belts, residential
+     furnishing values, and the `property_segment` / `project_category` /
+     `owner_account_type` / `review_outcome` types. **Run this on its own,
+     before 0006**: `alter type … add value` may not use the value it adds in
+     the same transaction, so every column and policy that references these
+     lives in the next file.
+   - [`0006_projects_and_leads.sql`](supabase/migrations/0006_projects_and_leads.sql) —
+     segment/category/RERA and residential columns, the verification trail,
+     `owners.account_type`, and the `leads_owner_read` policy that lets a
+     lister see the enquiries on their own projects.
 
 3. **Fill in `.env.local`** — copy [`.env.example`](.env.example):
 
@@ -96,7 +139,7 @@ flag, [`isSupabaseConfigured`](lib/supabase/env.ts).
    | Who | Where | Email |
    | --- | --- | --- |
    | Staff (super admin) | `/admin/login` | `nikhil@commerciallink.in` |
-   | Owner | `/login` | `sanjay@kotharirealty.in` |
+   | Lister (broker) | `/login` | `sanjay@kotharirealty.in` |
    | Buyer | `/login` | `rohan@arclighttech.example.com` |
 
    **Rotate these from the Supabase dashboard before the site is exposed to
@@ -106,11 +149,16 @@ flag, [`isSupabaseConfigured`](lib/supabase/env.ts).
 
 There are **two separate sign-in surfaces**, and each rejects the other's users:
 
-| | Staff | Buyers & owners |
+| | Staff | Buyers & listers |
 | --- | --- | --- |
 | Sign in | `/admin/login` | `/login` |
 | Lands on | `/admin` | `/dashboard` |
 | Identity | [`lib/auth.ts`](lib/auth.ts) → `admin_users` | [`lib/portal.ts`](lib/portal.ts) → `owners` / `buyers` |
+
+An owner, a broker and a developer are all rows in `owners`, told apart by
+`account_type`. They are one `PortalRole` (`"owner"`) because they do exactly
+the same things on the platform — list projects, and work the enquiries on them.
+The account type changes labels and the verification checklist, not capabilities.
 | Actions | [`lib/auth-actions.ts`](lib/auth-actions.ts) | [`lib/portal-actions.ts`](lib/portal-actions.ts) |
 
 - [`proxy.ts`](proxy.ts) matches `/admin/**` and `/dashboard/**` only — a
@@ -130,25 +178,44 @@ There are **two separate sign-in surfaces**, and each rejects the other's users:
 - Failure messages are deliberately vague, and post-login redirects are
   regex-restricted so the login page can't be turned into an open redirect.
 
-### The owner dashboard sees counts, not enquirers
+### Listers see their own leads — and nobody else's
 
-`/dashboard` shows an owner their listings with view and enquiry **counts**
-sourced from `properties.enquiry_count`. There is deliberately **no owner SELECT
-policy on `leads`** — RLS is row-level, not column-level, so any owner-facing
-read of that table would expose `buyer_phone` and `buyer_email`. That is the
-"no direct contact" guarantee from Section 2.1, held at the database rather than
-in the UI.
+`/dashboard` gives an owner, broker or developer a **lead inbox**: every enquiry
+raised on one of their own projects, with the buyer's name, phone, email and
+message, plus a stage selector.
+
+This **reverses** the earlier design, which showed enquiry *counts* only and had
+no owner SELECT policy on `leads` at all. The reasoning is recorded at the top
+of
+[`0006_projects_and_leads.sql`](supabase/migrations/0006_projects_and_leads.sql):
+the platform is now a marketplace where the lister works their own enquiries,
+not a desk that sits between both sides. The scoping is still per row —
+`leads_owner_read` admits a lead only when `owns_property(property_id)` holds.
+
+Two things are deliberately **not** granted:
+
+- **No lister UPDATE policy on `leads`.** RLS is row-level, so an UPDATE grant
+  would let a lister rewrite `buyer_name` or `buyer_phone` on any row they can
+  read. Stage changes go through `updateOwnerLeadStatus()`, which re-checks
+  ownership with the service role and writes only `status`.
+- **No lister read of `requirements`.** A posted requirement stays with the
+  internal desk; only a project enquiry is routed onward.
 
 ### Row Level Security
 
-The brief's core guarantee is enforced in the database, not the UI:
-
-- `leads` has an **INSERT policy for anon and no SELECT policy** — a visitor can
-  submit an enquiry and cannot read anyone's back, even with a direct API call.
+- `leads` has an **INSERT policy for anon and no anon SELECT policy** — a
+  visitor can submit an enquiry and cannot read anyone's back. Reads are limited
+  to staff, the buyer who raised it, and the lister of the project it is on.
 - `owners.phone` / `owners.email` are readable only by staff or the owner
-  themselves.
-- `properties.owner_id` is `NOT NULL` with an owner-scoped INSERT policy, which
-  makes registration a structural prerequisite for listing rather than a UI gate.
+  themselves, and are never published on a listing page.
+- `properties.owner_id` is `NOT NULL` with an owner-scoped INSERT policy, and
+  `submitPropertyListing` refuses an unauthenticated caller outright — so
+  registration is a structural prerequisite for listing, not a UI gate.
+- A lister may update their own listing but **never to `status = 'published'`**
+  (the `with check` on `properties_owner_update` forbids it). Publishing is
+  reachable only through `reviewProperty`, which requires an editor role. An
+  edit to a live listing drops it back to `pending_review` via the
+  `properties_sync_review` trigger, so it is re-verified before it goes back up.
 - Public reads of `properties` are limited to `status = 'published'`.
 
 Staff membership is the admin grant: `is_admin()` and `admin_role()` are
@@ -161,17 +228,17 @@ Staff membership is the admin grant: `is_admin()` and `admin_role()` are
 
 | Route | Rendering | Notes |
 | --- | --- | --- |
-| `/` | Static | Hero search, asset classes, featured mandates, trust, process, testimonials, owner CTA, requirement band |
-| `/properties` | Dynamic | URL-driven filters (type, zone, micro-market, purpose, budget, area, possession, sort) + empty state that converts into a requirement |
-| `/properties/[slug]` | SSG | Gallery, specs, sticky enquiry rail, `RealEstateListing` JSON-LD, similar stock |
+| `/` | Static | Hero search, asset classes, featured, **every live project** split by segment, trust, process, testimonials, lister CTA, requirement band |
+| `/properties` | Dynamic | URL-driven filters (segment, category, type, zone, station area, purpose, budget, area, BHK, possession, sort) + empty state that converts into a requirement |
+| `/properties/[slug]` | SSG | Gallery, specs incl. RERA and configuration, sticky enquiry rail, `RealEstateListing` JSON-LD, similar stock |
 | `/post-requirement` | Static | The "didn't find a match" capture path |
-| `/list-your-property` | Static | Supply-side landing + owner submission form |
+| `/list-your-property` | Dynamic | Supply-side landing. Shows the **single-screen** submission form to a signed-in lister, and a registration gate to everyone else |
 | `/about` | Static | Positioning, principles, process, FAQs with `FAQPage` JSON-LD |
-| `/contact` | Static | Desk contact routes + message form |
-| `/login`, `/signup` | Dynamic | Buyer & owner sign-in and registration with role selection (`noindex`) |
+| `/contact` | Static | Contact routes + message form |
+| `/login`, `/signup` | Dynamic | Sign-in and registration with four account types — buyer, owner, broker, developer (`noindex`) |
 | `/reset-password` | Static | Landing page for Supabase recovery links |
-| `/dashboard` | Dynamic | Owner: listings with view/enquiry counts, verification checklist. Buyer: enquiry history, requirements, profile. Gated. |
-| `/sitemap.xml`, `/robots.txt` | Static | Includes `type × micro-market` landing URLs |
+| `/dashboard` | Dynamic | Lister: **lead inbox**, projects with verification state, withdraw/relist, verification checklist. Buyer: enquiry history, requirements, profile. Gated. |
+| `/sitemap.xml`, `/robots.txt` | Static | Includes `type × station area` and `category × station area` landing URLs |
 
 ### Admin (`noindex`, gated)
 
@@ -181,10 +248,10 @@ Staff membership is the admin grant: `is_admin()` and `admin_role()` are
 | `/admin` | KPI tiles, lead funnel, 12-month volume, first-call queue, activity + audit feeds |
 | `/admin/leads` | Kanban with drag-between-columns **and** a table view, filter row, detail drawer with activity timeline, CSV export |
 | `/admin/requirements` | Buyer briefs with inventory matching and suggested stock |
-| `/admin/properties` | Status filters, owner-submission approval queue, per-listing performance |
-| `/admin/properties/[id]` | Details, Cloudinary media manager (drag-reorder), SEO fields with search preview, linked leads |
+| `/admin/properties` | Status filters, **verification queue with approve / request-changes / reject**, per-listing performance |
+| `/admin/properties/[id]` | Verification panel, details incl. segment/category/RERA/configuration, Cloudinary media manager (drag-reorder), SEO fields with search preview, linked leads |
 | `/admin/sales` | Deal register, commission by advisor and asset class, monthly revenue, payout tracking |
-| `/admin/owners` | Directory, KYC state, linked properties, communication log |
+| `/admin/owners` | Directory with **account type** (owner / broker / developer) and RERA registration, KYC state, linked properties, communication log |
 | `/admin/analytics` | Funnel health, source volume vs. average value, acquisition split, listing performance |
 | `/admin/settings` | Team roster, RBAC permission matrix, audit log |
 

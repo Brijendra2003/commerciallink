@@ -118,9 +118,10 @@ export function Consent({ error }: { error?: string }) {
       <label className="flex cursor-pointer items-start gap-2.5 text-[0.75rem] leading-relaxed text-ink-500">
         <input type="checkbox" name="consent" className="control-box mt-0.5" />
         <span>
-          I agree to be contacted by CommercialLink about this enquiry. My
-          details are held under the firm&apos;s DPDP-compliant retention policy
-          and are never shared with property owners without my consent.
+          I agree to be contacted about this enquiry by CommercialLink and by
+          the verified lister of the project. My details are held under the
+          firm&apos;s DPDP-compliant retention policy and are never sold or
+          passed to anyone else.
         </span>
       </label>
       {error ? (

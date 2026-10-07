@@ -57,11 +57,11 @@ export function EnquiryForm({
       {!compact ? (
         <div>
           <h2 className="font-display text-[1.35rem] leading-tight tracking-[-0.015em] text-brand-900">
-            Enquire about this property
+            Enquire about this project
           </h2>
           <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-500">
-            An advisor calls you back — usually within four working hours — with
-            the full document set and current commercial terms.
+            Your enquiry goes straight to the owner, broker or developer who
+            listed it. Most reply the same day.
           </p>
         </div>
       ) : null}
@@ -132,10 +132,15 @@ export function EnquiryForm({
         {pending ? "Sending…" : "Send Enquiry"}
       </Button>
 
+      {/* The honest version of this notice.
+          The platform now routes a listing enquiry to the lister so they can
+          call you back — so the form says exactly that, rather than the
+          desk-in-the-middle promise it used to make. */}
       <p className="flex items-start gap-2 text-[0.6875rem] leading-relaxed text-ink-300">
         <ShieldIcon className="mt-px h-3.5 w-3.5 shrink-0 text-brand-500" />
-        Your details go to our advisory desk only. We never pass them to the
-        property owner without asking you first.
+        Your name, phone number and message are shared with the verified lister
+        of this project and with our team, so they can respond. They are never
+        sold or passed to anyone else.
       </p>
     </form>
   );

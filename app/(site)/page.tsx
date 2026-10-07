@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Hero } from "@/components/home/hero";
 import { AssetClasses } from "@/components/home/asset-classes";
 import { Featured } from "@/components/home/featured";
+import { AllProjects } from "@/components/home/all-projects";
 import { Trust } from "@/components/home/trust";
 import { Process } from "@/components/home/process";
 import { Testimonials } from "@/components/home/testimonials";
@@ -10,9 +11,9 @@ import { RequirementBand } from "@/components/home/requirement-band";
 import { site } from "@/lib/data/site";
 
 export const metadata: Metadata = {
-  title: `${site.name} — Commercial Property for Lease & Sale in Mumbai`,
+  title: `${site.name} — Residential & Commercial Property, Mira Road to Dahanu Road`,
   description:
-    "Verified office, retail, warehouse, industrial and land mandates across the Mumbai Metropolitan Region. One advisory desk from shortlist to handover.",
+    "Verified flats, villas, plots, shops, offices and godowns from Mira Road to Dahanu Road. New projects, ready to move and resale — listed by owners, brokers and developers.",
   alternates: { canonical: "/" },
 };
 
@@ -24,16 +25,28 @@ const organizationSchema = {
   url: site.url,
   email: site.email,
   telephone: site.phone,
-  areaServed: {
-    "@type": "City",
-    name: "Mumbai",
+  // The corridor, station to station, rather than a single city.
+  areaServed: [
+    "Mira Road",
+    "Bhayandar",
+    "Naigaon",
+    "Vasai",
+    "Nalasopara",
+    "Virar",
+    "Saphale",
+    "Palghar",
+    "Boisar",
+    "Dahanu Road",
+  ].map((name) => ({
+    "@type": "Place",
+    name,
     containedInPlace: { "@type": "State", name: "Maharashtra" },
-  },
+  })),
   address: {
     "@type": "PostalAddress",
-    streetAddress: "Unit 704, Trade Centre, Bandra Kurla Complex",
-    addressLocality: "Mumbai",
-    postalCode: "400051",
+    streetAddress: site.address,
+    addressLocality: "Mira Road",
+    postalCode: "401107",
     addressCountry: "IN",
   },
 };
@@ -51,6 +64,8 @@ export default function HomePage() {
       <Hero />
       <AssetClasses />
       <Featured />
+      {/* The full book, not just the featured six. */}
+      <AllProjects />
       <Trust />
       <Process />
       <Testimonials />

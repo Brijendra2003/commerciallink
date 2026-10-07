@@ -20,8 +20,9 @@ export default function PrivacyPage() {
     >
       <Clause heading="Who we are">
         <p>
-          {site.name} operates a commercial real estate advisory desk and this
-          website, serving the {site.region}. Our office is at {site.address}. For
+          {site.name} operates a residential and commercial property
+          marketplace, serving the corridor from {site.region}. Our office is at{" "}
+          {site.address}. For
           anything in this policy, write to{" "}
           <a
             href={`mailto:${site.email}`}
@@ -74,8 +75,9 @@ export default function PrivacyPage() {
       <Clause heading="Why we process it">
         <Bullets
           items={[
-            "To answer your enquiry and to match a requirement against available and off-market stock — the purpose you provided it for.",
-            "To verify ownership before a listing publishes, which is a condition of every mandate we take.",
+            "To pass your enquiry to the verified lister of the project you enquired about, so they can respond — the purpose you provided it for.",
+            "To match a requirement against available stock and projects that have not yet published.",
+            "To verify ownership and RERA registration before a project publishes, which is a condition of listing here.",
             "To operate your account, including password resets and email confirmation.",
             "To send Market Notes, only where you subscribed, and only until you unsubscribe.",
             "To keep records of transactions we have brokered, where retention is required by law.",
@@ -83,14 +85,25 @@ export default function PrivacyPage() {
         />
       </Clause>
 
-      <Clause heading="The rule that shapes this platform">
+      <Clause heading="Who sees your enquiry">
         <p>
-          Buyer and occupier contact details are visible to our advisory desk only.
-          They are never shown to a property owner without your explicit agreement
-          to an introduction. Owner phone numbers and email addresses are never
-          published on a listing page. This is enforced by row-level security
-          policies in the database, not only by what the interface chooses to
-          display.
+          When you send an enquiry on a project, your name, phone number, email
+          address and message are shared with the registered owner, broker or
+          developer who listed that project, and with our team. That is the
+          point of the enquiry: they are the people who can answer you. They see
+          enquiries on their own projects and on no one else&apos;s, which is
+          enforced by row-level security policies in the database rather than
+          only by what the interface chooses to display.
+        </p>
+        <p>
+          A <strong>requirement</strong> is different. A requirement you post is
+          visible to our team only. We describe what is wanted when we take it to
+          a lister, not who is asking, and we do not pass your contact details on
+          until you have agreed to an introduction.
+        </p>
+        <p>
+          Lister phone numbers and email addresses are not published on a listing
+          page. We do not sell any contact details, to listers or to anyone else.
         </p>
       </Clause>
 
@@ -138,7 +151,7 @@ export default function PrivacyPage() {
             "Confirm what personal data of yours we hold, and give you a summary of it.",
             "Correct anything inaccurate, complete anything incomplete, or update it.",
             "Erase it, where we no longer need it for the purpose you gave it for and no law requires us to keep it.",
-            "Withdraw consent — for Market Notes, for being contacted about an enquiry, or for an introduction to an owner.",
+            "Withdraw consent — for Market Notes, for being contacted about an enquiry, or for an introduction to a lister.",
             "Nominate another person to exercise these rights on your behalf.",
           ]}
         />

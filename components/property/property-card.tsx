@@ -5,8 +5,10 @@ import { AreaIcon, PinIcon, ShieldIcon } from "@/components/ui/icons";
 import { formatArea, formatPrice } from "@/lib/format";
 import {
   POSSESSION_LABEL,
+  PROJECT_CATEGORY_LABEL,
   PROPERTY_TYPE_LABEL,
-  PURPOSE_LABEL,
+  isLandType,
+  purposeLabel,
 } from "@/lib/data/taxonomy";
 import type { Property } from "@/lib/types";
 
@@ -36,9 +38,18 @@ export function PropertyCard({
         ) : null}
 
         <div className="absolute inset-x-0 top-0 flex items-start justify-between gap-2 p-3">
-          <span className="rounded bg-brand-900/90 px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-white">
-            {PURPOSE_LABEL[property.purpose]}
-          </span>
+          <div className="flex flex-col items-start gap-1.5">
+            <span className="rounded bg-brand-900/90 px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.1em] text-white">
+              {purposeLabel(property.purpose, property.segment)}
+            </span>
+            {/* A new project is the one category a buyer must not mistake for
+                ready stock, so it is called out on the photograph itself. */}
+            {property.category === "new_project" ? (
+              <span className="rounded bg-white/95 px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.08em] text-brand-700">
+                New project
+              </span>
+            ) : null}
+          </div>
           <div className="flex flex-col items-end gap-1.5">
             {property.verified ? (
               <span className="flex items-center gap-1 rounded bg-white/95 px-2 py-1 text-[0.625rem] font-bold uppercase tracking-[0.08em] text-brand-700">
@@ -71,10 +82,12 @@ export function PropertyCard({
 
         <p className="mt-1.5 flex items-center gap-1.5 text-[0.8125rem] text-ink-500">
           <PinIcon className="h-3.5 w-3.5 shrink-0 text-ink-300" />
-          {property.locality}, {property.city}
+          {property.locality}
         </p>
 
-        {/* Specification strip — the three facts an occupier screens on. */}
+        {/* Specification strip. A home buyer screens on BHK first; a
+            commercial occupier has no BHK to screen on, so that slot carries
+            the possession status instead. */}
         <dl className="mt-3.5 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-sand-200 pt-3.5 text-[0.75rem]">
           <div className="flex items-center gap-1.5">
             <AreaIcon className="h-3.5 w-3.5 shrink-0 text-ink-300" />
@@ -82,8 +95,28 @@ export function PropertyCard({
             <dd className="text-ink-500 tnum">{formatArea(property.area_sqft)}</dd>
           </div>
           <div>
-            <dt className="sr-only">Possession</dt>
-            <dd className="text-ink-500">{POSSESSION_LABEL[property.possession]}</dd>
+            {property.segment === "residential" &&
+            !isLandType(property.type) &&
+            property.bedrooms ? (
+              <>
+                <dt className="sr-only">Configuration</dt>
+                <dd className="text-ink-500 tnum">{property.bedrooms} BHK</dd>
+              </>
+            ) : (
+              <>
+                <dt className="sr-only">Possession</dt>
+                <dd className="text-ink-500">
+                  {POSSESSION_LABEL[property.possession]}
+                </dd>
+              </>
+            )}
+          </div>
+          <div className="col-span-2">
+            <dt className="sr-only">Category</dt>
+            <dd className="text-ink-300">
+              {PROJECT_CATEGORY_LABEL[property.category]}
+              {property.rera_number ? ` · RERA ${property.rera_number}` : ""}
+            </dd>
           </div>
         </dl>
 

@@ -6,9 +6,9 @@ export function Process() {
     <Section className="border-y border-sand-200 bg-white">
       <Container>
         <SectionHeading
-          kicker="Engagement process"
-          title="Four stages, with a named advisor"
-          accent="accountable at each one."
+          kicker="For buyers and tenants"
+          title="Four steps, and no"
+          accent="phone tree in the middle."
           align="center"
         />
 
